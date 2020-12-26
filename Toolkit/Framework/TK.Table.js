@@ -9,7 +9,9 @@ window.TK.Table = {
     DisableFilterForColumns: [],
     ThresholdFilterMultiselect: 15,
     EnableCheckBoxes: false,
-    EnableRemoveButton: false,
+    EnableFullRowCheckBoxToggle: false,
+    EnableFullRowClickDeselectOthers: false,
+    EnableRemoveButton: false,    
     PageSize: null,
     PageOffset: 0,
     SpecificColumns: null,    
@@ -633,7 +635,22 @@ window.TK.Table = {
             Elements: {},
             Row: rowObj,
             RowIndex: rowIndex,
-            onclick: function () {
+            onclick: function (event) {
+                if (obj.EnableFullRowCheckBoxToggle) {
+                    var checkBoxElement = this.querySelector("input[type=checkbox]");
+                    if (checkBoxElement != null) {
+                        if (obj.EnableFullRowClickDeselectOthers && !event.shiftKey && !event.ctrlKey) {
+                            var allCheckBoxes = obj.querySelectorAll("input[type=checkbox]");
+                            for (var i = 0; i < allCheckBoxes.length; i++) {
+                                allCheckBoxes[i].checked = false;
+                            }
+                        }
+                        checkBoxElement.checked = !checkBoxElement.checked;
+                        checkBoxElement.onclick(event);
+                        checkBoxElement.onchange();
+                        obj.PreviousCheckBox = checkBoxElement;
+                    }
+                }
                 obj.RowClick(this.Row, this);
             }
         };
