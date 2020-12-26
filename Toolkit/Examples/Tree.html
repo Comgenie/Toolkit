@@ -1,0 +1,34 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>TK.Tree</title>
+    <link href="../Style.css" rel="stylesheet" />
+    <script src="/Framework/TK.Main.js"></script>
+    <script src="/Framework/ArrayExtensions.js"></script>
+    <script src="/Framework/TK.Tree.js"></script>
+    <script src="Example.js"></script>
+    <link href="/Minified/Style.css" rel="stylesheet" />
+</head>
+<body>
+    <a href="/" class="home">Toolkit</a>
+
+    <h1>TK.Tree</h1>
+    <pre>
+{
+    _: TK.Tree,
+    Rows: [
+        { Id: 1, ParentId: null, Text: "Item 1"},
+        { Id: 2, ParentId: 1, Text: "Sub Item 1"},
+        { Id: 3, ParentId: 1, Text: "Sub Item 2 "},
+        { Id: 4, ParentId: 2, Text: "Sub Sub Item 1 "},
+        { Id: 5, ParentId: 2, Text: "Sub Sub Item 2 "}
+    ],
+    RowClick: function(row) {
+        alert(JSON.stringify(row));
+    }
+}
+</pre>
+
+</body>
+</html>

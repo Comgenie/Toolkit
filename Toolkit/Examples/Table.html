@@ -1,0 +1,223 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>TK.Table</title>
+    <link href="../Style.css" rel="stylesheet" />
+    <script src="/Framework/TK.Main.js"></script>
+    <script src="/Framework/Ajax.js"></script>
+    <script src="/Framework/ArrayExtensions.js"></script>
+    <script src="/Framework/TK.Table.js"></script>
+    <script src="/Framework/TK.Form.js"></script>
+    <script src="Example.js"></script>
+    <link href="/Minified/Style.css" rel="stylesheet" />
+</head>
+<body>
+    <a href="/" class="home">Toolkit</a>
+
+    <h1>TK.Table</h1>
+    <h2>Simple sortable table</h2>
+<pre>
+{
+    _: TK.Table,
+    Rows: [
+        { Name: "Peter", Age: 25 },
+        { Name: "Bob", Age: 27 }
+    ]
+}
+</pre>
+
+
+
+    <h2>Table with custom titles and only specific columns</h2>
+<pre>
+{
+    _: TK.Table,
+    Rows: [
+        { Name: "Peter", Age: 25 },
+        { Name: "Bob", Age: 27 }
+    ],
+    SpecificColumns: ["Name"],
+    ColumnTitles: { Name: "Custom Title" }
+}
+</pre>
+
+
+    <h2>Filter by code</h2>
+    <pre>
+{
+    _: TK.Table,
+    Rows: [
+        { Name: "Peter", Age: 25 },
+        { Name: "Bob", Age: 27 },
+        { Name: "Alice", Age: 30 },
+    ],
+    Init: function() {
+        this.ApplyFilter("e"); // Returns number of matches ( 2 )
+    }
+}
+</pre>
+
+
+    <h2>Filter by user</h2>
+    <p>Adds the ability for the user to filter by column using a multi-select list. If the possible option count exceeds the threshold, it will use a text box instead.</p>
+    <pre>
+{
+    _: TK.Table,
+    EnableFilter: true,
+    ThresholdFilterMultiselect: 4,
+    Rows: [
+        { Name: "Peter", Age: 25 },
+        { Name: "John", Age: 25 },
+        { Name: "David", Age: 25 },
+        { Name: "Charles", Age: 25 },
+        { Name: "James", Age: 27 },
+        { Name: "Bob", Age: 27 },
+        { Name: "Alice", Age: 30 },
+    ]
+}
+</pre>
+
+
+    <h2>Max Rows</h2>
+    <p>Limit the number of visible rows. This is used in case a large number of rows is causing performance issues.</p>
+    <pre>
+{
+    _: TK.Table,
+    Rows: [
+        { Name: "Peter", Age: 25 },
+        { Name: "Bob", Age: 27 },
+        { Name: "Alice", Age: 30 },
+    ],
+    MaxRows: 2
+}
+</pre>
+
+    <h2>Page numbers</h2>
+    <pre>
+{
+    _: TK.Table,
+    PageSize: 5,
+    Rows: [
+        { Name: "Peter", Age: 25 },
+        { Name: "John", Age: 25 },
+        { Name: "David", Age: 25 },
+        { Name: "Charles", Age: 25 },
+        { Name: "James", Age: 27 },
+        { Name: "Bob", Age: 27 },
+        { Name: "Alice", Age: 30 }
+    ]
+}
+</pre>
+
+
+    <h2>Check boxes</h2>
+    <pre>
+{
+    _: TK.Table,
+    Rows: [
+        { Name: "Peter", Age: 25 },
+        { Name: "Bob", Age: 27 },
+        { Name: "Alice", Age: 30 },
+    ],
+    EnableCheckBoxes: true,
+    CheckboxCheck: function() {
+        var selectedRows = this.SelectedRows();
+        alert(selectedRows.length + " rows selected.");
+    }
+}
+</pre>
+
+    <h2>Custom templates</h2>
+    <pre>
+{
+    _: TK.Table,
+    Rows: [
+        { Name: "Peter", Age: 25 },
+        { Name: "Bob", Age: 27 },
+        { Name: "Alice", Age: 30 },
+    ],
+    Templates: {
+        Name: {
+            _: "td",
+            Init: function() {
+                this.innerHTML = this.Data.toUpperCase();
+            }
+        }
+    }
+}
+</pre>
+
+    <h2>Add new rows</h2>
+    <pre>
+{
+    _: TK.Table,
+    Rows: [
+        { Name: "Peter", Age: 25 },
+        { Name: "Bob", Age: 27 },
+        { Name: "Alice", Age: 30 },
+    ],
+    Init: function() {
+        // Method 1
+        this.Rows.push({ Name: "James", Age: 32 });
+        this.Rows.push({ Name: "Smith", Age: 40 });
+        this.Refresh();
+
+        // Method 2
+        this.AddRow({ Name: "John", Age: 42 });
+    }
+}
+</pre>
+
+    <h2>Load data using Ajax</h2>
+    <pre>
+{
+    _: TK.AjaxTable,
+    Url: "ExampleData.txt",
+    Post: null, // A GET request will be executed unless 'Post' is not null
+    Update: function() {
+        // This function is called after data is loaded
+    }
+}
+</pre>
+
+    <pre>
+{
+    _: TK.AjaxTable,
+    Url: "ExampleData.txt?sort=SORTBY&desc=SORTDESC&filter=FILTER",
+    Post: null, // A GET request will be executed unless 'Post' is not null
+    Update: function() {
+        // This function is called after data is loaded
+    }
+}
+</pre>
+
+    <h2>Adding a form</h2>
+    <pre>
+{
+    Elements: {
+        AddTextButton: {
+            onclick: function() {
+                this.Parent.Elements.Table.AddRow({
+                    Description: "",
+                    Price: 0,
+                    Count: 1
+                }, true);
+            }
+        },
+        Table: {
+            _: TK.AjaxTable,
+            Url: "ExampleData.txt",
+            Form: { _: TK.Form },
+            EnableRemoveButton: true,
+            Save: function(model, isDeleted) {
+                alert(model.Description + " " + (isDeleted ? "deleted" : "changed"));
+            }
+        }
+    }
+}
+</pre>
+
+
+</body>
+</html>

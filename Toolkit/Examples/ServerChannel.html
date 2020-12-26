@@ -1,0 +1,75 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>TK.ServerChannel</title>
+    <link href="../Style.css" rel="stylesheet" />
+    <script src="/Framework/TK.Main.js"></script>
+    <script src="/Framework/Ajax.js"></script>
+    <script src="/Framework/ArrayExtensions.js"></script>
+    <script src="/Framework/TK.ServerChannel.js"></script>
+    <script src="Example.js"></script>
+</head>
+<body>
+    <a href="/" class="home">Toolkit</a>
+
+    <h1>TK.ServerChannel</h1>
+    <h2>Join a public shared channel</h2>
+    <p>Using this component it is possible to create a real time communication channel to send messages to other browsers listening to the same channel (max 4KB per message). The communication is done by WebSocket with a fallback to ajax requests to the Toolkit Server API. This component will re-use the same websocket connection when added multiple times within the same page. When the communication is not needed anymore, remove this component using the .Remove() method on this component or any parent elements.</p>
+    <p><strong>Security notice:</strong> This communication can be seen and new messages can be sent by anyone knowing the channel name!</p>
+    <p>For an useful example: Open this page in multiple browsers or tabs.</p>
+    <pre>
+{
+    Elements: {
+        Channel: {
+            _: TK.ServerChannel,
+            ClientId: "Client"+Math.random(), // Optional, Not visible for other clients but used for private channels
+            Channels: ["Example"],
+            Receive: function(channel, identity, message) {
+                this.Parent.Elements.Messages.Add({
+                    innerText: "Received: " + message
+                });
+            }
+        },
+        Messages: {},
+        TextInput: {
+            onkeydown: function(event) {
+                if (event.keyCode === 13) {
+                    this.Parent.Elements.Channel.Send("Example", this.value);
+                    this.Parent.Elements.Messages.Add({
+                        innerText: "Sent: " + this.value
+                    });
+                    this.value = "";
+                }
+            }
+        }
+    }
+}
+</pre>
+    <h2>Join a private shared channel</h2>
+    <p>By using a web address as channel name, An Identity will be retrieved from that web addres using the clientId as GET parameter ( https://channel_url?clientId=CLIENT_ID ). If the response status is 200 OK and the response body contains an JSON object with the PublicIdentifier set, it will be seen as the Identity for this client. Use the AllowChannelSend and AllowChannelReceive properties to decide what the user is allowed to do (example: { "PublicIdentifier": "Bob", "AllowChannelSend": true, "AllowChannelReceive": true } ). This Identity data will be cached for 30 minutes.</p>
+    <p>Only clients with an identity are allowed to see or sent any messages within the channel. Their PublicIdentifier will be sent with their message to other clients. The Client ID will not be shared with other clients.</p>
+
+    <h2>Send or retrieve messages using another application</h2>
+    <p>Using the addresses below it is possible to send or receive messages from any other application by doing web requests. When retrieving messages, the current index of each channel is also included (datatype long). Use this index number for the next request to only retrieve the new messages.</p>    
+    <pre>Retrieve messages for a channel using a GET request:
+GET https://toolkitapi.comgenie.com/channel/communicate?clientId=YOURCLIENTIDHERE&channels=Channel1&indexes=0
+
+Send messages to a channel using a GET request:
+GET https://toolkitapi.comgenie.com/channel/communicate?clientId=YOURCLIENTIDHERE&sendChannel=Channel1&sendData=Hello+world
+
+Retrieve messages and send a message at the same time using a GET request:
+GET https://toolkitapi.comgenie.com/channel/communicate?clientId=YOURCLIENTIDHERE&channels=Channel1&indexes=0&sendChannel=Channel1&sendData=Hello+world
+
+Retrieve messages and send a message at the same time using a POST request:
+POST https://toolkitapi.comgenie.com/channel/communicate
+{
+    clientId: "YOUR_CLIENT_ID_HERE",
+    channels: ["Channel1", "Channel2"],
+    indexes: [0, 0],
+    sendChannel: "Channel1",
+    sendData: "Hello world"
+}
+</pre>
+</body>
+</html>

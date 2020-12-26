@@ -1,0 +1,59 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Ajax</title>
+    <link href="../Style.css" rel="stylesheet" />
+    <script src="/Framework/TK.Main.js"></script>
+    <script src="/Framework/ArrayExtensions.js"></script>
+    <script src="/Framework/Ajax.js"></script>
+    <script src="Example.js"></script>
+</head>
+<body>
+    <a href="/" class="home">Toolkit</a>
+
+    <h1>Ajax</h1>
+    <p>This object is included in the minified toolkit library and is required for all the Ajax methods used. It acts as a helper for all ajax requests.</p>
+
+    <h2>Simple Ajax GET</h2>
+    <pre>
+{
+    _: "button",
+    innerHTML: "Test",
+    onclick: function() {
+        Ajax.do("ExampleData.txt", null, function(response) {
+           alert(response); 
+        });
+    }
+}
+</pre>
+    <h2>Reference</h2>
+    <p>The following functions can be used:</p>
+    <ul>
+        <li>Ajax.do(get, post, callBack, callBackData, extraSettings);</li>
+        <li>Ajax.doAjaxToDiv(get, post, divName, extraSettings);</li>
+        <li>Ajax.doAjaxToDivElement(get, post, divElement, extraSettings);</li>
+        <li>Ajax.doAjaxFormSubmit(formElement, callBack, submitButton, extraSettings);</li>
+        <li>Ajax.doAjaxFormSubmitToDiv(formElement, divName, submitButton, extraSettings);</li>
+        <li>Ajax.clearSaved();</li>
+        <li>Ajax.clearCached();</li>
+    </ul>
+
+    <p>Optional: post parameter, if null or undefined is passed the request will be executed as GET request.</p>
+    <p>Optional: callBackData, this information will be passed to the callback method as second parameter.</p>
+    <p>Optional: submitButton, If included, this value will also be passed, just like a normal form.</p>
+    <p>Optional: extraSettings parameter, it can be passed as an { } object and can contain these settings:</p>
+    <ul>
+        <li>timeout (int, default 30000) - automatically end and retry the request after x milliseconds.</li>
+        <li>saveResults (boolean, default false) - save this url and response to the browsers localStorage (kept after page refresh). This saved version will only be used when a request to this url in the future fails.</li>
+        <li>cacheResults (boolean, default false) - save this url and response to a javascript variable (lost after page refresh).</li>
+        <li>executeScriptTags (boolean, default true) - parse the response and execute all script tags.</li>
+        <li>allowEmptyResponse (boolean, default false) - If set to false, empty requests will be seen as error and cause a retry (This can happen in Internet Explorer in some cases).</li>
+        <li>showServerErrors (boolean, default true) - Show alert message with error if the HTTP result code is 400 or higher.</li>
+        <li>maxRetries (int, default 3) - Max number of retries if the request fails.</li>
+        <li>parseJSONResponse (boolean, default false unless object is posted) - Parse the JSON response before passing it to the callback</li>
+    </ul>
+    <p>Note that defaults kan be overwritten by directly setting the parameter on the Ajax object (for example: Ajax.timeout = 60000; ).</p>
+    <p>The extraSettings can also be set on the TK. components which are using ajax using the property AjaxSettings.</p>
+</body>
+</html>

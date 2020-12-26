@@ -1,0 +1,140 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>ArrayExtensions</title>
+    <link href="../Style.css" rel="stylesheet" />
+    <script src="/Framework/TK.Main.js"></script>
+    <script src="/Framework/ArrayExtensions.js"></script>
+    <script src="Example.js"></script>
+</head>
+<body>
+    <a href="/" class="home">Toolkit</a>
+
+    <h1>ArrayExtensions</h1>
+    <p>The ArrayExtensions are included in the framework and offer some extensions to the Array object in javascript. The ArrayExtensions are inspired by Linq.</p>
+    <h2>Sorting: OrderBy, OrderByDesc</h2>
+    <pre>
+{
+    Init: function() {
+        var items = [{ Id: 1, Name: "Number one" }, { Id: 3, Name: "Number three" }, { Id: 2, Name: "Number two" }];
+
+        items = items.OrderBy(function(a){ return a.Id; });
+
+        for (var i = 0; i &lt; items.length; i++) {
+            this.Add({
+                innerHTML: items[i].Name
+            });
+        }
+    }
+}
+</pre>
+
+    <h2>Where</h2>
+    <p>Filter array items</p>
+    <pre>
+{
+    Init: function() {
+        var items = [{ Id: 1, Name: "A" }, { Id: 2, Name: "B" }, { Id: 3, Name: "C" }];
+
+        items = items.Where(function(a){ return a.Id >= 2; });
+
+        for (var i = 0; i &lt; items.length; i++) {
+            this.Add({
+                innerHTML: items[i].Name
+            });
+        }
+    }
+}
+</pre>
+
+    <h2>Skip, Take</h2>
+    <pre>
+{
+    Init: function() {
+        var items = [{ Id: 1, Name: "A" }, { Id: 2, Name: "B" }, { Id: 3, Name: "C" }];
+
+        items = items.Skip(2).Take(1);
+
+        for (var i = 0; i &lt; items.length; i++) {
+            this.Add({
+                innerHTML: items[i].Name
+            });
+        }
+    }
+}
+</pre>
+
+    <h2>Select</h2>
+    <p>Transform existing array items into new items</p>
+    <pre>
+{
+    Init: function() {
+        var items = [{ Id: 1, Name: "A" }, { Id: 2, Name: "B" }, { Id: 3, Name: "C" }];
+
+        items = items.Select(function(a) { return a.Id + 10; });
+
+        for (var i = 0; i &lt; items.length; i++) {
+            this.Add({
+                innerHTML: items[i]
+            });
+        }
+    }
+}
+</pre>
+
+    <h2>Min, Max, Average</h2>
+    <pre>
+{
+    Init: function() {
+        var items = [{ Id: 1, Name: "A" }, { Id: 2, Name: "B" }, { Id: 3, Name: "C" }];        
+        
+        this.Add({
+            innerHTML: "Min: "+ items.Min(function(a) { return a.Id })
+        });
+        this.Add({
+            innerHTML: "Max: "+ items.Max(function(a) { return a.Id })
+        });
+        this.Add({
+            innerHTML: "Average: "+ items.Average(function(a) { return a.Id })
+        });
+    }
+}
+</pre>
+
+    <h2>Unique</h2>
+    <pre>
+{
+    Init: function() {
+        var items = [{ Name: "Double" }, { Name: "Double" }, { Name: "Single" }];        
+        
+        items = items.Unique(function(a) { return a.Name; });
+
+        for (var i = 0; i &lt; items.length; i++) {
+            this.Add({
+                innerHTML: items[i].Name
+            });
+        }
+    }
+}
+</pre>
+
+    <h2>Randomize</h2>
+    <pre>
+{
+    Init: function() {
+        var items = ["A","B","C","D","E","F","G","H","I","J"];        
+        
+        items = items.Randomize();
+
+        for (var i = 0; i &lt; items.length; i++) {
+            this.Add({
+                _: "span",
+                innerHTML: items[i]
+            });
+        }
+    }
+}
+</pre>
+</body>
+</html>

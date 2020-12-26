@@ -1,0 +1,72 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>TK.Popup</title>
+    <link href="../Style.css" rel="stylesheet" />
+    <script src="/Framework/TK.Main.js"></script>
+    <script src="/Framework/ArrayExtensions.js"></script>
+    <script src="/Framework/TK.Popup.js"></script>
+    <script src="Example.js"></script>
+    <link href="/Minified/Style.css" rel="stylesheet" />
+</head>
+<body>
+    <a href="/" class="home">Toolkit</a>
+
+    <h1>TK.Popup</h1>
+    <pre>
+{
+    _: "button",
+    innerHTML: "Open popup",
+    onclick: function() {
+        this.Add({
+            _: TK.Popup,
+            Title: "Example Title",
+            EnableCloseButton: true, // Default: True
+            EnableBackDrop: true, // Default: false
+            EnableResize: true, // Default: true
+            Width: 500, 
+            Height: 250,
+            Template: {
+                innerHTML: "This is the popup contents"
+            }
+        });
+    }
+}
+</pre>
+
+    <h2>Popup with button bar</h2>
+    <pre>
+{
+    _: "button",
+    innerHTML: "Open popup 2",
+    onclick: function() {
+        this.Add({
+            _: TK.Popup,
+            Title: "Example Title",
+            EnableCloseButton: true, // Default: True
+            EnableBackDrop: true, // Default: false
+            EnableResize: true, // Default: true
+            Width: 500, 
+            Height: 250,
+            Template: {
+                innerHTML: "This is the popup contents"
+            },
+            Buttons: {
+                Apply: function() {
+                    return !confirm("Apply changes and close popup?");
+                },
+                Cancel: {
+                    Text: "Close this popup!",
+                    Click: function() {
+                        alert('Button pressed');
+                    }            
+                }
+            }
+        });
+    }
+}
+</pre>
+
+</body>
+</html>

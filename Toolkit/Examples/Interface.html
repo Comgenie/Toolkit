@@ -1,0 +1,99 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>TK.Interface</title>
+    <link href="../Style.css" rel="stylesheet" />
+    <script src="/Framework/TK.Main.js"></script>
+    <script src="/Framework/ArrayExtensions.js"></script>
+    <script src="/Framework/Ajax.js"></script>
+    <script src="/Framework/TK.Navigator.js"></script>
+    <script src="/Framework/TK.Interface.js"></script>
+    <script src="Example.js"></script>
+    <script src="/Minified/Svg.js"></script>
+    <link href="/Minified/Style.css" rel="stylesheet" />
+</head>
+<body>
+    <a href="/" class="home">Toolkit</a>
+
+    <h1>TK.Interface</h1>
+    <p>A ready to use interface with menu items, headers and responsive support.</p>
+
+    <h2>Example</h2>
+    
+    <pre>
+{
+    _: TK.Interface,
+    style: {
+        height: "250px",
+        overflow: "auto"
+    },
+    CurrentUserTemplate: { innerHTML: "John Smith" },
+    CurrentLogoTemplate: { innerHTML: "Application 1" },
+    Embedded: true, // Set to false when adding it to the body element
+
+    Content: {
+        Index: {
+            Name: "Page 1",
+            Icon: Svg.Icons.Home,
+            Template: {
+                innerHTML: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.&lt;br /&gt;"+
+                    "Suspendisse felis nibh, elementum sit gravida eget, volutpat eu nisl.&lt;br /&gt;"+
+                    "Integer lobortis lacinia augue sit amet pharetra.&lt;br /&gt;"+
+                    "Quisque rutrum tortor nec odio finibus feugiat eu eget urna.&lt;br /&gt;"+
+                    "Sed dolor lectus, hendrerit vel sem eget, finibus pellentesque urna.&lt;br /&gt;"+
+                    "Sed semper maximus nisi, sit amet blandit purus suscipit vel.&lt;br /&gt;"+
+                    "Nam tincidunt purus eu erat ullamcorper scelerisque.&lt;br /&gt;"+
+                    "Suspendisse eget sapien ut leo vulputate lobortis.&lt;br /&gt;"+
+                    "Praesent enim enim, mattis quis tincidunt non, tempor vel sapien.&lt;br /&gt;"+
+                    "Nam et vestibulum felis.&lt;br /&gt;"+
+                    "Etiam placerat ultricies mauris, commodo sagittis ex ullamcorper ac.&lt;br /&gt;"+
+                    "Nunc scelerisque metus nibh."
+            }   
+        },
+        Page2: {
+            Name: "Page 2",
+            Icon: Svg.Icons.Settings,
+            Template: {
+                innerHTML: "This is the contents of the second page"
+            }
+        },
+        Page3: {
+            Name: "Page 3",
+            Icon: Svg.Icons.Dashboard,
+            Content: {
+                Index: {
+                    Name: "Sub Page 1",
+                    Icon: Svg.Icons.Find,
+                    Template: { 
+                        innerHTML: "This is the contents of a sub page"
+                    }
+                },
+                SubPage2: {
+                    Name: "Sub Page 2",
+                    Icon: Svg.Icons.Download,
+                    Template: { 
+                        innerHTML: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.&lt;br /&gt;"+
+                            "Suspendisse felis nibh, elementum sit gravida eget, volutpat eu nisl.&lt;br /&gt;"+
+                            "Integer lobortis lacinia augue sit amet pharetra.&lt;br /&gt;"+
+                            "Quisque rutrum tortor nec odio finibus feugiat eu eget urna.&lt;br /&gt;"+
+                            "Sed dolor lectus, hendrerit vel sem eget, finibus pellentesque urna.&lt;br /&gt;"+
+                            "Sed semper maximus nisi, sit amet blandit purus suscipit vel.&lt;br /&gt;"+
+                            "Nam tincidunt purus eu erat ullamcorper scelerisque.&lt;br /&gt;"+
+                            "Suspendisse eget sapien ut leo vulputate lobortis.&lt;br /&gt;"+
+                            "Praesent enim enim, mattis quis tincidunt non, tempor vel sapien.&lt;br /&gt;"+
+                            "Nam et vestibulum felis.&lt;br /&gt;"+
+                            "Etiam placerat ultricies mauris, commodo sagittis ex ullamcorper ac.&lt;br /&gt;"+
+                            "Nunc scelerisque metus nibh."
+                    }
+                }
+            }
+        }
+    }
+}
+</pre>
+
+
+
+</body>
+</html>

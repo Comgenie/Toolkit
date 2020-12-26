@@ -1,0 +1,86 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>TK.Navigator</title>
+    <link href="../Style.css" rel="stylesheet" />
+    <script src="/Framework/TK.Main.js"></script>
+    <script src="/Framework/ArrayExtensions.js"></script>
+    <script src="/Framework/Ajax.js"></script>
+    <script src="/Framework/TK.Table.js"></script>
+    <script src="/Framework/TK.Navigator.js"></script>
+    <script src="Example.js"></script>
+</head>
+<body>
+    <a href="/" class="home">Toolkit</a>
+
+    <h1>TK.Navigator</h1>
+    <p>This component makes it easier to create navigateable pages using the #hash in the url.</p>
+
+    <h2>Example</h2>
+    <p>In this example all 'page' elements are loaded directly. By using the property 'Templates' instead of 'Elements', the page elements will be initialized when navigated to and destroyed when navigated away.</p>
+    <pre>
+{
+    _: TK.Navigator,
+    
+    Elements: {
+        index: {
+            _: TK.AjaxTable,
+            Url: "ExampleData.txt",
+            Templates: {
+                Description: { HTML: "&lt;a href='#view/$Data$' &gt;$Data$&lt;/a&gt;" }
+            }
+        },
+        view: {     
+            Navigate: function(param) {
+                // Show items
+                
+                this.innerHTML = "&lt;a href='#' &gt;go back&lt;/a&gt; (or use the back button) &lt;br /&gt;";
+                this.appendChild(document.createTextNode("You have selected " + param));
+            }
+        }
+    }
+}
+</pre>
+
+
+    <h2>Sub navigators</h2>
+    <pre>
+{
+    Elements: {
+        Menu: "&lt;a href='#index' &gt;Index&lt;/a&gt; - &lt;a href='#categories' &gt;Categories&lt;/a&gt;",
+        Navigator: {
+            _: TK.Navigator,
+    
+            Elements: {
+                index: {
+                    innerHTML: "Test Index"
+                },
+                categories: {
+                    _: TK.Navigator,
+                    innerHTML: "Test Categories &lt;a href='#categories/shoes' &gt;Shoes&lt;/a&gt;"+
+                               " &lt;a href='#categories/boats' &gt;Boats&lt;/a&gt;"+
+                               " &lt;a href='#categories/pizza' &gt;Pizza&lt;/a&gt;",
+                    DefaultHash: "shoes",
+
+                    Elements: {
+                        shoes: {
+                            innerHTML: "Shoes!"
+                        },
+                        boats: {
+                            innerHTML: "Boats!"        
+                        },
+                        pizza: {
+                            innerHTML: "Pizza!"        
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+</pre>
+
+
+</body>
+</html>

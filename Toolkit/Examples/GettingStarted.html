@@ -1,0 +1,308 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Getting Started</title>
+    <link href="../Style.css" rel="stylesheet" />
+    <script src="/Minified/Toolkit.js"></script>
+    <script src="Example.js"></script>
+</head>
+<body>
+    <a href="/" class="home">Toolkit</a>
+
+    <h1>Getting Started</h1>
+
+    <h2>A small introduction</h2>
+    <p>The Toolkit javascript framework allows you to define your HTML in a JSON structure. The structure can contain the normal html attributes, javascript events, or any custom properties and events. The framework also includes support for inheritance. When initializing, the JSON structure is processed and HTML elements are generated.</p>
+    <p>The name Toolkit is choosen because the ability to use inheritance opens op abilities to easily define, use, reuse and extend components. Toolkit comes with several built in components (Sortable Tables, Tree, Forms and more). Reusability and Structure are the main focus points for Toolkit. </p>
+
+    <h2>Include the Toolkit script</h2>
+    <p>Get started by adding this script to your HTML page</p>
+    <pre>&lt;script src="https://toolkit.comgenie.com/minified/toolkit.js"&gt;&lt;/script&gt;</pre>
+
+    <h2>Define an entry point</h2>
+    <pre>
+&lt;script&gt;
+    // This is your application template. This will be used to generate HTML elements.
+    var application =  {
+        innerHTML: "Hello World!"
+    };
+
+    // Wait till all resources are loaded    
+    window.addEventListener("load", function() {
+        // Initialize and append the application template above to the current body element.
+        document.body.appendChild(TK.Initialize(application));
+    });
+&lt;/script&gt;
+</pre>
+
+    <p>The application template of the code above will create a DIV with the text 'Hello World!'. For all code examples, this is the only part of the code above we are going to modify.</p>
+    <pre>
+{
+    innerHTML: "Hello World!"
+}
+</pre>
+
+
+    <h2>Defining the type</h2>
+    <p>Use the special property name _ to say what HTML element should be created. By default a DIV element will be created.</p>
+    <pre>
+{
+    _: "button",
+    innerHTML: "I am a button",
+    onclick: function() {
+        alert('You pressed me, great job!');
+    }
+}
+</pre>
+    <p>You can also reference another template in the _ property as demonstrated below. This will inherit all properties and allows you to override them.</p>
+
+    <pre style="display: none;">
+{
+    _: {
+        _: "button",
+        innerHTML: "I am a button",
+        onclick: function() {
+            alert('You pressed me, great job!');
+        }
+    },
+    innerHTML: "I am ALSO a button"
+}
+</pre>
+    <pre>
+var buttonTemplate = {
+    _: "button",
+    innerHTML: "I am a button",
+    onclick: function() {
+        alert('You pressed me, great job!');
+    }
+};
+
+var application = {
+    _: buttonTemplate,
+    innerHTML: "I am ALSO a button"
+};
+</pre>
+
+    <h2>The Init event</h2>
+    <p>After transforming the application template to HTML elements, the framework will call all the Init functions defined (including those overriden).</p>
+    <pre>
+{
+    _: "button",
+    innerHTML: "Button Button",
+    Init: function() {
+        this.innerHTML = "Changed";
+    }
+}
+</pre>
+
+
+    <h2>Children</h2>
+    <p>Using the Elements property, child elements can be defined with their own name. These children and their parents can be reached using the .Elements and .Parent property.</p>
+    <pre>
+{   
+    innerHTML: "Parent",
+    Elements: {
+        FirstChild: {
+            innerHTML: "I am child one"
+        },
+        SecondChild: {
+            innerHTML: "I am child two",
+            onclick: function() {
+                this.Parent.Elements.FirstChild.innerHTML = "I am changed by child two";
+
+            }
+        }
+    },
+    Init: function() {
+        this.Elements.FirstChild.innerHTML = "I am changed by my parent element.";
+    }
+}
+</pre>
+
+    <h3>Helpers: Creating childs</h3>
+    <p>
+        Adding a suffix with the HTML element name, will create the child element as that HTML type, removing the need to use the _ property.
+        <br />If only the innerHTML needs to be changed, the value can also be just a "string". You can also include variables with the $propertyName$ syntax.  $SearchFilter:propertyName$ can be used to search for a specific element (Same functionality as the <strong>Near</strong> method).
+        <br />The prefix TextButton will create a button element, and uses the name as text for the button.
+        <br />If a function is given instead of a sub property, it is automatically added as onclick code.
+    </p>
+
+    <pre>
+{   
+    innerHTML: "Parent",
+    SomeField: 123,
+    Elements: {
+        FirstChildH3: {
+            innerHTML: "I am child one"
+        },
+        SecondChildH4: "I am child two, $Parent.SomeField$, $FirstChildH3:innerHTML$",
+        TestTextButton: function() {
+            this.innerHTML = "Hi";
+        }
+    }
+}
+</pre>
+    <p>You can also use the .HTML property for the same functionality. Note that this will remove the child Elements from the DOM.</p>
+    <pre>
+{
+    PersonName: "Mr. Anderson",
+    HTML: "Hello $PersonName$",
+    Elements: {
+        SomeButton: "I am not visible unless referenced as explained below"
+    },
+    onclick: function() {
+        // Changing is also possible
+        this.SetHTML("Bye $PersonName$"); 
+    }
+}
+</pre>
+    <p>Using the $propertyName$ syntax, you can also reference to a (child) Element. This will insert that element into that location. Note that this does come with some performance penalty.</p>
+    <pre>
+{
+    HTML: "You can press the $Elements.TestButton$, but it does $Elements.ResultSpan$!",
+    Elements: {
+        TestButton: {
+            innerHTML: "button",
+            onclick: function() {
+                this.Parent.Elements.ResultSpan.innerHTML = "something";
+            }
+        },
+        ResultSpan: "nothing"
+    }
+}
+</pre>
+
+    <h2>Adding and Removing</h2>
+    <p>The following functions are added to all elements: <strong>Add / Remove / Clear</strong>. These can be used to manipulate the structure. </p>
+    <pre>
+{
+    Elements: {
+        AddButton: {
+            innerHTML: "Add",
+            onclick: function() {
+
+                // Add a child to my parent element
+                // (Optionally, you can give the new child a name with the second parameter)
+                this.Parent.Add({
+                    _: "button",
+                    innerHTML: "I am a child, Click to remove me",
+                    onclick: function() {
+                        // Remove this element
+                        this.Remove();
+                    },
+                    Destroy: function() {
+                        // Optionally, you can also do something when this element gets removed.
+                    }
+                });
+                
+            }
+        },
+        ClearButton: {
+            innerHTML: "Clear",
+            onclick: function() {
+                // Remove all the childs from the parent element, including me
+                this.Parent.Clear();
+            }
+        }
+    }
+}
+</pre>
+
+    <h2>Other methods</h2>
+    <p>The <strong>Near</strong> function can be used to find the nearest child element with a specific name. Note that this method comes with a small performance penalty.</p>
+    <pre>
+{   
+    Elements: {
+        ResultText: {
+            innerHTML: "Press the buttons"
+        },
+        FirstButton: {
+            innerHTML: "First Button",
+            onclick: function() {
+                this.Near("ResultText").innerHTML = "Changed by the first button";
+            }
+        },
+        SecondButton: {
+            innerHTML: "Second Button",
+            onclick: function() {
+                this.Near("ResultText").innerHTML = "Changed by the second button";
+            }
+        }
+    }
+}
+</pre>
+
+    <h2>Styling</h2>
+    <p>A css class is added automatically to all children: .Element-ChildName<br />Adding your own css class is of course possible with the default javascript property className.</p>
+
+    <style>
+        .Element-ExampleStyle {
+            color: #f00;
+        }
+    </style>
+    <pre>
+{
+    innerHTML: "Styling",
+    Elements: {
+        ExampleStyle: "This is an example"
+    }
+}
+</pre>
+    <pre>
+.Element-ExampleStyle {
+  color: #f00;
+}
+</pre>
+
+    <h2>Reference a property on runtime</h2>
+    <p>In some cases it is needed to reference to a property on runtime (When the element is added to the page), instead of during parsing of the javascript. This can be done by using the TK.P("propertyName") function. It is also possible to use TK.P(function) in case the value needs to be retrieved on runtime using a custom javascript function.</p>
+    
+    <pre>
+{
+    Template: {
+        Text: TK.P("TextInput:value"),
+        Number: TK.P(function(a) {
+            return a.Parent.Elements.ToArray().length;
+        }),
+        Init: function() {
+            this.innerHTML = this.Text + ", Number: " + this.Number;
+        }
+    },
+    Elements: {
+        TextInput: {},
+        AddTextButton: {
+            onclick: function() {
+                this.Parent.Elements.TextContainer.Add(this.Parent.Template);
+            }
+        },
+        TextContainer: {
+
+        }
+    }
+}
+</pre>
+
+    <h2>Reference a property on runtime and observe changes</h2>
+    <p>You can also add an reference to another property, and observe any changes. Note that this will make your current property read-only. Using the FieldUpdate function you can react on the changes.</p>
+    <pre>
+{
+    Elements: {
+        AgeLabel: "Enter your age: ",
+        AgeInput: {        
+            SelectedValue: 0,
+            onchange: function() {
+                this.SelectedValue = this.value;
+            }
+        },
+        Status: {
+            Age: TK.P("AgeInput:SelectedValue", true),
+            FieldUpdate: function() {
+                this.innerHTML = "You entered " + this.Age;
+            }
+        }
+    }
+}
+</pre>
+</body>
+</html>

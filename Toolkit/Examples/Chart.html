@@ -1,0 +1,261 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>TK.Chart</title>
+    <link href="../Style.css" rel="stylesheet" />
+    <script src="/Framework/TK.Main.js"></script>
+    <script src="/Framework/Ajax.js"></script>
+    <script src="/Framework/ArrayExtensions.js"></script>
+    <script src="/Framework/TK.Draw.js"></script>
+    <script src="/Framework/TK.Chart.js"></script>
+    <script src="Example.js"></script>
+</head>
+<body>
+    <a href="/" class="home">Toolkit</a>
+
+    <h1>TK.Chart</h1>
+    <p>Chart properties:</p>
+    <ul>
+        <li>Axis: Object with all the axis settings, see property list below</li>
+        <li>Series: Array of all the series, see property list below</li>
+        <li>FontLegend: Font used in the legend</li>
+        <li>ColorLegend: Color used for the legend text</li>
+        <li>TimeZone: UTC or Local</li>
+        <li>AxisPadding: Padding between chart area and axis</li>
+        <li>LabelSpacing</li>
+    </ul>
+
+
+    <p>Axis properties:</p>
+    <ul>
+        <li>Type: 0 Numbers, 1 DateTime (mapped to epoch), 2 DateTime (mapped to labels), 3 Labels</li>
+        <li>Labels: 0 Automatic, 1 Years, 2 Months, 4 Days, 8 Hours, 16 Minutes, 32 Seconds</li>
+        <li>ColorLabels: Color of the labels</li>
+        <li>Location: Location of this axis: 0. Top, 1. Right, 2. Bottom, 3. Left</li>
+        <li>Range: Array with Min,Max values for the range for this axis. Using the value Null will decide the value automatically.</li>
+    </ul>
+
+    <p>Series properties:</p>
+    <ul>
+        <li>Axis: Comma seperated, first column will be the primary axis.</li>
+        <li>Style (Flags): 1 Line, 2 Bar, 4 Points, 8 Area</li>
+        <li>Data: Series data array, will follow the order of the axises</li>
+        <li>Smoothing: Smooth the line between points</li>
+        <li>LineWidth: Width of the line</li>
+        <li>Title: Series title which is displayed in the legend</li>
+        <li>Color: Color of the line/bar/point (If not overriden by the 'Color' axis)</li>
+
+    </ul>
+
+    <h2>Basic line chart</h2>
+    <pre>
+{
+    _: TK.Chart,
+    style: { width: "800px", height: "400px"},
+    LabelSpacing: 20,
+    Series: [
+        {
+            Title: "Line Series",
+            Axis: "X,Y1",
+            Color: "#0081D5",
+            Style: 1+4,
+            Smoothing: 1,
+            LineWidth: 2,
+            Data: [["2010-01-01T15:00:00Z", 100], ["2010-01-02", 100], ["2010-01-03", 50], ["2010-01-04", 100], ["2010-01-05", 75]]
+        }
+    ]
+}
+</pre>
+
+    <h2>Basic bar chart with some styling</h2>
+    <pre>
+{
+    _: TK.Chart,
+    style: { width: "800px", height: "400px"},
+    Series: [
+        { Title: "Test series 1", Axis: "X,Y1", Color: "#0081D5",StackGroup: "b",  Style: 2, Data: [["2010-01-01", 100], ["2010-01-02", 100], ["2010-01-03", 50], ["2010-01-04", 100], ["2010-01-05", 75]] },
+        { Title: "Test series 2", Axis: "X,Y1", Color: "#FF9947", StackGroup: "b", Style: 2, LineWidth: 2, Data: [["2010-01-01", 10], ["2010-01-02", 20], ["2010-01-03", 10], ["2010-01-04", 10], ["2010-01-05", 20]] },
+        { Title: "Test series 3", Axis: "X,Y1", Color: "#990000", Style: 2, LineWidth: 2, Data: [["2010-01-01", 20], ["2010-01-02", 30], ["2010-01-03", 20], ["2010-01-04", 30], ["2010-01-05", 20]] }
+    ],
+    Axis: {
+        Y1: {
+            ColorLabels: "#F00",
+            ColorLine: "#900",
+            ColorSteps: "#900",
+            FontLabels: "16pt Arial"
+        }
+    }
+}
+</pre>
+
+
+    <h2>Chart using different location</h2>
+    <pre>
+{
+    _: TK.Chart,
+    style: { width: "800px", height: "400px"},
+    Series: [
+        { Title: "Test series 1", Axis: "X,Y1", Color: "#0081D5", Style: 2, Data: [["2010-01-01", 100], ["2010-01-02", 100], ["2010-01-03", 50], ["2010-01-04", 100], ["2010-01-05", 75]] },
+    ],
+    LegendLocation: 0,
+    Axis: {
+        X: {
+            Location: 0,
+        },
+        Y1: {
+            Reverse: false,
+            Range: [0,null]
+        }
+    }
+}
+</pre>
+
+
+    <h2>Chart using different primary axis and custom colors</h2>
+    <pre>
+{
+    _: TK.Chart,
+    style: { width: "800px", height: "400px"},
+    Series: [
+        {
+            Title: "Test series 1",
+            Axis: "Y1,X,Color",
+            Color: "#0081D5",
+            Style: 2,
+            Data: [["Cookies", 100, "#0081D5"], ["Cakes", 80, "#0081D5"], ["Bread", 50, "#9F9"]]
+        }
+    ],
+    Axis: {
+        X: {
+            Type: 0,
+            Range: [0, null]
+        },
+        Y1: {
+            Type: 3
+            
+        }
+    }
+}
+</pre>
+
+    <h2>Chart with points in different colors and sizes</h2>
+    <pre>
+{
+    Init: function() {
+        var data = [];
+        for (var i = 0; i < 1000; i++) {
+            data.push([Math.random(), Math.random(), Math.random(), Math.random()]);
+        }
+        this.Add({
+            _: TK.Chart,
+            style: { width: "800px", height: "400px"},
+            Series: [
+                {
+                    Title: "Random dots",
+                    Axis: "X,Y1,Color,Size",
+                    Color: "#000",
+                    Style: 4,
+                    Data: data
+                }
+            ],
+            Axis: {
+                X: {
+                    Type: 0, // Numbers
+                },
+                Y1: {
+                    Type: 0, // Numbers
+                },
+                Size: {
+                    RangeResult: [2,10], // Between 2 and 10
+                },
+                Color: {
+                    RangeResult: ["#F00", "#0F0"] // Between Red and Green
+                }
+            }
+        });
+    }, 
+
+}
+</pre>
+
+    <h2>Chart with events</h2>
+    <pre>
+{
+    Init: function() {
+        var data = [];
+        for (var i = 0; i < 1000; i++) {
+            data.push([Math.random(), Math.random()]);
+        }
+        this.Add({
+            _: TK.Chart,
+            style: { width: "800px", height: "400px"},
+            Series: [
+                {
+                    Title: "Random dots",
+                    Axis: "X,Y1",
+                    Color: "rgba(0,0,0,0.2)",
+                    Style: 4,
+                    Data: data,
+                    Click: function() {
+                        this.Animate("W", 100, 1000, window.TK.Draw.EaseExponential);
+                        this.Animate("H", 100, 1000, window.TK.Draw.EaseExponential);
+                    },
+                    MouseOver: function() {
+                        this.Fill = "#F00";
+                    },
+                    MouseOut: function() {
+                        this.Fill = "rgba(0,0,0,0.2)";
+                    }
+                }
+            ],
+            Axis: {
+                X: {
+                    Type: 0, // Numbers
+                    Size: 15            
+                },
+                Y1: {
+                    Type: 0, // Numbers
+                }
+            }
+        });
+    }, 
+
+}
+</pre>
+
+
+    <h2>Line chart with navigator</h2>
+    <pre>
+{
+    _: TK.Chart,
+    Height: 200,
+    style: { width: "800px", height: "200px"},
+    LabelSpacing: 20,
+    EnableNavigator: true,
+    LegendLocation: -1,
+    Navigate: function(from, till, final) {
+        if (final) { // Check if the mouse button is not pressed anymore
+            alert("Selected area: " + new Date(from) + " - " + new Date(till));
+        }
+    },
+    Axis: {
+        Y1: {
+            Location: 5 // Hidden Y
+        }
+    },
+    Series: [
+        {
+            Title: "Line Series",
+            Axis: "X,Y1",
+            Color: "#0081D5",
+            Style: 1+4,
+            Smoothing: 1,
+            LineWidth: 2,
+            Data: [["2010-01-01", 100], ["2010-01-02", 100], ["2010-01-03", 50], ["2010-01-04", 100], ["2010-01-05", 75]]
+        }
+    ]
+}
+</pre>
+</body>
+</html>

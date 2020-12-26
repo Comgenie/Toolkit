@@ -1,0 +1,74 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>TK.Donut</title>
+    <link href="../Style.css" rel="stylesheet" />
+    <script src="/Framework/TK.Main.js"></script>
+    <script src="/Framework/Ajax.js"></script>
+    <script src="/Framework/ArrayExtensions.js"></script>
+    <script src="/Framework/TK.Draw.js"></script>
+    <script src="/Framework/TK.Donut.js"></script>
+    <script src="Example.js"></script>
+</head>
+<body>
+    <a href="/" class="home">Toolkit</a>
+
+    <h1>TK.Donut</h1>
+
+    <pre>
+{
+    _: TK.Donut,
+    Width: 500,
+    Height: 300,
+    Values: [
+        { 
+          Name: "Value A", Color: "#F90", Value: 1, 
+          ColorLabel: "#F90", ColorLabelLine: "#F00", Extrude: 10
+        },
+        { Name: "Value B", Color: "#93C", Value: 2 },
+        { Name: "Value C", Color: "#09F", Value: 2 }
+    ]
+}
+</pre>
+
+    <h2>Donut with legend</h2>
+
+    <pre>
+{
+    _: TK.Donut,
+    Width: 500,
+    Height: 200,
+    Values: [
+        { Name: "Value A", Color: "#F90", Value: 1 },
+        { Name: "Value B", Color: "#93C", Value: 2 },
+        { Name: "Value C", Color: "#09F", Value: 2 }
+    ],    
+    EnableLegend: true,
+    LabelStyle: 1
+}
+</pre>
+
+    <h2>Static simple donut</h2>
+
+    <pre>
+{
+    _: TK.Donut,
+    Width: 200,
+    Height: 200,
+    Values: [
+        { Name: "Value A", Color: "#F90", Value: 1 },
+        { Name: "Value B", Color: "#93C", Value: 2 },
+        { Name: "Value C", Color: "#09F", Value: 2 }
+    ],
+    EnableLegend: false,
+    EnableLabels: false,
+    AnimationLength: 0,
+    FinalSizeRatio: 1,
+    DonutSize: 0.9
+}
+</pre>
+
+
+</body>
+</html>

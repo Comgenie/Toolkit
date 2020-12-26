@@ -1,0 +1,714 @@
+﻿/* Form */
+.toolkitForm, .toolkitTree, .toolkitHtmlEditor, .toolkitImageEditor {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.toolkitForm input[type=text], .toolkitForm input[type=password], .toolkitForm input[type=number], .toolkitForm input[type=date], .toolkitForm select {
+    border: 1px solid #666;
+    border-radius: 2px;
+    padding: 5px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f9f9ff;
+}
+.toolkitForm .withWidth input {
+    width: 98%;
+}
+.toolkitForm input[type=number] {
+    width: 60px;
+}
+.toolkitForm input[type=text]:focus, .toolkitForm input[type=password]:focus, .toolkitForm input[type=number]:focus, .toolkitForm input[type=date]:focus, .toolkitForm select:hover {
+    box-shadow: rgba(20, 113, 182, 0.5) 0px 0px 3px;
+} 
+
+.toolkitForm label {
+    display: block;
+    font-size: 10pt;
+    font-weight: 600;
+    padding-bottom: 2px;
+}
+.toolkitForm .fieldRow {
+    padding-bottom: 5px;        
+}
+.toolkitForm .fieldRow.inlineBlock {
+    display: inline-block;
+    padding-right: 20px;
+}
+.toolkitForm fieldset {
+    border: 0;
+    border-top: 1px solid #ccc;
+    padding-left: 25%;
+    position: relative;
+    padding-top: 10px;
+    padding-bottom: 25px; 
+}
+.toolkitForm fieldset legend {
+    position: absolute;
+    top: 10px;
+    left: 5px;
+    font-size: 16pt;
+    font-weight: 600;
+    color: #333;
+}
+.toolkitForm button, .toolkitButtonBar button {
+    padding: 7px 15px;
+    background-color: #1a73d4;
+    color: #fff;
+    border: 0;
+    border-radius: 2px;
+    font-weight: 600;
+    margin-bottom: 2px;
+    cursor: pointer;
+}
+    .toolkitForm .toolkitRelativeDateLine button {
+        margin: 0;
+        padding: 3px 5px;
+    }
+
+.toolkitForm button:hover {
+    opacity: 0.8;
+}
+.toolkitForm .validationError {
+    border: 1px solid #ed5a5a;
+    padding: 5px;
+    border-radius: 2px;
+    background-color: #f8ecec;
+    font-size: 10pt;
+}
+.toolkitForm .subForms {
+    position: relative;
+    background-color: #f9f9ff;
+    padding: 5px;
+    padding-bottom: 35px;
+    border: 1px solid #eee;
+}
+.toolkitForm .subForms > .toolkitForm {
+    background-color: #fff;
+    margin-bottom: 5px;
+    border: 1px solid #ddd;
+    padding: 5px;
+    position: relative;
+    padding-right: 100px;
+}
+.toolkitForm .removeButton {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background-color: #ccc;
+    font-size: 8pt;
+}
+.toolkitForm .addButton {
+    position: absolute;
+    bottom: 5px;    
+}
+
+/* Tree */
+.toolkitTree, .toolkitTree ul {
+    list-style: none;
+    padding: 0px;    
+}
+.toolkitTree ul {
+    padding-left: 20px;
+}
+
+.toolkitTree .expandCollapseButton {
+    padding-right: 4px;    
+}
+.toolkitTree .expandCollapseButton svg {
+
+}
+.toolkitTree .expandCollapseButton:hover path {
+    stroke: #000;
+}
+
+/* Popup */
+.toolkitPopup {
+    box-shadow: rgba(0,0,0,0.4) 0px 0px 5px;
+    background-color: #fff;    
+    padding: 0px;
+    border-radius: 2px;
+}
+    .toolkitPopup > .Element-CloseButton, .toolkitFilterBox > .Element-CloseButton {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        padding: 5px 8px;
+        padding-top: 2px;
+        text-align: center;
+        font-size: 8pt;
+        border: 1px solid #ccc;
+        background-color: #eee;
+        cursor: pointer;
+    }
+.toolkitPopup > .Element-CloseButton:hover {
+    border: 1px solid #1a73d4;
+    color: #1a73d4;
+}
+.toolkitPopup > .Element-PopupTitle {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    right: 0px;
+    border-bottom: 1px solid #eee;
+    padding: 5px;
+    margin: 0;    
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-weight: 400;
+    font-size: 16pt;
+    color: #1a73d4;
+    height: 30px;
+}
+.toolkitPopup > .Element-PopupTitle span {
+    cursor: move;
+
+}
+.toolkitPopup > .Element-Content {
+    position: absolute;
+    top: 41px;
+    left: 0px;
+    right: 0px;
+    bottom: 0px;
+    border-bottom: 1px solid #eee;
+    padding: 5px;
+    margin: 0;
+    overflow: auto;
+}
+.toolkitPopupWithButtonBar > .Element-Content {
+    bottom: 40px;
+}
+.toolkitButtonBar {
+    position: absolute;
+    bottom: 0px;
+    left: 0px;
+    right: 5px;
+    height: 30px;
+    padding: 5px;
+    background-color: #f9f9ff;
+    text-align: right;
+}
+.toolkitButtonBar button {
+    margin-left: 10px;
+    margin-right: 0px;
+}
+
+.toolkitPopup > .Element-ResizeButton {
+    position: absolute;
+    bottom: 0px;
+    right: 0px;
+    width: 10px;
+    height: 10px;
+    z-index: 100000;
+    cursor: se-resize;
+    border: 0;
+    background-color: #eee;
+    padding: 0px;
+    opacity: 0;
+    transition: all ease-in-out 0.2s;
+}
+.toolkitPopup > .Element-ResizeButton:hover {
+    background-color: #1a73d4;
+}
+.toolkitPopup:hover > .Element-ResizeButton {
+    opacity: 1;
+}
+.toolkitPopupBackDrop {
+    background-color: rgba(0,0,0,0.6);
+}
+
+
+/* Dashboard */
+.toolkitDashboard {
+    position: relative;
+    overflow: hidden;
+}
+.toolkitDashboard > div {
+    position: absolute;
+    background-color: #fff;
+    width: 100px;
+    height: 100px;
+    transition: all ease-in-out 0.1s;
+}
+.toolkitDashboard > div > .tkDashboardButton {
+    position: absolute;
+    border: 0;
+    background-color: transparent;
+    width: 0px;
+    height: 0px;
+    background-size: 16px;
+    background-repeat: no-repeat;
+    z-index: 10000;
+    opacity: 0;
+    transition: all ease-in-out 0.2s;
+    overflow: hidden;
+    background-color: #fff;
+    padding: 0px;
+}
+.tkDashboardButton svg {
+    width: 18px;
+    height: 18px;
+}
+.tkDashboardButton:hover svg path {
+    fill: #1a73d4 !important;
+}
+.toolkitDashboard .Element-MoveButton {
+    top: 0px;
+    left: 0px;
+}
+.toolkitDashboard .Element-CopyButton {
+    left: 22px;
+    top: 0px;
+}
+.toolkitDashboard .Element-EditButton {
+    top: 0px;
+    left: 44px;
+}
+.toolkitDashboard .Element-ResizeButton {
+    right: 0px;
+    bottom: 0px;
+    cursor: se-resize;
+}
+.toolkitDashboard .Element-RemoveButton {
+    top: 0px;
+    right: 0px;
+}
+.toolkitDashboard.toolkitDashboardEditable > div:hover > .tkDashboardButton, .toolkitDashboard > div.toolkitSelectedDashboardItem > .tkDashboardButton, .toolkitDashboard.toolkitDashboardAlwaysEditable > div > .tkDashboardButton {
+    opacity: 1;
+    padding: 2px;
+    width: 18px;
+    height: 18px;
+}
+.toolkitDashboard > div.tkGridElement {
+    position: absolute;
+    background-color: rgba(255,255,255,0.2);
+    border-radius: 2px;
+}
+/*.toolkitDashboard.toolkitDashboardEditing {
+    background-color: #eee !important;
+}*/
+/* DragDrop */
+.toolkitDragDropContainerHover {
+    box-shadow: rgba(100,100,100,0.4) 0px 0px 10px;
+}
+/* DateTime */
+.toolkitDateTimeSelector {
+    width: 200px;
+    border: 1px solid #999;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    position: absolute;
+    z-index: 1000;
+    background-color: #fff;
+    box-shadow: rgba(0,0,0,0.4) 0px 0px 10px;
+}
+.toolkitDateTimeSelector .previousButton, .toolkitDateTimeSelector .nextButton {
+    background-color: transparent;
+    color: #1a73d4;
+    font-weight: 600;
+    border: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+.toolkitDateTimeSelector .previousButton:hover, .toolkitDateTimeSelector .nextButton:hover {
+    background-color: #eee;
+}
+.toolkitDateTime input.invalidDate {
+    background-color: #fadede;
+}
+.toolkitDateTimeSelector .previousButton {
+    position: absolute;
+    left: 0px;
+    top: 0px;
+    bottom: 0px;
+}
+.toolkitDateTimeSelector .nextButton {
+    position: absolute;
+    right: 0px;
+    top: 0px;
+    bottom: 0px;
+}
+.toolkitDateTimeSelector .statusText {
+    padding: 0px 26px;    
+    font-size: 10pt;
+    line-height: 20pt;
+}
+.toolkitDateTimeSelector .dayItem {
+    width: 20px;
+    border: 0;
+    padding: 0;
+    font-size: 8pt;
+    background-color: transparent;
+    color: #333;
+    padding: 3px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+.toolkitDateTimeSelector .dayItem.otherMonth {
+    color: #CCC;
+}
+.toolkitDateTimeSelector .daySelection {
+    text-align: left;
+}
+.toolkitDateTimeSelector .dayItem:hover, .toolkitDateTimeSelector .dayItem.selected {
+    color: #1a73d4;
+    background-color: #eee;
+}
+.toolkitDateTimeSelector .buttonLine {
+    position: relative;
+        
+    text-align: center;
+}
+
+.toolkitDateTimeSelector .topButtonContainer {
+    position: relative;
+    height: 25px;
+}
+.toolkitDateTimeSelector .switchUTCButton {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    background-color: #eee;
+    color: #333;
+    padding: 2px 5px;
+    border-radius: 2px;
+    font-size: 8pt;
+    cursor: default;
+}
+.toolkitRelativeDateLine input {
+    width: 40px;
+}
+
+.toolkitRelativeDateLine select, .toolkitRelativeDateLine input {
+    display: inline-block;
+    padding: 2px;
+    border: 1px solid #ccc;
+    margin: 2px;
+    font-size: 8pt;
+}
+.toolkitDateTimeSelectorRelative {
+    text-align: center;
+}
+.toolkitDateTimeSelector .toolkitAddLineButton {
+    width: 75%;
+    display: inline-block;
+    background-color: #fff;
+    border: 1px dotted #ccc;
+    color: #1a73d4;
+}
+.toolkitDateTimeSelector .toolkitApplyButton {
+    margin: 5px;
+    padding: 5px;
+    width: 75%;
+}
+.toolkitDateTimeSelector .switchRelativeButton {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    background-color: #eee;
+    color: #333;
+    padding: 2px 5px;
+    border-radius: 2px;
+    font-size: 8pt;
+    cursor: default;
+}
+.toolkitDateTime .timeZoneInfo {
+    display: inline-block;
+    background-color: #eee;
+    border-radius: 3px;
+    padding: 2px 5px;
+    font-size: 8pt;
+    color: #333;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    cursor: default;
+}
+.toolkitDateTime .timeZoneInfo:hover, .toolkitDateTimeSelector .switchUTCButton:hover {
+    background-color: #ccc;
+}
+.toolkitDateTime .dateTimeContainer {
+    border: 1px solid #ccc;
+    padding: 5px;
+    display: inline-block;    
+}
+.toolkitDateTime .dateTimeContainer input {
+    border: 0;
+    margin-left: 5px;
+}
+.toolkitDateTimeRelative .dateTimeContainer input {
+    color: #5dba3c;
+    cursor: pointer;
+}
+.toolkitTableNavigation {
+    background-color: #eee;
+    border: 1px solid #ccc;
+    font-size: 8pt;
+    padding: 2px;
+    min-width: 25px;
+    margin-right: 2px;
+    color: #1d1d1d;
+}
+.toolkitTableNavigation:hover {
+    background-color: #fafafa;
+} 
+.toolkitTableNavigation:disabled {
+    background-color: transparent;
+    border-color: transparent;
+}
+.toolkitFilterBox {
+    padding: 5px;
+    padding-right: 33px;
+    box-shadow: rgba(0,0,0,0.5) 0px 0px 5px;
+    z-index: 10000;
+}
+
+.toolkitFilterButton {
+    background-color: #eee;
+    border: 1px solid #ccc;
+    padding: 2px 5px;
+    margin-left: 5px;
+    opacity: 0;
+    border-radius: 2px;
+    font-size: 8pt;
+    cursor: pointer;
+}
+th:hover > .toolkitFilterButton {
+    opacity: 1;
+}
+.toolkitFilterBox table {
+    border: 1px solid #ccc;
+    background-color: #fff;
+}
+.toolkitFilterBox .Element-CloseButton {
+    top: 5px;
+    right: 5px;        
+}
+.toolkitFilterBox th {
+    display: none;
+}
+.toolkitFilterBox td, .toolkitFilterBox th {
+    border-collapse: collapse;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-size: 10pt;
+    padding: 0px;
+    padding-right: 5px;
+}
+th.toolkitHasFilter {
+    font-style: italic;    
+}
+th.toolkitHasFilter > .toolkitFilterButton {
+    opacity: 1;
+}
+.toolkitActive {
+    color: #1a73d4;
+}
+
+.toolkitInterface {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+    .toolkitInterface > .Element-Header {
+        background-color: #1a73d4;
+        color: #fff;
+        transition: all ease-in-out 0.2s;
+        overflow: hidden;
+    }
+.toolkitInterface > .Element-Menu {
+    transition: top ease-in-out 0.2s;
+}
+.toolkitInterface > .Element-Menu {
+    background-color: #eee;
+    transition: width ease-in-out 0.2s;
+    border-right: 1px solid #ccc;
+}
+.toolkitInterface > .Element-Menu > li {
+    cursor: pointer;
+    border-bottom: 1px solid #999;
+    font-weight: 600;
+    user-select: none;
+}
+.toolkitInterface > .Element-Menu.toolkitDocked:hover {
+    width: 200px !important;
+}
+
+.toolkitInterface > .Element-Menu > li  svg{ 
+    width: 100%; height: 100%;
+}
+.toolkitInterface .Element-Menu path, .toolkitInterface .Element-Menu rect, .toolkitInterface .Element-Menu text, .toolkitInterface .Element-Menu circle {
+    fill: #555 !important;
+}
+.toolkitInterface .Element-Menu > li:hover path, .toolkitInterface .Element-Menu > li:hover rect, .toolkitInterface .Element-Menu > li:hover text, .toolkitInterface .Element-Menu > li:hover circle, .toolkitInterface .Element-Menu .toolkitActive path, .toolkitInterface .Element-Menu .toolkitActive rect, .toolkitInterface .Element-Menu .toolkitActive text, .toolkitInterface .Element-Menu .toolkitActive circle {
+    fill: #1a73d4 !important;
+}
+.toolkitInterface .Element-Menu > li.toolkitActive {
+    background-color: #ccc;
+    font-weight: 600;
+}   
+.toolkitInterface .Element-HamburgerMenu path {
+    fill: #fff !important;
+    opacity: 0.8;
+}
+.toolkitInterface .Element-HamburgerMenu {
+    line-height: 40px;
+    text-align: center;
+    cursor: pointer;
+}
+.toolkitInterface .Element-HamburgerMenu svg {
+    width: 75%;
+    height: 75%;
+}
+.toolkitInterface .Element-HamburgerMenu:hover path, .toolkitInterface .Element-HamburgerMenu.toolkitActive path {
+    opacity: 1;
+}
+.toolkitInterface .Element-CurrentUser {
+    font-weight: 400;
+    font-size: 10pt;
+}
+.toolkitInterface .Element-CurrentLogo {
+    font-weight: 600;
+}
+.toolkitInterface .Element-SubMenu {      
+    border-bottom: 1px solid #CCC;
+    margin: 0;
+    padding: 7px 5px 0px 0px;
+    height: 32px;
+    display: block;
+    background-color: #f9f9f9;    
+
+}
+
+.toolkitInterface .Element-SubMenu > li {
+    position: relative;
+    display: inline-block;
+    padding: 5px 10px;
+    border: 1px solid #CCC;
+    border-bottom: 0;
+    background-color: #eee;
+    margin-left: 10px;
+    cursor: pointer;
+    white-space: nowrap;
+    user-select: none;
+}
+.toolkitInterface .Element-SubMenu > li .Element-Icon {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 30px;
+    height: 30px;
+}
+
+.toolkitInterface .Element-SubMenu > li.menuButtonWithIcon {
+    padding-left: 32px;
+}
+
+.toolkitInterface.toolkitSizeSmall .Element-SubMenu {
+    position: absolute;
+    bottom: 0px;
+    left: 0px;
+    right: 0px;
+    border: 0;
+    height: 60pt;
+    background-color: #eee;
+    margin: 0;
+    padding: 0;
+    text-align: center;
+    font-size: 9pt;
+    white-space: nowrap;
+}
+.toolkitInterface.toolkitSizeSmall .Element-SubMenu > li {
+    border: 0 !important;
+    width: 56pt;
+    height: 20pt;
+    padding: 0;
+    padding-top: 40pt;    
+    
+}
+.toolkitInterface.toolkitSizeSmall .Element-SubMenu > li .Element-Icon {
+    width: 32pt;
+    left: 12pt;
+    right: 12pt;
+    height: 32pt; 
+    top: 6pt;
+}
+.toolkitInterface .Element-SubMenu > li.toolkitActive {
+    font-weight: normal;
+    background-color: #fff;
+}
+.toolkitInterface.toolkitSizeSmall .Element-SubMenu > li.toolkitActive {
+    background-color: #ddd;
+}
+
+.toolkitToast {
+    background-color: #1a73d4;
+    color: #fff;
+    border-radius: 5px;
+    box-shadow: rgba(0,0,0,0.3) 0px 5px 5px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-size: 10pt;
+    padding: 0;
+    opacity: 0;
+    transition: all ease-in-out 0.3s;
+    margin-top: 5px;
+    text-align: center;
+    z-index: 10000;
+}
+.toolkitToast h3 {
+    margin: 0 0 5px 0;
+    font-size: 12pt;
+    font-weight: 600;
+    text-align: center;
+    padding: 10pt 10pt 0pt 10pt;
+}
+.toolkitToast > div {
+    padding: 0px 10pt 10pt 10pt;
+}
+.toolkitToast.toolkitVisible {
+    opacity: 1;
+    margin-top: 0px;
+}
+
+.toolkitHtmlEditor {
+    border: 1px solid #ccc;
+}
+    .toolkitHtmlEditor .Element-MenuBar {
+        background-color: #eee;
+        user-select: none;
+        -ms-user-select: none;
+    }
+    .toolkitHtmlEditor .Element-MenuBar > div {
+        width: 25px;
+        height: 25px;
+        padding: 5px;
+        display: inline-block;
+        user-select: none;
+    }
+    .toolkitHtmlEditor .Element-MenuBar svg {
+        width: 24px;
+    }
+    .toolkitHtmlEditor .Element-MenuBar > div:hover {
+        background-color: #ccc;
+    }
+    .toolkitHtmlEditor .Element-Editor {
+        padding: 5px;
+        overflow: auto;
+    }
+    .toolkitHtmlEditor .Element-Editor:focus {
+        outline: 0px solid transparent;
+    }
+
+.toolkitImageEditor .Element-DropArea {
+    border: 3px dashed #ccc;
+    padding: 0px 0px;
+    width: 150px;
+    height: 150px;
+    line-height: 150px;
+    text-align: center;
+    display: inline-block;
+    font-size: 9pt;
+    color: #999;
+    cursor: pointer;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center center;
+}
+    .toolkitImageEditor .Element-DropArea svg path, .toolkitImageEditor .Element-DropArea svg rect, .toolkitImageEditor .Element-DropArea svg ellipse, .toolkitImageEditor .Element-DropArea svg circle {
+        fill: #ccc !important;
+    }
+.toolkitImageEditor .Element-DropArea:hover {
+    border-color: #999;
+}
+    .toolkitImageEditor .Element-DropArea:hover svg path, .toolkitImageEditor .Element-DropArea:hover svg rect, .toolkitImageEditor .Element-DropArea:hover svg ellipse, .toolkitImageEditor .Element-DropArea:hover svg circle {
+        fill: #999 !important;
+    }

@@ -1,0 +1,71 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>TK.Gauge</title>
+    <link href="../Style.css" rel="stylesheet" />
+    <script src="/Framework/TK.Main.js"></script>
+    <script src="/Framework/Ajax.js"></script>
+    <script src="/Framework/ArrayExtensions.js"></script>
+    <script src="/Framework/TK.Draw.js"></script>
+    <script src="/Framework/TK.Gauge.js"></script>
+    <script src="Example.js"></script>
+</head>
+<body>
+    <a href="/" class="home">Toolkit</a>
+
+    <h1>TK.Gauge</h1>
+
+    <pre>
+{
+    _: TK.Gauge,
+    Width: 400,
+    Height: 200,
+    Ranges: [
+        { MinValue: 0, MaxValue: 5, Color: "#C00" },
+        { MinValue: 5, MaxValue: 15, Color: "#FC0" },
+        { MinValue: 15, MaxValue: 30, Color: "#090" }
+    ],
+    Label: "Gauge 1",
+    Value: 25
+}
+</pre>
+
+    <h2>Gauge with some customization</h2>
+    <pre>
+{
+    _: TK.Gauge,
+    Width: 400,
+    Height: 200,
+    Ranges: [
+        { MinValue: 0, MaxValue: 5, Color: "#333" },
+        { MinValue: 5, MaxValue: 10, Color: "#666" },
+        { MinValue: 10, MaxValue: 15, Color: "#999" }
+    ],
+    Value: 30,
+    DonutSize: 0.5,
+    TextValue: "OK",
+    EnableShadow: false,
+    ColorCursor: "#339"
+}
+</pre>
+
+    <h3>Horizontal Gauge</h3>
+    <pre>
+{
+    _: TK.Gauge,
+    Width: 400,
+    Height: 125,
+    Ranges: [
+        { MinValue: 0, MaxValue: 5, Color: "#C00" },
+        { MinValue: 5, MaxValue: 15, Color: "#FC0" },
+        { MinValue: 15, MaxValue: 30, Color: "#090" }
+    ],
+    Label: "Gauge 1",
+    Value: 25,
+    Style: 1
+}
+</pre>
+
+</body>
+</html>

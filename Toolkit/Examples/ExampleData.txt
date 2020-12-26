@@ -1,0 +1,22 @@
+﻿[
+  {
+    "Description": "Flying Duck",
+    "Price": 12.34,
+    "Count": 40
+  },
+  {
+    "Description": "Pink Banana",
+    "Price": 42.00,
+    "Count": 12
+  },
+  {
+    "Description": "Crazy Cow",
+    "Price": 3.14,
+    "Count": 1
+  },
+  {
+    "Description": "Very fast car",
+    "Price": 400000,
+    "Count": 3
+  }
+]

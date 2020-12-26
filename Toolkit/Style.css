@@ -1,0 +1,57 @@
+﻿body {
+
+}
+.usedFiles {    
+    font-style: italic;
+    color: #999;
+}
+
+pre, .example {
+    position: relative;
+    display: block;
+    background-color: #eee;
+    border: 1px solid #999;
+    padding: 5px;
+    margin: 15px 5px 25px 5px;
+    color: #333;
+    max-width: 800px;
+    
+}
+pre::before, .example::before {
+    position: absolute;
+    top: -13px;
+    left: 0px;
+    
+    content: "Code:";
+    font-size: 8pt;
+    color: #999;
+    font-family: Consolas, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+pre.editable::before {
+    content: "Code (editable):";
+}
+.example::before {
+    content: "Result:";
+}
+
+.example {
+    background-color: #fff;
+}
+blockquote {
+    border-left: 3px solid #ccc;
+    margin-left: 10px;
+    padding-left: 5px;
+}
+
+.pageWarning {
+    background-color: #ebc4d6;
+    color: #1d1d1d;
+    padding: 10px;
+    border: 3px solid #900;
+    margin-top: 5px;
+    max-width: 500px;
+    font-weight: 600;
+}
+.pageWarning p {
+    margin: 0;
+}

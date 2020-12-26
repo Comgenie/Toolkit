@@ -1,0 +1,67 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>TK.DragDrop</title>
+    <link href="../Style.css" rel="stylesheet" />
+    <script src="/Framework/TK.Main.js"></script>
+    <script src="/Framework/ArrayExtensions.js"></script>
+    <script src="/Framework/TK.DragDrop.js"></script>
+    <script src="Example.js"></script>
+    <link href="/Minified/Style.css" rel="stylesheet" />
+</head>
+<body>
+    <a href="/" class="home">Toolkit</a>
+
+    <h1>TK.DragDrop</h1>
+    <pre>
+{
+    Elements: {
+        ContainerA: {
+            style: {
+                backgroundColor: "#fee",
+                width: "400px",
+                height: "400px"
+            },
+            className: "toolkitDragDropContainer",
+            Elements: {
+                ItemA: {
+                    _: TK.DragDrop,
+                    innerHTML: "Item A"
+                },
+                ItemB: {
+                    _: TK.DragDrop,
+                    innerHTML: "Item B"
+                }
+            }
+        },
+        ContainerB: {
+            style: {
+                backgroundColor: "#eef",
+                width: "400px",
+                height: "400px"
+            },
+            className: "toolkitDragDropContainer",
+            Elements: {
+                ItemC: {
+                    _: TK.DragDrop,
+                    innerHTML: "Item C"
+                },
+                ItemD: {
+                    _: TK.DragDrop,
+                    innerHTML: "Item D (New element source)",
+                    ElementTemplate: {
+                        _: TK.DragDrop,
+                        innerHTML: "I am a new element"
+                    }
+                }
+            },
+            Drop: function(element, x, y) {
+                alert("Dropped in ContainerB: "+ element.innerHTML + " at location ("+x+","+y+")");
+            }
+        }
+    }
+}
+</pre>    
+</body>
+</html>

@@ -1,0 +1,51 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>TK.HtmlEditor</title>
+    <link href="../Style.css" rel="stylesheet" />
+    <script src="/Framework/TK.Main.js"></script>
+    <script src="/Framework/ArrayExtensions.js"></script>
+    <script src="/Minified/Svg.js"></script>
+    <script src="/Framework/TK.HtmlEditor.js"></script>
+    <script src="Example.js"></script>
+    <link href="/Minified/Style.css" rel="stylesheet" />
+</head>
+<body>
+    <a href="/" class="home">Toolkit</a>
+
+    <h1>TK.HtmlEditor</h1>
+    <p>A basic rich text editor. This is also available as form field type "html". Use the .GetValue() method to retrieve the value as html string.</p>
+    <pre>
+{
+    _: TK.HtmlEditor,
+    Data: "Some &lt;strong&gt;example&lt;/strong&gt; data"
+}
+</pre>
+    <h2>Html editor with specific buttons, custom button and filling the parent container.</h2>
+    <pre>
+{
+    style: {
+        width: "600px",
+        height: "400px"
+    },
+    Elements: {
+        HtmlEditor: {
+            _: TK.HtmlEditor,
+            FillContainer: true,
+            Buttons: ["Bold", "Italic", "Underline", "Custom"],
+            ButtonTemplates: {
+                Custom: {
+                    innerHTML: Svg.Icons.Settings,
+                    onclick: function() {
+                        alert(this.Near("HtmlEditor").GetValue());
+                    }
+                }
+            }
+        }
+    }
+}
+</pre>
+
+</body>
+</html>

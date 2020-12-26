@@ -1,0 +1,382 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>TK.Form</title>
+    <link href="../Style.css" rel="stylesheet" />
+    <script src="/Framework/TK.Main.js"></script>
+    <script src="/Framework/Ajax.js"></script>
+    <script src="/Framework/ArrayExtensions.js"></script>
+    <script src="/Framework/TK.Form.js"></script>
+    <script src="/Framework/TK.DateTime.js"></script>
+    <script src="Example.js"></script>
+    <link href="/Minified/Style.css" rel="stylesheet" />
+    <style>
+        .fieldError {
+            color: #f00;
+        }
+    </style>
+</head>
+<body>
+    <a href="/" class="home">Toolkit</a>
+
+    <h1>TK.Form</h1>
+    <p>Form builder</p>
+
+    <h2>Automatically create a form based on an object</h2>
+    <pre>
+{
+    _: TK.Form,
+    Model: {
+        Name: "Duck",
+        Active: true,
+        Age: 5
+    },
+    Save: function(newModel) {
+        alert(JSON.stringify(newModel));
+    }
+}
+</pre>
+
+    <h3>Field settings</h3>
+    <pre>
+{
+    _: TK.Form,
+    SaveButtonText: "Woop",
+    Model: {
+        Name: "",
+        Active: true,
+        Age: 5,
+        From: "2018-04-27",
+        Id: 99
+    },
+    Fields: {    
+        // Setting a type or display name
+        From: { Type: "date", DisplayName: "Active From" },
+
+        // Marking a field as required
+        Name: { Required: true, PlaceHolder: "Name here" },
+
+        // Hide the ID field (Original result will still be available in the saved model)
+        Id: { Type: "ignore"},
+
+        // Using a custom template
+        Age: {
+            Template: {
+                _: "span",
+                Init: function() {
+                    this.Elements.NumberInput.value = this.Data;
+                },
+                GetValue: function () {
+                    return parseFloat(this.Elements.NumberInput.value);
+                },
+                Elements: {
+                    NumberInput: {},
+                    AddButton: {
+                        innerHTML: "+",
+                        type: "button",
+                        onclick: function() {
+                            this.Near("NumberInput").value =
+                                parseInt(this.Near("NumberInput").value) + 1;
+                        }
+                    }
+                }
+            }
+        }
+    },
+    Save: function(newModel) {
+        alert(JSON.stringify(newModel));
+    }
+}
+</pre>
+
+    <h3>Sub forms</h3>
+    <h4>Single sub form</h4>
+    <pre>
+{
+    _: TK.Form,
+    Model: {
+        Name: "Duck",
+        Food: {
+            Name: "Donuts",
+            Amount: 20
+        }
+    },
+    Fields: {
+        Food: {
+            Type: "form",
+            Fields: {
+                Name: { 
+                    Required: true, DisplayName: "Name of the food"
+                }
+            }
+        }
+    },
+    Save: function(newModel) {
+        alert(JSON.stringify(newModel));
+    }
+}
+</pre>
+    <h4>Array</h4>
+    <pre>
+{
+    _: TK.Form,
+    Model: {
+        Name: "Duck",
+        Active: true,
+        Age: 5,
+        Food: [
+            { Name: "Grass", Amount: 5 },
+            { Name: "Donuts", Amount: 2 }
+        ]
+    },
+    Fields: {
+        Food: {
+            Type: "forms",
+            NewItem: { Name: "", Amount: 0 },
+            AddButtonText: "ADD!", // Default: Add
+            RemoveButtonText: "REMOVE!", // Default: Remove
+            Fields: {
+                Name: { Required: true, DisplayName: "Name of the food" }
+            }            
+        }
+    },
+    Save: function(newModel) {
+        alert(JSON.stringify(newModel));
+    }
+}
+</pre>
+
+    <h3>Auto Save</h3>
+    <p>This executes the save callback when there is any potential change.</p>
+    <pre>
+{
+    Elements: {
+        Form: {
+            _: TK.Form,
+            AutoSave: true,
+            SaveButtonText: null, // Hide the normal save button
+            Model: {
+                Name: "Duck",
+                Active: true,
+                Age: 5
+            },
+            Save: function(newModel) {                
+                this.Near("Status").innerHTML = "Name is now: " + newModel.Name;
+            }
+        },
+        Status: {}
+    }
+}
+</pre>
+
+    <h3>Javascript Events and ajax combo box</h3>
+    <p>The selectable options can be retrieved using ajax. This will be done once during exection and cached for any other form elements using this Url. It is also possible to add onchange / onblur / onfocus events to most fields.</p>
+    <pre>
+{
+    Elements: {
+        Form: {
+            _: TK.Form,
+            Model: {
+                Name: "Pink Banana",
+                Active: true,
+                Age: 5
+            },
+            Fields: {
+                Name: {
+                    Type: "ajaxselect",
+                    Url: "ExampleData.txt",
+                    GetName: function(a) { return a.Description; }, // Default: a.Name
+                    GetValue: function(a) { return a.Description; }, // Default: a.Id
+                    ValueIsText: true,
+                    onchange: function() {
+                        alert(this.value);
+                    }                    
+                },
+                Age: {
+                    onfocus: function() {
+                        this.value = 123;
+                    },
+                    onblur: function() {
+                        this.value = 456;
+                    }
+                }
+            }
+        }
+    }
+}
+</pre>
+
+    <h3>Styling options</h3>
+    <p>When using the SortByFields setting, the fields will be added in the order of the Fields setting. This also enables the use of sections which will create html fieldsets and allows adding other (non-field) elements in between.</p>
+    <pre>
+{
+    _: TK.Form,
+    SortByFields: true,
+    Model: {
+        FirstName: "",
+        LastName: "",
+        Street: "",
+        Postcode: "",
+        City: "",
+        Country: ""
+    },
+    Fields: {    
+        FirstSection: { Type: "section", DisplayName: "Name"},        
+        FirstName: { Required: true,DisplayName: "First Name", Inline: 1 },
+        LastName: { Required: true, DisplayName: "Last Name", Inline: 1 },
+
+        SecondSection: { Type: "section", DisplayName: "Address"},
+        Desc: { _: "p", innerHTML: "Please fill in your address below"},
+        Street: { Required: true, DisplayName: "Street", Width: "300px" },
+        Postcode: { Required: true, DisplayName: "Postcode", Inline: 1, Width: "100px" },
+        City: { Required: true, DisplayName: "City", Inline: 1 },
+        Country: {  Required: true,  Type: "select", ValueIsText: true, Options: [
+            { Text: "- Please select -", Value: "" },
+            { Text: "Netherlands", Value: "NL" },
+            { Text: "United Kingdom", Value: "UK" },
+        ]}
+
+    },
+    Save: function(newModel) {
+        alert(JSON.stringify(newModel));
+    }
+}
+</pre>
+
+    <h3>Dynamic sub form</h3>
+    <p>A field can be linked to another field. When the other field changes, the linking field will be cleared and <em>Init</em> in the template will be called again. The property <em>LinkedData</em> is filled with the value of the linked field.</p>
+    <pre>
+{
+    _: TK.Form,
+    Model: {
+        Country: "",
+        Custom: ""
+    },    
+    Fields: {
+        Country: { 
+            Required: true, Type: "select", ValueIsText: true, 
+            Options: [
+                { Text: "- Please select -", Value: "" },
+                { Text: "Netherlands", Value: "NL" },
+                { Text: "United Kingdom", Value: "UK" },
+            ]
+        },
+        Custom: {            
+            LinkField: "Country",
+            Template: {       
+                _: "input",         
+                
+                Init: function() {
+                    if (!this.LinkedData) {
+                        this.value = "Nothing selected";
+                    } else {
+                        this.value = "You selected " + this.LinkedData + "!";
+                    }
+                },
+                GetValue: function() {
+                    return this.value;
+                }
+            }        
+        }
+    },
+    Save: function(newModel) {
+        alert(JSON.stringify(newModel));
+    }
+}
+</pre>
+    <h3>IsVisible function to control if a field should be visible or not</h3>
+    <p>The IsVisible method is called at Init and whenever the 'onchange' is called by any of the fields.</p>
+    <pre>
+{
+    _: TK.Form,
+    Model: {
+        Name: "Duck",
+        ShowAge: false,
+        Age: 5
+    },
+    Fields: {
+        ShowAge: {
+            DisplayName: "Show age field"
+        },
+        Age: {
+            IsVisible: function(model) {
+                // Return true if this field should be visible
+                // Return false to hide it
+                return model.ShowAge;
+            }
+        }
+    },
+    Save: function(newModel) {
+        alert(JSON.stringify(newModel));
+    }
+}
+</pre>
+    <p>By using the <em>form</em> field type and the <em>LinkSettings</em> property, it is possible to dynamically change the form based on the value of the linked field.</p>
+    <pre>
+{
+    _: TK.Form,
+    Model: {
+        ContactType: "Personal",
+        ContactDetails: null
+    },    
+    Fields: {
+        ContactType: { 
+            Required: true, Type: "select", ValueIsText: true, 
+            DisplayName: "Contact Type",
+            Options: [
+                { Text: "Personal", Value: "Personal" },
+                { Text: "Business", Value: "Business" },
+            ]
+        },
+        ContactDetails: {            
+            Type: "form",
+            DisplayName: "Contact Details",
+            LinkField: "ContactType",
+            LinkSettings: {
+                Personal: {
+                    DefaultModel: { Name: "", Address: "", City: "" }
+                },
+                Business: {
+                    DefaultModel: { ContactPerson: "", Name: "", Address: "", City: "" },
+                    Fields: {
+                        ContactPerson: {
+                            DisplayName: "Contact person"
+                        },
+                        Address: {
+                            DisplayName: "Address main office"
+                        }
+                    }
+                }
+            }       
+        }
+    },
+    Save: function(newModel) {
+        alert(JSON.stringify(newModel));
+    }
+}
+</pre>
+    <h3>Custom validation</h3>
+    <p>Assign a custom validation function to do extra validations. The result needs to be passed by calling the given callBack function. This allows for ajax requests.</p>
+    <pre>
+{
+    _: TK.Form,
+    Model: {
+        Name: "Duck",
+        Active: true,
+        Age: 5
+    },
+    CustomValidation: function(newModel, callBackResult) {
+        if (newModel.Age < 10)
+            callBackResult(["At least 10 years or older!"]);
+        else
+            callBackResult(); // OK
+    },
+    Save: function(newModel) {
+        alert(JSON.stringify(newModel));
+    }
+}
+</pre>
+
+</body>
+</html>

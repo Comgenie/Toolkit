@@ -1,0 +1,49 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>TK.Event</title>
+    <link href="../Style.css" rel="stylesheet" />
+    <script src="/Framework/TK.Main.js"></script>
+    <script src="/Framework/Ajax.js"></script>
+    <script src="/Framework/ArrayExtensions.js"></script>
+    <script src="/Framework/TK.Event.js"></script>
+    <script src="Example.js"></script>
+</head>
+<body>
+    <a href="/" class="home">Toolkit</a>
+
+    <h1>TK.Event</h1>
+    <h2>Subscribe for events</h2>
+    
+    <pre>
+{
+    Elements: {
+        Events: {
+            _: TK.Event,
+            Subscribe: ["Test"], // Subscribe for event type Test
+            Receive: function(eventType, eventData) {
+                this.Parent.Elements.ReceivedEvents.Add({ 
+                    _: "p", innerHTML: eventData
+                });
+            }
+        },
+        ReceivedEvents: {
+            innerHTML: "Events received will be displayed here"
+        }
+    }
+}
+</pre>
+
+    <h2>Send event</h2>
+    <pre>
+{
+    _: "button",
+    innerHTML: "Press me and look at the example output above",
+    onclick: function() {
+        TK.Event.Send("Test", "This is the data")
+    }
+}
+</pre>
+</body>
+</html>

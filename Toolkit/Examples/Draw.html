@@ -1,0 +1,64 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>TK.Draw</title>
+    <link href="../Style.css" rel="stylesheet" />
+    <script src="/Framework/TK.Main.js"></script>
+    <script src="/Framework/Ajax.js"></script>
+    <script src="/Framework/ArrayExtensions.js"></script>
+    <script src="/Framework/TK.Draw.js"></script>
+    <script src="Example.js"></script>
+</head>
+<body>
+    <a href="/" class="home">Toolkit</a>
+
+    <h1>TK.Draw</h1>
+    <p>This is a canvas-based component to simplify drawing graphical elements on the screen, animate them and attach events to them.</p>
+
+    <pre>{
+    _: TK.Draw,
+    Width: 500,
+    Height: 300,
+    Init: function() {
+        this.Add({
+            _: TK.Draw.Rect,
+            X: 10, Y: 10, W: 100, H: 50,
+            Fill: "#F00"            
+        });
+        
+        this.Refresh(); // Refresh required after manually adding elements
+    },
+    Elements: {
+        SomeCircle: {
+            _: TK.Draw.Circle,
+            X: 250, Y: 150, W: 100, H: 100,            
+            Fill: "#00F",
+            Anchor: window.TK.Draw.AnchorMiddle | window.TK.Draw.AnchorCenter,
+            MouseDown: function(x, y) {
+                // React on events by changing properties directly
+                // The canvas will always redraw after an event
+                this.Fill = "#000";                
+            },
+            MouseUp: function(x, y) {
+                // Change property using an animation
+                // PropertyName, TargetValue, Length-in-miliseconds, [easing]
+                this.Animate("Fill", "#090", 500, TK.Draw.EaseExponential);                
+            }
+
+            // Also available: MouseMove, MouseOut, Click
+        },
+        SomeText: {
+            _: TK.Draw.Text,
+            X: 250, Y: 150,
+            Fill: "#FFF",
+            Text: "Hello World",
+            Font: "12px",
+            Anchor: window.TK.Draw.AnchorMiddle | window.TK.Draw.AnchorCenter
+        }
+    }
+}</pre>
+
+
+</body>
+</html>

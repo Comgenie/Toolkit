@@ -1,0 +1,6 @@
+﻿{
+  Elements: {
+    TestH4: "Example Template",
+    Text: "Lorem Ipsum"
+  }
+}

@@ -1,0 +1,88 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>TK.Dashboard</title>
+    <link href="../Style.css" rel="stylesheet" />
+    <script src="/Framework/TK.Main.js"></script>
+    <script src="/Framework/ArrayExtensions.js"></script>
+    <script src="/Framework/TK.Popup.js"></script>
+    <script src="/Framework/TK.Form.js"></script>
+    <script src="/Framework/TK.Dashboard.js"></script>
+    <script src="Example.js"></script>
+    <script src="/Minified/Svg.js"></script>
+    <link href="/Minified/Style.css" rel="stylesheet" />
+</head>
+<body>
+    <a href="/" class="home">Toolkit</a>
+    <h1>TK.Dashboard</h1>
+    
+    <pre>
+{
+    _: TK.Dashboard,
+    style: {
+        width: "625px",
+        minHeight: "415px",
+        backgroundColor: "#ccc"
+    },
+    DashboardItems: [
+        {
+            _: "window.TK.DashboardTemplates.Text",
+            State: {
+                Text: "This is a text dashboard item"
+            }
+        },
+        {
+            _: "window.TK.DashboardTemplates.Text",
+            State: {
+                Text: "This is a text dashboard item 2"
+            }
+        },
+        {
+            _: "window.TK.DashboardTemplates.Text",
+            State: {
+                Text: "This is a text dashboard item 3"
+            }
+        }
+    ]
+}
+</pre>
+
+    <h2>Save and load state</h2>
+    <p>The state can be saved and restored. The dashboard items have to be stateful.</p>
+    <pre>
+{
+    Elements: {
+        Dashboard: {
+            _: TK.Dashboard,
+            style: {
+                width: "625px",
+                minHeight: "415px",
+                backgroundColor: "#ccc"
+            }
+        },
+        AddTextButton: {
+            onclick: function() {
+                this.Near("Dashboard").AddDashboardItem({
+                    _: window.TK.DashboardTemplates.Text,
+                    Text: "Random number: " + Math.random()
+                }, null, null, null, 2, 1); 
+                // AddDashboardItem(template, name, left, top, width, height)
+            }
+        },
+        SaveTextButton: {
+            onclick: function() {
+                this.Near("CurrentStateInput").value = this.Near("Dashboard").Save();
+            }        
+        },
+        LoadTextButton: {
+            onclick: function() {
+                this.Near("Dashboard").Load(this.Near("CurrentStateInput").value);
+            }        
+        },
+        CurrentStateInput: {}
+    }
+}
+</pre>
+</body>
+</html>

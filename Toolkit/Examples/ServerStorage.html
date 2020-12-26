@@ -1,0 +1,98 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>TK.ServerStorage</title>
+    <link href="../Style.css" rel="stylesheet" />
+    <script src="/Framework/TK.Main.js"></script>
+    <script src="/Framework/Ajax.js"></script>
+    <script src="/Framework/ArrayExtensions.js"></script>
+    <script src="/Framework/TK.Table.js"></script>
+    <script src="/Framework/TK.ServerStorage.js"></script>
+    <script src="Example.js"></script>
+</head>
+<body>
+    <a href="/" class="home">Toolkit</a>
+
+    <h1>TK.ServerStorage</h1>
+    <div class="pageWarning">
+        <p>Do not store any illegal or copyright infringement material using this API. Please <a href="mailto:toolkit@comgenie.com">send an email</a> to report unlawful files stored using this API.</p>
+    </div>
+    <p>Using this component files can be saved and retrieved using the TisedaAPI. This service is made for storing small files like photos (profile images) or JSON files. The <em>Url</em> property can be set to use a different back-end.</p>
+
+    <h2>Simple anonymous storage</h2>
+    <p>By default, files will be stored using a randomized name which can only be retrieved by knowing the exact name.</p>
+    <pre>
+{
+    Elements: {
+        Storage: {
+            _: TK.ServerStorage
+        },
+        File: {
+            _: "input",
+            type: "file",
+            onchange: function() {
+                var obj = this;
+                if (this.files.length == 0)
+                    return;
+                this.Near("Result").innerText = "Uploading...";
+                this.Parent.Elements.Storage.Store(this.files[0].name, this.files[0], function(fileMetaData) {
+                    obj.Near("Result").innerText = JSON.stringify(fileMetaData);
+                });
+            }
+        },
+        Result: {}
+    }
+}
+</pre>
+
+    <h2>Private container</h2>
+    <p>Using a Container url and ClientId, a private container can be accessed with rights to store/retrieve/list/delete. These rights can be set per ClientId.</p>
+
+    <pre>
+{
+    Init: function() {
+        this.Elements.Files.Refresh();
+    },
+    Elements: {
+        Storage: {
+            _: TK.ServerStorage,
+            ClientId: "SecretCodeForBob", // Change Bob to Alice to see a read-only client
+            Container: "https://toolkitapi.comgenie.com/Test/Identity"
+        },
+        Files: {
+            Refresh: function() {
+                var obj = this;
+                this.Clear();
+                this.Parent.Elements.Storage.List(function(files) {
+                    obj.Add({
+                        _: TK.Table,
+                        EnableRemoveButton: true,
+                        Rows: files,
+                        Save: function(fileToBeRemoved, remove) {
+                            obj.Near("Storage").Delete(fileToBeRemoved.fileName, function(isDeleted) {
+                                obj.Refresh();
+                            });                            
+                            return false;
+                        }
+                    });
+                });
+            }
+        },
+        File: {
+            _: "input",
+            type: "file",
+            onchange: function() {
+                var obj = this;
+                if (this.files.length == 0)
+                    return;
+                this.Near("Storage").Store(this.files[0].name, this.files[0], function(fileMetaData) {
+                    obj.Near("Files").Refresh();
+                });
+            }
+        }
+    }
+}
+</pre>
+</body>
+</html>
