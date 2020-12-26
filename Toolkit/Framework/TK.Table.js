@@ -152,6 +152,7 @@ window.TK.Table = {
             this.OpenViewForRow(trElement, template);
         }
     },
+    RowDoubleClick: function (rowObj, trElement) { },
     Save: function (rowObj, isRemoved) {
         // Only used when the Form property is given
     },
@@ -652,6 +653,11 @@ window.TK.Table = {
                     }
                 }
                 obj.RowClick(this.Row, this);
+            },
+            ondblclick: function () {
+                if (obj.RowDoubleClick) {
+                    obj.RowDoubleClick(this.Row, this);
+                }
             }
         };
         
