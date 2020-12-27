@@ -18,6 +18,7 @@ window.TK.Dashboard = {
     DefaultWidth: 600,
     AutoGrow: true, // Automatic increase size of this element (Adds [SnapSize] spacing to this div when moving/resizing elements)
     AutoShrink: false,
+    AutoWidthCount: null, // When this is a positive value, the snap size will be adjusted automatically to make sure there are always X 'blocks' in the width
 
     Init: function () {
         this.SetEditMode(this.EditMode);
@@ -60,6 +61,14 @@ window.TK.Dashboard = {
             state = JSON.parse(state);
         this.Clear();       
         var regex = /[^A-Za-z0-9\.]/g;
+       
+        if (this.AutoWidthCount) {            
+            this.SnapSize = Math.floor(this.offsetWidth / this.AutoWidthCount);
+            while (this.offsetWidth / (this.SnapSize + this.Spacing) < this.AutoWidthCount && this.SnapSize > 30) {
+                this.SnapSize -= 5;
+            }
+        }
+        
         for (var i = 0; i < state.length; i++) {
             if (regex.exec(state[i]._))
                 continue;
