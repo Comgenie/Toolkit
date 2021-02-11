@@ -24,7 +24,7 @@ TK.Chart = {
             Range: null, // [null, null]  Fixed min/max, null/undefined for automatic, values outside this range will be filtered
             LabelFormat: null,
             LabelFormatEdge: null,
-            Title: "kWh",
+            Title: "",
             Location: 2, // Bottom  ( Top,Right,Bottom,Left,Hidden X,Hidden Y,Size,Color)
         },
         Y1: {
@@ -36,9 +36,11 @@ TK.Chart = {
             ColorSteps: "#999",
             ColorMinorSteps: "#CCC",
             ColorLabels: "#999",
-            ColorTitle: "#F00",
+            ColorTitle: "#999",
+            FontTitle: "12pt Arial",
             Location: 3, // Left      
-            Reverse: true            
+            Reverse: true,
+            Title: ""
         },
         Size: {
             RangeResult: null, // [10, 25],
@@ -311,8 +313,8 @@ TK.Chart = {
                         ColorMinorSteps: this.Axis[axisName] && this.Axis[axisName].ColorMinorSteps ? this.Axis[axisName].ColorMinorSteps : "#999",
                         ColorLabels: this.Axis[axisName] && this.Axis[axisName].ColorLabels ? this.Axis[axisName].ColorLabels : "#999",
                         FontLabels: this.Axis[axisName] && this.Axis[axisName].FontLabels ? this.Axis[axisName].FontLabels : "9pt Arial",
-                        ColorTitle: this.Axis[axisName] && this.Axis[axisName].ColorTitle ? this.Axis[axisName].ColorTitle : "#333",
-                        FontTitle: this.Axis[axisName] && this.Axis[axisName].FontTitle ? this.Axis[axisName].FontTitle : "9pt Arial",
+                        ColorTitle: this.Axis[axisName] && this.Axis[axisName].ColorTitle ? this.Axis[axisName].ColorTitle : "#999",
+                        FontTitle: this.Axis[axisName] && this.Axis[axisName].FontTitle ? this.Axis[axisName].FontTitle : "12pt Arial",
                         Title: this.Axis[axisName] && this.Axis[axisName].Title ? this.Axis[axisName].Title : "",
                         Labels: this.Axis[axisName] && this.Axis[axisName].Labels ? this.Axis[axisName].Labels : 0,
                         LabelFormat: this.Axis[axisName] && this.Axis[axisName].LabelFormat ? this.Axis[axisName].LabelFormat : "dd-MM-yyyy",
@@ -688,6 +690,16 @@ TK.Chart = {
             var stepTexts = [];
             if (d.Location == 2 || d.Location == 0) { // Bottom, Top
                 var y = d.Location == 2 ? d.Position[1] : d.Position[3] + d.Position[1];
+
+                if (d.Title) {
+                    this.Elements.Canvas.Add({
+                        _: TK.Draw.Text, X: d.Position[2] + d.Position[0], Y: (d.Location == 2 ? y + 30 : y - 30),
+                        Anchor: TK.Draw.AnchorRight | (d.Location == 2 ? TK.Draw.AnchorTop : TK.Draw.AnchorBottom),
+                        Fill: d.ColorTitle,
+                        Font: d.FontTitle,
+                        Text: d.Title 
+                    });
+                }
                 
                 this.Elements.Canvas.Add({
                     _: TK.Draw.Line, X: d.Position[0], Y: y, W: d.Position[2], H: 0, Stroke: d.ColorLine
@@ -767,7 +779,18 @@ TK.Chart = {
                 }
             } else if (d.Location == 1 || d.Location == 3) { // Right, Left
                 var x = d.Location == 1 ? d.Position[0] : d.Position[2] + d.Position[0];
-                
+
+                if (d.Title) {
+                    this.Elements.Canvas.Add({
+                        _: TK.Draw.Text, X: d.Location == 3 ? 5 : this.Width - 5, Y: d.Position[1] + (d.Position[3] / 2),
+                        Anchor: TK.Draw.AnchorCenter | TK.Draw.AnchorTop,
+                        Fill: d.ColorTitle,
+                        Font: d.FontTitle,
+                        Text: d.Title,
+                        Rotate: d.Location == 3 ? -90 : 90
+                    });
+                }
+
                 this.Elements.Canvas.Add({
                     _: TK.Draw.Line, X: x, Y: d.Position[1], W: 0, H: d.Position[3], Stroke: d.ColorLine
                 });

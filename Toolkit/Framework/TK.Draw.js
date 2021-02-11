@@ -797,6 +797,7 @@ TK.Draw.Text = {
     Draw: function (c) {
         c.beginPath();
         this.Transform(c);
+
         c.font = this.Font;
 
         if ((this.Anchor & TK.Draw.AnchorCenter) > 0) {
@@ -816,12 +817,26 @@ TK.Draw.Text = {
         }
 
         this.DrawFS(c);
+
+
+
         if (!this.W) {
             var rect = c.measureText(this.Text);
             this.W = rect.width;         
         }
         if (!this.H) {
             this.H = this.MeasureHeight(this.Text, this.Font);
+        }
+
+        if (this.Rotate) {
+            var translateX = this.X;
+            var translateY = this.Y;
+
+            c.translate(translateX, translateY);
+            //c.ellipse(0, 0, 35, 35, 0, 0, (2 * Math.PI));
+
+            c.rotate(this.Rotate * Math.PI / 180);
+            c.translate(-translateX, -translateY);
         }
 
         if (this.Fill)
