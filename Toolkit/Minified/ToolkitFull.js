@@ -697,7 +697,8 @@ if(d.Location%2==0){pos[n][0]=px;}else{pos[n][1]=px;}}else if(d.Location==8){if(
 pos[n][2]=d.RangeResult[1];else
 pos[n][2]=(((value-d.Min)/(d.Max-d.Min))*(d.RangeResult[1]-d.RangeResult[0]))+d.RangeResult[0];}else if(d.Location==7){if(value.toLowerCase){pos[n][3]=value;}else{var colorA=getColor(d.RangeResult[0]),colorB=getColor(d.RangeResult[1]);for(var n2=0;n2<colorA.length;n2++){if(d.Max==d.Min){colorA[n2]=colorB[n2];}else{colorA[n2]=(((value-d.Min)/(d.Max-d.Min))*(colorB[n2]-colorA[n2]))+colorA[n2];}}
 pos[n][3]="rgba("+colorA.join(",")+")";}}}}
-var curStackGroups={};var barCount=0;var barIndex=0;for(var j=0;j<firstAxis.Series.length;j++){var otherSerie=this.Series[firstAxis.Series[j]];if(otherSerie.StackGroup&&curStackGroups[otherSerie.StackGroup]!==undefined){if(firstAxis.Series[j]==i)
+var curStackGroups={};var barCount=0;var barIndex=0;for(var j=0;j<firstAxis.Series.length;j++){var otherSerie=this.Series[firstAxis.Series[j]];if((otherSerie.Style&2)==0){continue;}
+if(otherSerie.StackGroup&&curStackGroups[otherSerie.StackGroup]!==undefined){if(firstAxis.Series[j]==i)
 barIndex=curStackGroups[otherSerie.StackGroup];continue;}
 if(otherSerie.StackGroup)
 curStackGroups[otherSerie.StackGroup]=barCount;if(firstAxis.Series[j]==i)

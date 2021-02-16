@@ -907,7 +907,10 @@ TK.Chart = {
             var barCount = 0;
             var barIndex = 0;
             for (var j = 0; j < firstAxis.Series.length; j++) {
-                var otherSerie = this.Series[firstAxis.Series[j]];                 
+                var otherSerie = this.Series[firstAxis.Series[j]];
+                if ((otherSerie.Style & 2) == 0) { // Check if this serie has bars
+                    continue;
+                }
                 if (otherSerie.StackGroup && curStackGroups[otherSerie.StackGroup] !== undefined) {
                     if (firstAxis.Series[j] == i)
                         barIndex = curStackGroups[otherSerie.StackGroup];                               
