@@ -54,6 +54,8 @@ TK.Donut = {
         var total = 0;
         var countLegend = 0;
         for (var i = 0; i < this.Values.length; i++) {
+            if (this.Values[i].Value && this.Values[i].Value < 0)
+                this.Values[i].Value = 0;
             if (this.Values[i].HideZeroes && !this.Values[i].Value)
                 continue;
             total += this.Values[i].Value;
