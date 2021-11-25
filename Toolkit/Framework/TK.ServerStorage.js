@@ -2,11 +2,11 @@
 /* Minify Skip */
 /* Minify Order(100) */
 
-// Component to save and retrieve files, using the Tiseda API
+// Component to save and retrieve files, using the Toolkit API
 TK.ServerStorage = {
     _: "component",
     Container: null, // null is only for public file storage/retrieval, use a https:// link for a private storage container with rights check based on the clientId
-    ClientId: "Client" + (Math.random() * 100000), // Used for private containers  
+    ClientId: "Client" + (Math.random() * 100000) + "-" + (Math.random() * 100000) + "-" + (Math.random() * 100000) + "-" + (Math.random() * 100000), // Used for private containers
     Url: "https://toolkitapi.comgenie.com/Storage",
 
     Store: function (path, blobOrByteArrayOrStringContents, callBack) {

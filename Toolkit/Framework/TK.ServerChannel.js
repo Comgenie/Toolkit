@@ -6,7 +6,7 @@
 TK.ServerChannel = {
     _: "component",
     Channels: [],
-    ClientId: "Client" + (Math.random() * 100000), // Not visible for other connected client    
+    ClientId: "Client" + (Math.random() * 100000) + "-" + (Math.random() * 100000) + "-" + (Math.random() * 100000) + "-" + (Math.random() * 100000), // Not visible for other connected client
     Receive: function (channel, identity, data) { },    
 
     Connection: null,

@@ -5,6 +5,7 @@ TK.HtmlEditor = {
     FillContainer: false,
     Buttons: ["IncreaseFontSize", "DecreaseFontSize", "Bold", "Italic", "Underline", "AlignLeft", "AlignCenter", "AlignRight", "Indent", "Outdent", "Paragraph", "Header1", "Header2", "Header3", "CodeBlock", "QuoteBlock"],
     __RecursivePropertiesButtonTemplates: true,
+    EnableHTMLPasting: true,
     ButtonTemplates: {
         IncreaseFontSize: {
             innerHTML: Svg.Icons.TextIncrease,
@@ -180,8 +181,16 @@ TK.HtmlEditor = {
             onpaste: function (e) {
                 if (e.clipboardData) {
                     e.preventDefault();
+                    if (this.Parent.EnableHTMLPasting && e.clipboardData.types && e.clipboardData.types.indexOf("text/html") >= 0) {
+                        try {
+                            var html = e.clipboardData.getData("text/html");
+                            document.execCommand("insertHTML", false, html);
+                            return;
+                        } catch (errie) { } // If insertHTML is not supported for any reason, we will still paste it as text                        
+                    }
+
                     var text = e.clipboardData.getData("text");
-                    document.execCommand("insertText", false, text);
+                    document.execCommand("insertText", false, text);                    
                 }
             },
             onkeydown: function (e) {

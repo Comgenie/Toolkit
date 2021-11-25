@@ -9,7 +9,7 @@ window.TK.Tree = {
         _: "li",
         Data: null,
         Init: function () {
-            this.Elements.Text.innerHTML = (this.Data && this.Data.Text) ? this.Data.Text : "";
+            this.Elements.Text.innerText = (this.Data && this.Data.Text) ? this.Data.Text : "";
         },
         Elements: {
             Text: { _: "span" }
