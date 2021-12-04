@@ -3,7 +3,8 @@ allObjs.push(type);type=type._;}
 var className=null;if(!type){type="div";if(nameChildObj&&window.TK.AutoTypeSelection){var autoTypes=["Input","TextButton","Button","Select","Label","Span","Textarea","H1","H2","H3","H4"];var endsWith=function(s,has){if(!s||!has||s.length<has)
 return false;return s.substr(s.length-has.length)==has;};for(var i=0;i<autoTypes.length;i++){if(endsWith(nameChildObj,autoTypes[i])){if(autoTypes[i]=="TextButton"){defaultInnerHTML=nameChildObj.substr(0,nameChildObj.length-10);type="button";}else{type=autoTypes[i].toLowerCase();}
 break;}}}}
-var copyObj=type!="component"?document.createElement(type):{};copyObj._=type;var elements={};var resolveProperties=[];for(var i=allObjs.length-1;i>=0;i--){for(var propName in allObjs[i]){if(propName=="style"&&copyObj.appendChild){for(var styleName in allObjs[i].style){copyObj.style[styleName]=allObjs[i].style[styleName];}
+var copyObj=type!="component"?document.createElement(type):{};copyObj._=type;if(type=="button"){copyObj.type="button";}
+var elements={};var resolveProperties=[];for(var i=allObjs.length-1;i>=0;i--){for(var propName in allObjs[i]){if(propName=="style"&&copyObj.appendChild){for(var styleName in allObjs[i].style){copyObj.style[styleName]=allObjs[i].style[styleName];}
 continue;}
 if(reserved.indexOf(propName)>=0)
 continue;if(propName=="Elements"){for(var elementName in allObjs[i][propName]){if(typeof allObjs[i][propName][elementName]==='string'){elements[elementName]={HTML:allObjs[i][propName][elementName]};}else if(typeof allObjs[i][propName][elementName]==='function'){elements[elementName]={onclick:allObjs[i][propName][elementName]};}else{elements[elementName]=allObjs[i][propName][elementName];}}}else{if(allObjs[i][propName]&&allObjs[i][propName].ToolkitPropertyReference)

@@ -51,7 +51,11 @@ window.TK.Initialize = function (obj, parentObj, nameChildObj) {
 	}
 	// Actually create the element (or empty object, in case its a component with no DOM representation)
 	var copyObj = type != "component" ? document.createElement(type) : {};
-	copyObj._ = type;
+    copyObj._ = type;
+
+    if (type == "button") {
+        copyObj.type = "button"; // Prevent Buttons to automatically become submit buttons in case they are located in a form
+    }
 
 	// Go through all levels of elements, set (and override) properties. Keep all child elements and Init functions in a seperate list
     var elements = {};
