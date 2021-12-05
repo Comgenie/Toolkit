@@ -527,6 +527,12 @@ window.TK.DateTime = {
             dayItem.tabIndex = -1;
             dayItem.onclick = function (e) {
                 dateObj.setDate(this.DateIndex);
+                if (!obj.Data && (dateObj.getDate() != new Date().getDate() || dateObj.getDay() != new Date().getDay() || dateObj.getFullYear() != new Date().getFullYear())) {                    
+                    // Different day, default to 00:00:00
+                    dateObj.setHours(0);
+                    dateObj.setMinutes(0);
+                    dateObj.setSeconds(0);
+                }
                 obj.RenderDateInput(element, dateObj.toISOString());
                 obj.RefreshDateInput(true);
                 var event = e || window.event;
