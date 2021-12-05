@@ -240,6 +240,10 @@ TK.Chart = {
             },
             GetPositionAsValue: function () { // Convert X value to actual value
                 var r = (this.X - minPX) / (maxPX - minPX);
+                if (this.X - 3 < minPX) // If its near start end, pick the start value
+                    r = 0;
+                if (this.X + 3 > maxPX) // If its near the end, pick the end value
+                    r = 1;
                 return (r * (d.ScaleMax - d.ScaleMin)) + d.ScaleMin;                
             }
         };
