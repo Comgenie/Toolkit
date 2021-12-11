@@ -208,6 +208,35 @@ var application = {
     }
 }
 </pre>
+    <h2>Self</h2>
+    <p>Use the .Self property to directly point to the main object which is added using .Add(), or the entry point initialized using TK.Initialize(). This can be useful to directly navigate to the main properties of a template without having to use a .Parent.Parent.Parent.. chain.</p>
+    <pre>
+{   
+    Test: 123,
+    Elements: {
+        Container: {
+            innerHTML: "Press the button",
+            Elements: {
+                List: {
+                    _: "ul",
+                    Elements: {
+                        Item: {
+                            _: "li",
+                            Elements: {
+                                ExampleTextButton: function() {
+                                    // this.Self is available everywhere
+                                    // And points to the top object manually Added
+                                    alert(this.Self.Test);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+</pre>
 
     <h2>Other methods</h2>
     <p>The <strong>Near</strong> function can be used to find the nearest child element with a specific name. Note that this method comes with a small performance penalty.</p>
@@ -254,10 +283,22 @@ var application = {
   color: #f00;
 }
 </pre>
+    <p>It is also possible to set a style in code:</p>
+    <pre>
+{
+    style: {
+        backgroundColor: "green"
+    },
+    innerHTML: "Styling using code",
+    onclick: function() {
+        this.style.backgroundColor = "blue";
+    }
+}
+</pre>
 
     <h2>Reference a property on runtime</h2>
     <p>In some cases it is needed to reference to a property on runtime (When the element is added to the page), instead of during parsing of the javascript. This can be done by using the TK.P("propertyName") function. It is also possible to use TK.P(function) in case the value needs to be retrieved on runtime using a custom javascript function.</p>
-    
+
     <pre>
 {
     Template: {

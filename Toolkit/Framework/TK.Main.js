@@ -2,7 +2,7 @@
 /* Minify Order(1) */
 window.TK = {};
 window.TK.AutoTypeSelection = true;
-window.TK.Initialize = function (obj, parentObj, nameChildObj) {
+window.TK.Initialize = function (obj, parentObj, nameChildObj, selfObj) {
 	var reserved = ['Parent', 'Add', 'AddMultiple', 'Clear', 'Near', 'Remove', 'SetHTML', '_'];
 	var allObjs = [obj];
 	var inits = [];
@@ -320,11 +320,17 @@ window.TK.Initialize = function (obj, parentObj, nameChildObj) {
 				arr.push(this[propName]);
 		}
 		return arr;
-	};
+    };
+
+    // Set the 'Self' property, which will always point to the main object added with .Add or TK.Initialize
+    if (!selfObj)
+        selfObj = copyObj;
+    if (copyObj.Self === undefined)
+        copyObj.Self = selfObj;
 
 	// Create all sub elements    
-	for (var name in elements) {
-		window.TK.Initialize(elements[name], copyObj, name);
+    for (var name in elements) {
+        window.TK.Initialize(elements[name], copyObj, name, selfObj);
     }
 
 	// Add this element to the child elements of a parent element (and get a reference to it)
