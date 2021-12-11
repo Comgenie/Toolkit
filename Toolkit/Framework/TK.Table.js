@@ -11,12 +11,14 @@ window.TK.Table = {
     EnableCheckBoxes: false,
     EnableFullRowCheckBoxToggle: false,
     EnableFullRowClickDeselectOthers: false,
+    EnableSelectAllCheckBox: true,
     EnableRemoveButton: false,    
     PageSize: null,
     PageOffset: 0,
     SpecificColumns: null,    
     ColumnTitles: {},
     Templates: {},
+    HeaderTemplates: {},
     SortedBy: null,
     SortedDesc: false,
     SortCallBack: null,
@@ -42,13 +44,16 @@ window.TK.Table = {
             CheckBox: {
                 _: "input",
                 type: "checkbox",
+                className: "tableRowCheckBox",
                 onclick: function (event) {
                     if (event.shiftKey && this.Parent.Table.PreviousCheckBox) {
                         // Select everything in between
                         var curIndex = this.Parent.Parent.RowIndex;
                         var otherIndex = this.Parent.Table.PreviousCheckBox.Parent.Parent.RowIndex;
                         for (var i = (curIndex < otherIndex ? curIndex + 1 : curIndex - 1); i != otherIndex; i = (curIndex < otherIndex ? i + 1 : i - 1)) {
-                            this.Parent.Table.querySelectorAll(".Element-row" + i + " input[type=checkbox]")[0].checked = this.Parent.Table.PreviousCheckBox.checked;
+                            var checkBoxElement = this.Parent.Table.querySelectorAll(".Element-row" + i + " .tableRowCheckBox input[type=checkbox]")[0];
+                            checkBoxElement.checked = this.Parent.Table.PreviousCheckBox.checked;
+                            checkBoxElement.UpdateData();
                         }
                     }
                 },
@@ -56,9 +61,20 @@ window.TK.Table = {
                     this.Parent.Table.PreviousCheckBox = this;
                 },
                 onchange: function (event) {
+                    this.UpdateData();
+                    if (this.Parent.Table.EnableSelectAllCheckBox) {
+                        var selectAll = this.Parent.Table.querySelectorAll(".tableSelectAllCheckBox")[0];
+                        if (selectAll) {
+                            selectAll.checked = this.Parent.Table.Rows.length == this.Parent.Table.SelectedRows().length;
+                        }
+                    }
+
                     if (this.Parent.Table.CheckboxCheck) {
                         this.Parent.Table.CheckboxCheck();
                     }
+                },
+                UpdateData: function () {
+                    this.Parent.Row["CheckBoxes"] = this.checked;
                 },
                 Init: function () {
                     this.checked = this.Parent.Data === true;
@@ -276,8 +292,53 @@ window.TK.Table = {
         var columns = [];
         if (this.EnableCheckBoxes) {
             columns.push("CheckBoxes");
+            if (!this.DisableFilterForColumns)
+                this.DisableFilterForColumns = [];
+            if (this.DisableFilterForColumns.indexOf("CheckBoxes") < 0)
+                this.DisableFilterForColumns.push("CheckBoxes");
             this.ColumnTitles["CheckBoxes"] = " ";
             this.Templates["CheckBoxes"] = this.CheckBoxTemplate;
+            if (this.EnableSelectAllCheckBox) {
+                this.HeaderTemplates["CheckBoxes"] = {
+                    _: "th",
+                    Init: function () {
+                        var selectAllCheckBox = this.Add({
+                            _: "input",
+                            type: "checkbox",
+                            className: "tableSelectAllCheckBox",
+                            onclick: function (event) {
+                                if (event)
+                                    event.stopPropagation();
+                                if (window.event)
+                                    window.event.cancelBubble = true;
+                            },
+                            onchange: function (event) {
+                                var checkBoxElements = obj.Elements.tbody.Elements.ToArray()
+                                    .Where(function (a) { return a.Elements.CheckBoxes && a.Elements.CheckBoxes.Elements.CheckBox; })
+                                    .Select(function (a) { return a.Elements.CheckBoxes.Elements.CheckBox });
+                                for (var i = 0; i < checkBoxElements.length; i++) {
+                                    checkBoxElements[i].checked = this.checked;
+                                    checkBoxElements[i].UpdateData();
+                                }
+                                if (obj.CheckboxCheck)
+                                    obj.CheckboxCheck();
+                            }
+                        });
+
+                        // See if all rows are already selected
+                        var totalRowsChecked = 0;
+                        for (; totalRowsChecked < obj.Rows.length; totalRowsChecked++) {
+                            if (!obj.Rows[totalRowsChecked]["CheckBoxes"])
+                                break;
+                        }
+                        if (totalRowsChecked > 0 && totalRowsChecked == obj.Rows.length)
+                            selectAllCheckBox.checked = true;
+                    }
+
+                };
+            } else {
+                this.HeaderTemplates["CheckBoxes"] = null;
+            }
         }
 
         if (this.SpecificColumns && this.SpecificColumns.length > 0) {
@@ -298,7 +359,7 @@ window.TK.Table = {
             var name = columns[i];
 
             thead.Elements.tr.Elements[name] = {
-                _: "th",
+                _: this.HeaderTemplates && this.HeaderTemplates[name] ? this.HeaderTemplates[name] : "th",
                 innerHTML: (this.ColumnTitles && this.ColumnTitles[name] ? this.ColumnTitles[name] : name),
                 className: (name == obj.SortedBy ? "sorted" + (this.SortedDesc ? " desc" : "") : ""),
                 DataColumnName: name,
