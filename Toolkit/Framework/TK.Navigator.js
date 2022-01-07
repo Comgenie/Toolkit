@@ -2,6 +2,7 @@
 window.TK.Navigator = {
     _: "div",
     DefaultHash: "index",
+    Seperator: "/",
     Current: null,
     CurrentElement: null,
     UseTemplates: false,
@@ -38,7 +39,7 @@ window.TK.Navigator = {
             navigateTo = navigateTo.substr(1);
 
 
-        var pagePart = decodeURIComponent(navigateTo).split('/');
+        var pagePart = decodeURIComponent(navigateTo).split(this.Seperator);
         if (pagePart.length <= this.NavigatorLevel) {
             pagePart.push(this.DefaultHash);
         }
