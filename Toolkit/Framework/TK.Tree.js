@@ -5,6 +5,7 @@ window.TK.Tree = {
     ParentIdField: "ParentId",
     Rows: [],
     className: "tree toolkitTree",
+    EnableFullRowExpand: false,
     Template: {
         _: "li",
         Data: null,
@@ -32,7 +33,10 @@ window.TK.Tree = {
                 _: this.Template,
                 Data: this.Rows[i],
                 onclick: function (e) {
-                    obj.RowClick(this.Data);
+                    obj.RowClick(this.Data);                    
+                    if (obj.EnableFullRowExpand && this.ExpandCollapseButton) {
+                        this.ExpandCollapseButton.click();
+                    }
                     e.stopPropagation();
                     return false;
                 }
@@ -69,9 +73,11 @@ window.TK.Tree = {
                         this.parentNode.className = "expanded";
                         this.innerHTML = window.SvgPath("M2,3L6,7L10,3", 12, 12, "#999");
                     }
-                    e.stopPropagation();
+                    if (e)
+                        e.stopPropagation();
                     return false;
                 };
+                parent.ExpandCollapseButton = expandButton;
                 parent.insertBefore(expandButton, parent.firstChild);
             }
             parent.SubList.appendChild(curRows["id" + rowId]);
@@ -137,6 +143,8 @@ window.TK.Tree = {
             row.style.display = "";
         }
         currentRow.scrollIntoView();
+
+        return currentRow;
     },
     RowClick: function (rowObj) { }
 };
