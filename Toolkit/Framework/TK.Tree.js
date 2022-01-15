@@ -56,7 +56,7 @@ window.TK.Tree = {
             if (!parent.SubList) {
                 parent.SubList = document.createElement("UL");
                 parent.SubList.style.display = "none";
-                parent.className = "collapsed";
+                parent.className += " collapsed";
                 parent.appendChild(parent.SubList);
                 var expandButton = document.createElement("SPAN");
                 
@@ -64,13 +64,13 @@ window.TK.Tree = {
                 var collapsed = window.SvgPath("M3,2L7,6L3,10", 12, 12, "#999");
                 expandButton.innerHTML = collapsed;
                 expandButton.onclick = function (e) {
-                    if (this.parentNode.className == "expanded") {
+                    if (this.parentNode.className.indexOf("expanded") >= 0) {
                         this.parentNode.SubList.style.display = "none";
-                        this.parentNode.className = "collapsed";
+                        this.parentNode.className = this.parentNode.className.replace(/expanded/g, "") + " collapsed";
                         this.innerHTML = collapsed;
                     } else {
                         this.parentNode.SubList.style.display = "";
-                        this.parentNode.className = "expanded";
+                        this.parentNode.className = this.parentNode.className.replace(/collapsed/g, "") + " expanded";
                         this.innerHTML = window.SvgPath("M2,3L6,7L10,3", 12, 12, "#999");
                     }
                     if (e)
@@ -110,7 +110,7 @@ window.TK.Tree = {
                     while (row.parentNode.Rows == undefined) {
                         row = row.parentNode;
                         if (row.SubList)
-                            row.className = "expanded";
+                            row.className = row.className.replace(/collapsed/g, "") + " expanded";
                         row.style.display = "";
                     }
                 }
@@ -133,13 +133,13 @@ window.TK.Tree = {
 
         row.style.display = "";
         if (row.SubList) {
-            row.className = "expanded";
+            row.className = row.className.replace(/collapsed/g, "") + " expanded";
             row.SubList.style.display = "";
         }
         while (row.parentNode.Rows == undefined) {
             row = row.parentNode;
             if (row.SubList)
-                row.className = "expanded";
+                row.className = row.className.replace(/collapsed/g, "") + " expanded";
             row.style.display = "";
         }
         currentRow.scrollIntoView();
