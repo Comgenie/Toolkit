@@ -27,8 +27,10 @@ namespace ToolkitServer
             {
                 try
                 {
-                    using (var wc = new WebClient())
+                    using (var wc = new WebClientWithTimeout())
                     {
+                        wc.TimeOutInSeconds = 10;
+
                         // Prevent downloading too much as we only accept a small identity data payload
                         long totalBytesReceived = 0;
                         wc.DownloadProgressChanged += (wcObj, eventArgs) =>
@@ -38,11 +40,10 @@ namespace ToolkitServer
                                 wc.CancelAsync();
                         };
 
-
+                        
                         var identityData = await wc.DownloadStringTaskAsync(new Uri(channel + (channel.Contains("?") ? "&" : "?") + "clientId=" + WebUtility.UrlEncode(clientId)));
                         if (!string.IsNullOrEmpty(identityData) && identityData.Length <= 1024 && identityData.StartsWith("{") && identityData.EndsWith("}")) 
                         {
-
                             var identityDataObj = System.Text.Json.JsonSerializer.Deserialize<IdentityData>(identityData);
                             if (string.IsNullOrEmpty(identityDataObj.publicIdentifier))
                                 throw new Exception("No or incorrect PublicIdentifier");
@@ -92,6 +93,17 @@ namespace ToolkitServer
             public bool allowFileWrite { get; set; }            
             public bool allowFileDelete { get; set; }
             public bool allowFileList { get; set; }
+        }
+    }
+
+    public class WebClientWithTimeout : WebClient
+    {
+        public int TimeOutInSeconds = 60;
+        protected override WebRequest GetWebRequest(Uri address)
+        {
+            var req = base.GetWebRequest(address);
+            req.Timeout = TimeOutInSeconds * 1000;
+            return req;
         }
     }
 }
