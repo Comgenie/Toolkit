@@ -9,6 +9,7 @@
     <script src="/Framework/TK.Popup.js"></script>
     <script src="/Framework/TK.Form.js"></script>
     <script src="/Framework/TK.Dashboard.js"></script>
+    <script src="/Framework/TK.DragDrop.js"></script>
     <script src="Example.js"></script>
     <script src="/Minified/Svg.js"></script>
     <link href="/Minified/Style.css" rel="stylesheet" />
@@ -16,7 +17,7 @@
 <body>
     <a href="/" class="home">Toolkit</a>
     <h1>TK.Dashboard</h1>
-    
+
     <pre>
 {
     _: TK.Dashboard,
@@ -81,6 +82,35 @@
             }        
         },
         CurrentStateInput: {}
+    }
+}
+</pre>
+
+    <h2>Drag and drop dashboard new elements</h2>
+    <pre>
+{
+    Elements: {
+        Dashboard: {
+            _: TK.Dashboard,
+            EnableDrop: true,
+            style: {
+                width: "625px",
+                minHeight: "415px",
+                backgroundColor: "#ccc"
+            }
+        },
+        Text: {
+            _: TK.DragDrop,
+            innerHTML: "Drag me!",
+            ElementTemplate: {
+                _: TK.DashboardTemplates.Text,
+                Text: "This is a text dashboard item",
+                Width: 3
+            },
+            HoverTemplate: {
+                innerHTML: "Text block"
+            }
+        }
     }
 }
 </pre>

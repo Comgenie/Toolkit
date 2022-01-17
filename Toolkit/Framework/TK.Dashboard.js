@@ -10,10 +10,11 @@ window.TK.Dashboard = {
     EnableEdit: true,
     EnableLimitX: true,
     EnableLimitY: true,
+    EnableDrop: false,
     Spacing: 5,
     SnapSize: 100,
     EditMode: 1, // 0: None, 1: Show edit buttons when hovering, 2: Always show edit buttons
-    className: "toolkitDashboard",    
+    className: "toolkitDashboard",
     DashboardItems: [],
     DefaultWidth: 600,
     AutoGrow: true, // Automatic increase size of this element (Adds [SnapSize] spacing to this div when moving/resizing elements)
@@ -35,9 +36,9 @@ window.TK.Dashboard = {
         var newClassName = this.className.replace(/toolkitDashboardEditable/g, "").replace(/toolkitDashboardAlwaysEditable/g, "");
 
         if (this.EditMode == 1)
-            newClassName += " toolkitDashboardEditable";
+            newClassName += " toolkitDashboardEditable toolkitDragDropContainer";
         else if (this.EditMode == 2)
-            newClassName += " toolkitDashboardAlwaysEditable";
+            newClassName += " toolkitDashboardAlwaysEditable toolkitDragDropContainer";
         this.className = newClassName;
     },
     Save: function () {
@@ -78,6 +79,36 @@ window.TK.Dashboard = {
             var stateProperties = state[i].State;
             stateProperties._ = state[i]._;
             this.AddDashboardItem(stateProperties, null, state[i].Left, state[i].Top, state[i].Width, state[i].Height);
+        }
+    },
+    CanDrop: function (elementOrTemplate) {
+        if (!this.EnableDrop)
+            return false;
+        for (var i = 0; i < 30 && elementOrTemplate._ && !elementOrTemplate.StateObjectName; i++)
+            elementOrTemplate = elementOrTemplate._;
+        return (elementOrTemplate && elementOrTemplate.StateObjectName);
+    },
+    Drop: function (elementOrTemplate, x, y) {
+        if (!this.EnableDrop)
+            return;
+        var size = this.SnapSize + this.Spacing;
+        y = Math.round(y / size);
+        x = Math.round(x / size);
+
+        if (y < 0) y = 0;
+        if (x < 0) x = 0;
+
+        var width = (elementOrTemplate.Width ? elementOrTemplate.Width : 1);
+        var height = (elementOrTemplate.Height ? elementOrTemplate.Height : 1);
+        if (!elementOrTemplate.appendChild) { // A template has been dropped
+            return this.AddDashboardItem(elementOrTemplate, "block" + new Date().getTime(), x, y, width, height);
+        } else { // An element has been dropped, add a block and then replace the content element
+            var addedBlock = this.AddDashboardItem({}, "block" + new Date().getTime(), x, y, width, height);
+            addedBlock.Elements.Content.Remove();
+            addedBlock.Elements.Content = elementOrTemplate;
+            elementOrTemplate.Parent = addedBlock;
+            addedBlock.appendChild(elementOrTemplate);
+            return addedBlock;
         }
     },
     AutoGrowHandler: function (restore) {

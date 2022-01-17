@@ -54,10 +54,32 @@
                         _: TK.DragDrop,
                         innerHTML: "I am a new element"
                     }
-                }
+                },
+                ItemE: {
+                    _: TK.DragDrop,
+                    innerHTML: "Item E (With custom hover)",
+                    HoverTemplate: {
+                        innerHTML: "I am a custom hover"
+                    }
+                },
+                ItemF: {
+                    _: TK.DragDrop,
+                    innerHTML: "Item F (With dropped callback)",
+                    Dropped: function(container, addedElement) {
+                        alert('The container I am dropped in has ' +
+                            container.childNodes.length + ' items');
+                    }
+                },
             },
-            Drop: function(element, x, y) {
-                alert("Dropped in ContainerB: "+ element.innerHTML + " at location ("+x+","+y+")");
+            Drop: function(elementOrTemplate, x, y) {
+                // If both HoverTemplate and ElementTemplate is set, 
+                // the template will be passed instead of an element
+
+                alert("Dropped in ContainerB: "+ elementOrTemplate.innerHTML + " at location ("+x+","+y+")");
+
+                // If this method is adding the block manually (or handling it some other way)
+                // return anything other than null/undefined/false, so the element won't be added automatically
+                // this return value will also be passed into the .Dropped callback
             }
         }
     }

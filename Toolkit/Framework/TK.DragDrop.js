@@ -8,7 +8,10 @@ window.TK.DragDrop = {
     },
     Type: "",
     Threshold: 10,
-    ElementTemplate: null, // When set, the current element will not be moved, but a new element will be created by this
+    ElementTemplate: null, // When set, the current element will not be moved, but a new element will be created by this. This will also be used as hover template if the HoverTemplate property is not set.
+    HoverTemplate: null, // When set, this element will be used for a hover-preview. If both are set, the ElementTemplate will be passed as Template to the .Drop method
+    Dropped: function (droppedInContainer, addedElement) { }, // Extra callback
+
     ontouchstart: function (e) {
         this.onmousedown(e.touches[0]);
         e.stopPropagation();
@@ -18,23 +21,18 @@ window.TK.DragDrop = {
         try { startX = e.clientX; startY = e.clientY; } catch (errie) { var e2 = window.event; startX = e2.clientX; startY = e2.clientY; }
 
         var obj = this;
+        var origObj = this;
         var origParent = this.parentNode;
         var myPosition = this.getBoundingClientRect();
+        
         var cursorOffsetX = startX - myPosition.left;
         var cursorOffsetY = startY - myPosition.top;
         
-        var containers = document.querySelectorAll(".toolkitDragDropContainer");        
-
+       
         var positions = [];
-        for (var i = 0; i < containers.length; i++) {
-            if (containers[i].DropFilter && (!obj.Type || containers[i].DropFilter.indexOf(obj.Type) < 0))
-                continue;
-            
-            positions.push({ Element: containers[i], Position: containers[i].getBoundingClientRect() });
-        }
-
         var newTop, newLeft;
         var first = true;
+        var elementOrTemplateToAdd = null;
         var passedThreshold = false;
         var aboveContainer = null;
         var aboveContainerPosition = null;
@@ -46,18 +44,34 @@ window.TK.DragDrop = {
                 return;
             passedThreshold = true;
 
-            for (var i = 0; i < positions.length; i++) {
-                positions[i].Position = positions[i].Element.getBoundingClientRect();
-            }
-
             if (first) {
-                if (obj.ElementTemplate) {
+                if (obj.HoverTemplate) {
+                    obj = obj.Add(obj.HoverTemplate);
+                    origParent = null;
+                } else if (obj.ElementTemplate) {
                     obj = obj.Add(obj.ElementTemplate);
                     origParent = null;
                 }
                 obj.style.position = "fixed";
                 document.body.appendChild(obj);
+
+                elementOrTemplateToAdd = (origObj.ElementTemplate && origObj.HoverTemplate ? origObj.ElementTemplate : obj);
+
+                var containers = document.querySelectorAll(".toolkitDragDropContainer");
+                for (var i = 0; i < containers.length; i++) {
+                    if (containers[i].DropFilter && (!obj.Type || containers[i].DropFilter.indexOf(obj.Type) < 0))
+                        continue;
+                    if (containers[i].CanDrop && !containers[i].CanDrop(elementOrTemplateToAdd))
+                        continue;
+
+                    positions.push({ Element: containers[i], Position: containers[i].getBoundingClientRect() });
+                }
+
                 first = false;
+            } else {
+                for (var i = 0; i < positions.length; i++) {
+                    positions[i].Position = positions[i].Element.getBoundingClientRect();
+                }
             }
 
             newTop = (y - startY) + myPosition.top;
@@ -100,30 +114,67 @@ window.TK.DragDrop = {
 
             if (aboveContainer) {
                 aboveContainer.className = aboveContainer.className.replace(/toolkitDragDropContainerHover/g, "");
+
+                var createdElement = null;
                 if (aboveContainer.Drop) {
-                    aboveContainer.Drop(obj, newLeft - aboveContainerPosition.left, newTop - aboveContainerPosition.top);
+                    createdElement = aboveContainer.Drop(elementOrTemplateToAdd, newLeft - aboveContainerPosition.left, newTop - aboveContainerPosition.top);
                 }
 
-                aboveContainer.appendChild(obj);
-                obj.Parent = aboveContainer;
-                var newElementId = Math.random();
-                if (origParent && origParent != aboveContainer && origParent.Elements) {
-                    
-                    for (var id in origParent.Elements) {
-                        if (origParent.Elements[id] == obj) {
-                            delete origParent.Elements[id];
-                            newElementId = id;
-                            break;
+                if (!createdElement && elementOrTemplateToAdd == obj) {
+                    if (origObj.ElementTemplate && origObj.HoverTemplate) { // Both are set, but not handled. Create a new element to add
+                        // Remove hover element
+                        if (obj.Remove)
+                            obj.Remove();
+                        else
+                            obj.parentNode.removeChild(obj);
+
+                        if (aboveContainer.Add) { // Container is a toolkit element, use the Add method
+                            aboveContainer.Add(origObj.ElementTemplate);
+                            obj = null; // Mark as finished
+                        } else {
+                            obj = TK.Initialize(origObj.ElementTemplate); // Initialize and append to this container
                         }
-                    }                    
+                    } else if (!origObj.ElementTemplate && origObj.HoverTemplate) { // Just the hover is set, add the original object to the new parent
+                        // Remove hover element
+                        if (obj.Remove)
+                            obj.Remove();
+                        else
+                            obj.parentNode.removeChild(obj);
+
+                        obj = origObj;
+                    }
+
+                    if (obj != null) {
+                        aboveContainer.appendChild(obj);
+                        obj.Parent = aboveContainer;
+                        var newElementId = Math.random();
+                        if (origParent && origParent != aboveContainer && origParent.Elements) {
+
+                            for (var id in origParent.Elements) {
+                                if (origParent.Elements[id] == obj) {
+                                    delete origParent.Elements[id];
+                                    newElementId = id;
+                                    break;
+                                }
+                            }
+                        }
+                        if (aboveContainer.Elements) {
+                            aboveContainer.Elements[newElementId] = obj;
+                        }
+                    }
                 }
-                if (aboveContainer.Elements) {
-                    aboveContainer.Elements[newElementId] = obj;
+
+                if (origObj.Dropped) {
+                    origObj.Dropped(aboveContainer, createdElement);
                 }
             } else if (passedThreshold && origParent) {
                 origParent.appendChild(obj);
             } else if (passedThreshold) {
-                obj.parentNode.removeChild(obj); 
+                // Remove hover element
+                if (obj.Remove)
+                    obj.Remove();
+                else
+                    obj.parentNode.removeChild(obj);
             }
             
 
