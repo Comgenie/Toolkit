@@ -12,7 +12,8 @@ window.TK.Table = {
     EnableFullRowCheckBoxToggle: false,
     EnableFullRowClickDeselectOthers: false,
     EnableSelectAllCheckBox: true,
-    EnableRemoveButton: false,    
+    EnableRemoveButton: false,
+    EnablePartialInit: false, // TODO: Only add rows as TR elements which are currently visible
     PageSize: null,
     PageOffset: 0,
     SpecificColumns: null,    
@@ -51,7 +52,7 @@ window.TK.Table = {
                         var curIndex = this.Parent.Parent.RowIndex;
                         var otherIndex = this.Parent.Table.PreviousCheckBox.Parent.Parent.RowIndex;
                         for (var i = (curIndex < otherIndex ? curIndex + 1 : curIndex - 1); i != otherIndex; i = (curIndex < otherIndex ? i + 1 : i - 1)) {
-                            var checkBoxElement = this.Parent.Table.querySelectorAll(".Element-row" + i + " .tableRowCheckBox input[type=checkbox]")[0];
+                            var checkBoxElement = this.Parent.Table.querySelectorAll(".Element-row" + i + " input[type=checkbox].tableRowCheckBox")[0];
                             checkBoxElement.checked = this.Parent.Table.PreviousCheckBox.checked;
                             checkBoxElement.UpdateData();
                         }
