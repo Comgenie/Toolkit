@@ -7,7 +7,10 @@
     <script src="/Framework/TK.Main.js"></script>
     <script src="/Framework/ArrayExtensions.js"></script>
     <script src="/Minified/Svg.js"></script>
+    <script src="/Framework/TK.Popup.js"></script>
+    <script src="/Framework/TK.Draw.js"></script>
     <script src="/Framework/TK.HtmlEditor.js"></script>
+    <script src="/Framework/TK.ImageEditor.js"></script>
     <script src="Example.js"></script>
     <link href="/Minified/Style.css" rel="stylesheet" />
 </head>
@@ -47,5 +50,23 @@
 }
 </pre>
 
+    <h2>Html editor with inserting image ability</h2>
+    <p>Note, this feature depends on the TK.ImageEditor, TK.Popup and TK.Draw. It requires using the <a href="https://toolkit.comgenie.com/minified/toolkitfull.js">full</a> version.</p>
+    <p>The image will be embedded in the HTML source using a data: url.</p>
+    <pre>
+{
+    style: {
+        width: "600px",
+        height: "400px"
+    },
+    Elements: {
+        HtmlEditor: {
+            _: TK.HtmlEditor,
+            FillContainer: true,
+            Buttons: TK.HtmlEditor.Buttons.concat(["InsertImage"])
+        }
+    }
+}
+</pre>
 </body>
 </html>

@@ -12,6 +12,7 @@ TK.ImageEditor = {
     StorageClientId: undefined,
     StorageContainer: undefined,
     StoragePath: undefined,
+    onchange: null,
 
     Init: function () {
         var obj = this;
@@ -309,11 +310,15 @@ TK.ImageEditor = {
                         inst.StorageHandlers[inst.ValueType](inst, resizeAndCropCanvas, function (value) {
                             inst.Data = value;
                             inst.Init();
+                            if (inst.onchange)
+                                inst.onchange();
                         });
                     } else {
                         var url = resizeAndCropCanvas.toDataURL(inst.Mine, inst.Quality);
-                        popup.ImageEditorInstance.Data = url;
-                        popup.ImageEditorInstance.Init();
+                        inst.Data = url;
+                        inst.Init();
+                        if (inst.onchange)
+                            inst.onchange();
                     }
                 }, 1);
             },
@@ -405,5 +410,33 @@ TK.ImageEditor = {
 if (window.TK.Form) {
     window.TK.Form.DefaultTemplates.image = {
         _: TK.ImageEditor
+    };
+}
+
+if (window.TK.HtmlEditor) {
+    window.TK.HtmlEditor.ButtonTemplates.InsertImage = {
+        innerHTML: Svg.Icons.Image,
+        title: "Insert image",
+        onmousedown: function () {
+            var randId = "img" + new Date().getTime();
+            var html = "<img id=\"" + randId + "\" style=\"max-width: 100%;\" />";
+            this.Near("Editor").focus();
+            document.execCommand("insertHTML", false, html);            
+
+            var img = document.getElementById(randId);
+            if (img) {
+                var tempEditor = TK.Initialize({
+                    _: TK.ImageEditor,
+                    style: { display: "none" },
+                    onchange: function () {
+                        var dataUrl = this.GetValue();
+                        if (dataUrl) {
+                            img.src = dataUrl;
+                        }
+                    }
+                });
+                tempEditor.Elements.FileUploadField.click();
+            }
+        }
     };
 }

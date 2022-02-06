@@ -155,7 +155,7 @@ TK.HtmlEditor = {
         }
     },
     GetValue: function () {
-        return this.Elements.Editor.innerHTML.replace("<b>", "<strong>").replace("</b>", "</strong>").replace("<i>", "<em>").replace("</i>", "</em>");
+        return this.Elements.Editor.innerHTML.replace(/<b>/g, "<strong>").replace(/<\/b>/g, "</strong>").replace(/<i>/g, "<em>").replace(/<\/i>/g, "</em>");
     },
     Elements: {
         MenuBar: {
