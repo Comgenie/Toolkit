@@ -7,7 +7,9 @@ window.TK.DateTime = {
     MonthNames: ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
     EnableTime: true,
     EnableTimeZone: true,
-    EnableRelative: false,    
+    EnableRelative: false,
+    TimeZone: "Local", // UTC, Local
+    UseGlobalTimeZone: true, // If true, the time zone will be based on the static TK.DateTime.TimeZone , and not this instance
     WeekStart: 1, // 0 Sunday, 1 Monday
     ValueIsEpoch: false,
     Data: null,
@@ -35,11 +37,19 @@ window.TK.DateTime = {
                 this.EnableTimeZone = this.DataSettings.EnableTimeZone;
             if (this.DataSettings.EnableRelative !== undefined)
                 this.EnableRelative = this.DataSettings.EnableRelative;
+            if (this.DataSettings.TimeZone !== undefined)
+                this.TimeZone = this.DataSettings.TimeZone;
+            if (this.DataSettings.UseGlobalTimeZone !== undefined)
+                this.UseGlobalTimeZone = this.DataSettings.UseGlobalTimeZone;
             //if (this.DataSettings.onchange !== undefined)
             //    this.onchange = this.DataSettings.onchange;
         }
         if (this.EnableRelative && this.Data == "now") {
             this.Data = "|";
+        }
+        if (!this.EnableTimeZone) {
+            this.UseGlobalTimeZone = false;
+            this.TimeZone = "UTC";
         }
 
         if (this.ValueIsEpoch && this.Data && (!this.Data.indexOf || this.Data == parseInt(this.Data).toString()))
@@ -67,14 +77,16 @@ window.TK.DateTime = {
         
         var dateObj = new Date(isoDate);
 
-        if (window.TK.DateTime.ShowInUTC) {
+        if (this.GetTimeZone() == "UTC") {
             dateObj.setUTCHours(0);
             dateObj.setUTCMinutes(0);
             dateObj.setUTCSeconds(0);
-        } else {
+        } else if (this.GetTimeZone() == "Local") {
             dateObj.setHours(0);
             dateObj.setMinutes(0);
-            dateObj.setSeconds(0);
+            dateObj.setSeconds(0);            
+        } else {
+            // TODO
         }
         
         return dateObj.toISOString();
@@ -86,7 +98,7 @@ window.TK.DateTime = {
                 TimeZoneInfo: {
                     className: "timeZoneInfo",
                     onclick: function () {
-                        this.Parent.Parent.SetShowInUTC(!window.TK.DateTime.ShowInUTC);
+                        this.Parent.Parent.SetTimeZone(this.Parent.Parent.GetTimeZone() == "UTC" ? "Local" : "UTC");
                         this.Parent.Elements.DateInput.focus();
                     }
                 }, 
@@ -136,7 +148,7 @@ window.TK.DateTime = {
 
                         var tmpDateTime = null;
                         var obj = this.Parent.Parent;
-                        if (window.TK.DateTime.ShowInUTC) {
+                        if (obj.GetTimeZone() == "UTC") {
                             tmpDateTime = new Date(year + "-" + obj.NumberFormat(month) + "-" + obj.NumberFormat(day) + "T" + obj.NumberFormat(hour) + ":" + obj.NumberFormat(minute) + ":" + obj.NumberFormat(second)+"Z");
                         } else {
                             tmpDateTime = new Date(year, month - 1, day, hour, minute, second);
@@ -195,17 +207,18 @@ window.TK.DateTime = {
     },
     RefreshDateInput: function (dontFocus) {
         var obj = this;
+        
         if (this.EnableTimeZone) {
-            if (window.TK.DateTime.ShowInUTC) {
+            if (this.GetTimeZone() == "UTC") {
                 this.Elements.DateInputContainer.Elements.TimeZoneInfo.innerHTML = "UTC";
                 this.Elements.DateInputContainer.Elements.TimeZoneInfo.title = "Universal timezone";
-            } else {
+            } else if (this.GetTimeZone() == "Local") {
                 if (this.Data) {
                     this.Elements.DateInputContainer.Elements.TimeZoneInfo.innerHTML = this.FormatOffset(-(new Date(this.Data).getTimezoneOffset()));
-                    this.Elements.DateInputContainer.Elements.TimeZoneInfo.style.display = "";
+                    //this.Elements.DateInputContainer.Elements.TimeZoneInfo.style.display = "";
                 } else {
                     this.Elements.DateInputContainer.Elements.TimeZoneInfo.innerHTML = this.FormatOffset(-(new Date().getTimezoneOffset()));
-                    this.Elements.DateInputContainer.Elements.TimeZoneInfo.style.display = "none";
+                    //this.Elements.DateInputContainer.Elements.TimeZoneInfo.style.display = "none";
                 }
 
                 try {
@@ -220,6 +233,8 @@ window.TK.DateTime = {
                     this.Elements.DateInputContainer.Elements.TimeZoneInfo.title = "Local timezone";
                 }
 
+            } else {
+                // TODO
             }
         }
         
@@ -236,31 +251,43 @@ window.TK.DateTime = {
         var d;
         if (isRelative) {
             // Parse and display
-            d = window.TK.DateTimeRelativeToDateObj(this.Data);
+            d = window.TK.DateTimeRelativeToDateObj(this.Data, this.GetTimeZone());
         } else {
             var d = new Date(this.Data);
         }
         
-        if (window.TK.DateTime.ShowInUTC) {                        
-            this.Elements.DateInputContainer.Elements.DateInput.value = obj.NumberFormat(d.getUTCFullYear()) + "-" + obj.NumberFormat(d.getUTCMonth() + 1) + "-" + obj.NumberFormat(d.getUTCDate());            
+        if (this.GetTimeZone() == "UTC") {
+            this.Elements.DateInputContainer.Elements.DateInput.value = obj.NumberFormat(d.getUTCFullYear()) + "-" + obj.NumberFormat(d.getUTCMonth() + 1) + "-" + obj.NumberFormat(d.getUTCDate());
             if (this.EnableTime)
-                this.Elements.DateInputContainer.Elements.DateInput.value +=  " " + obj.NumberFormat(d.getUTCHours()) + ":" + obj.NumberFormat(d.getUTCMinutes()) + ":" + obj.NumberFormat(d.getUTCSeconds());            
-        } else {            
+                this.Elements.DateInputContainer.Elements.DateInput.value += " " + obj.NumberFormat(d.getUTCHours()) + ":" + obj.NumberFormat(d.getUTCMinutes()) + ":" + obj.NumberFormat(d.getUTCSeconds());
+        } else if (this.GetTimeZone() == "Local") {
             this.Elements.DateInputContainer.Elements.DateInput.value = obj.NumberFormat(d.getFullYear()) + "-" + obj.NumberFormat(d.getMonth() + 1) + "-" + obj.NumberFormat(d.getDate());
             if (this.EnableTime)
                 this.Elements.DateInputContainer.Elements.DateInput.value += " " + obj.NumberFormat(d.getHours()) + ":" + obj.NumberFormat(d.getMinutes()) + ":" + obj.NumberFormat(d.getSeconds());
+        } else {
+            // TODO: Implement custom timezones
         }
+
         if (!dontFocus)
             this.Elements.DateInputContainer.Elements.DateInput.focus();
     },
-    SetShowInUTC: function (newStatus) {
-        window.TK.DateTime.ShowInUTC = newStatus;
-        var allPickers = document.querySelectorAll(".toolkitDateTimeSelector");
-        for (var i = 0; i < allPickers.length; i++) {
-            if (allPickers[i].Parent && allPickers[i].Parent.RenderDateInput) {
-                allPickers[i].Parent.RenderDateInput(allPickers[i], allPickers[i].DateISO);
-                allPickers[i].Parent.RefreshDateInput(true);
+    GetTimeZone: function () {
+        return this.UseGlobalTimeZone ? window.TK.DateTime.TimeZone : this.TimeZone;
+    },
+    SetTimeZone: function (newTimeZone) {
+        if (this.UseGlobalTimeZone) {
+            window.TK.DateTime.TimeZone = newTimeZone;
+            var allPickers = document.querySelectorAll(".toolkitDateTimeSelector");
+            for (var i = 0; i < allPickers.length; i++) {
+                if (allPickers[i].Parent && allPickers[i].Parent.RenderDateInput && allPickers[i].Parent.UseGlobalTimeZone) {
+                    allPickers[i].Parent.RenderDateInput(allPickers[i], allPickers[i].DateISO);
+                    allPickers[i].Parent.RefreshDateInput(true);
+                }
             }
+        } else {
+            this.TimeZone = newTimeZone;
+            this.RenderDateInput(this.Elements.Selection, this.Data);
+            this.RefreshDateInput(true);
         }
     },
     RenderDateInput: function (element, dateISO) {
@@ -292,7 +319,7 @@ window.TK.DateTime = {
             switchRelativeButtonR.innerHTML = "Relative Date";
             switchRelativeButtonR.onclick = function () {
                 // Switch back
-                obj.RenderDateInput(element, window.TK.DateTimeRelativeToDateObj(dateISO).toISOString());
+                obj.RenderDateInput(element, window.TK.DateTimeRelativeToDateObj(dateISO, obj.GetTimeZone()).toISOString());
             };
             topButtonContainerR.appendChild(switchRelativeButtonR);
             element.appendChild(topButtonContainerR);
@@ -386,7 +413,7 @@ window.TK.DateTime = {
             obj.Elements.DateInputContainer.Elements.DateInput.focus();
         };
 
-        window.TK.DateTimeUpdateDateObject(dateObj);
+        window.TK.DateTimeUpdateDateObject(dateObj, obj.GetTimeZone());
 
         var getButtons = function (text, funcPrevious, funcNext) {
             var div = document.createElement("DIV");
@@ -419,11 +446,11 @@ window.TK.DateTime = {
         if (this.EnableTimeZone) {
             var switchUTCButton = document.createElement("DIV");
             switchUTCButton.className = "switchUTCButton";
-            switchUTCButton.innerHTML = window.TK.DateTime.ShowInUTC ? "UTC" : obj.FormatOffset(-dateObj.getTimezoneOffset());;
+            switchUTCButton.innerHTML = this.GetTimeZone() == "UTC" ? "UTC" : obj.FormatOffset(-dateObj.getTimezoneOffset());
             switchUTCButton.tabIndex = -1;
 
             try {
-                if (!window.TK.DateTime.ShowInUTC) {
+                if (this.GetTimeZone() == "Local") {
                     var timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
                     switchUTCButton.title = timeZone;
                     timeZone = timeZone.replace("/", "");
@@ -435,7 +462,7 @@ window.TK.DateTime = {
 
 
             switchUTCButton.onclick = function () {
-                obj.SetShowInUTC(!window.TK.DateTime.ShowInUTC);
+                obj.SetTimeZone(obj.GetTimeZone() == "UTC" ? "Local" : "UTC");
             };
             switchUTCButton.title = dateISO + " - " + dateObj.toLocaleString();
             topButtonContainer.appendChild(switchUTCButton);
@@ -527,6 +554,7 @@ window.TK.DateTime = {
             dayItem.tabIndex = -1;
             dayItem.onclick = function (e) {
                 dateObj.setDate(this.DateIndex);
+                dateObj.setMilliseconds(0);
                 if (!obj.Data && (dateObj.getDate() != new Date().getDate() || dateObj.getDay() != new Date().getDay() || dateObj.getFullYear() != new Date().getFullYear())) {                    
                     // Different day, default to 00:00:00
                     dateObj.setHours(0);
@@ -563,9 +591,9 @@ window.TK.DateTime = {
     
 };
 
-window.TK.DateTime.ShowInUTC = false;
-window.TK.DateTimeUpdateDateObject = function (dateObj) {
-    if (window.TK.DateTime.ShowInUTC) {
+window.TK.DateTime.TimeZone = "Local";
+window.TK.DateTimeUpdateDateObject = function (dateObj, timeZone) {
+    if (timeZone == "UTC") {
         dateObj.getMonth = dateObj.getUTCMonth;
         dateObj.setMonth = dateObj.setUTCMonth;
         dateObj.getHours = dateObj.getUTCHours;
@@ -578,10 +606,11 @@ window.TK.DateTimeUpdateDateObject = function (dateObj) {
         dateObj.setDate = dateObj.setUTCDate;
     }
 };
-window.TK.DateTimeRelativeToDateObj = function (dateStr) {
-    var dateObj = new Date();
-    window.TK.DateTimeUpdateDateObject(dateObj);
+window.TK.DateTimeRelativeToDateObj = function (dateStr, timeZone) {
+    var dateObj = new Date();    
+    window.TK.DateTimeUpdateDateObject(dateObj, timeZone);
     dateObj.setSeconds(0);
+    dateObj.setMilliseconds(0);
     var parts = dateStr.split('|');
     for (var i = 0; i < parts.length; i++) {
         if (parts[i].length < 2)

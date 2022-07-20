@@ -27,11 +27,39 @@
 }
 </pre>
 
+    <pre>
+{
+    _: TK.DateTime,
+    Data: "2022-04-27 13:37:00", // Local, or "2022-04-27T11:37:00Z"  for UTC
+    readOnly: true,
+    disabled: true
+}
+</pre>
+
     <h2>Relative support</h2>
     <pre>
 {
     _: TK.DateTime,
     EnableRelative: true
+}
+</pre>
+
+    <h2>Without timezone</h2>
+    <p>This will hide the timezone switching options and will always return the time as UTC.</p>
+    <pre>
+{
+    _: TK.DateTime,
+    EnableTimeZone: false
+}
+</pre>
+
+    <h2>Independent</h2>
+    <p>Disables the sharing of the timezone setting between other datetime components.</p>
+    <pre>
+{
+    _: TK.DateTime,
+    TimeZone: "UTC", // or Local
+    UseGlobalTimeZone: false
 }
 </pre>
 </body>
