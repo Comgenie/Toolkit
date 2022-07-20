@@ -73,10 +73,23 @@ TK.Donut = {
 
         if (this.EnableLegend) {
             if (this.LegendSize == 0) {
-                if (this.LocationLegend == 0 || this.LocationLegend == 2)
+                if (this.LocationLegend == 0 || this.LocationLegend == 2) {
                     this.LegendSize = this.Width * 0.9;
-                else
-                    this.LegendSize = 150;
+                } else {
+                    // Find max width of the legend labels
+                    var maxWidth = 10;
+                    for (var i = 0; i < this.Values.length; i++) {
+                        var labelLegend = this.Values[i].Name;
+                        if (this.LegendStyle != 0) {
+                            labelLegend = (this.LegendStyle == 2 ? labelLegend + ": " : "") + (this.ShowValueAsPercentage ? "100 %" : this.Values[i].Value);
+                        }
+                        var curWidth = TK.Draw.Text.MeasureWidth(labelLegend, this.FontLegend);
+                        if (curWidth > maxWidth)
+                            maxWidth = curWidth;
+                    }
+
+                    this.LegendSize = maxWidth + 20; // Extra padding
+                }
             }
 
             var legendSize = (this.LocationLegend == 0 || this.LocationLegend == 2) ? this.LegendLineHeight * countLegend : this.LegendSize;
@@ -99,7 +112,7 @@ TK.Donut = {
             else if (this.LocationLegend == 3)
                 donutStartX = legendSize + (((this.Width - legendSize) / 2) - (this.Size / 2));
         }
-
+  
         var middlePointX = (this.Size * 0.5) + donutStartX;
         var middlePointY = (this.Size * 0.5) + donutStartY;
 
