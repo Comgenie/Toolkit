@@ -96,6 +96,7 @@
     <Content Include="Framework\Ajax.js" />
     <Content Include="Framework\ArrayExtensions.js" />
     <Content Include="Framework\TK.AjaxList.js" />
+    <Content Include="Framework\TK.Switch.js" />
     <Content Include="Framework\TK.ImageEditor.js" />
     <Content Include="Framework\TK.HtmlEditor.js" />
     <Content Include="Framework\TK.ServerStorage.js" />

@@ -9,6 +9,7 @@
     <script src="/Framework/ArrayExtensions.js"></script>
     <script src="/Framework/TK.Form.js"></script>
     <script src="/Framework/TK.DateTime.js"></script>
+    <script src="/Framework/TK.Switch.js"></script>
     <script src="Example.js"></script>
     <link href="/Minified/Style.css" rel="stylesheet" />
     <style>
@@ -216,6 +217,7 @@
     Model: {
         FirstName: "",
         LastName: "",
+        AllowContact: false,
         Street: "",
         Postcode: "",
         City: "",
@@ -225,6 +227,7 @@
         FirstSection: { Type: "section", DisplayName: "Name"},        
         FirstName: { Required: true,DisplayName: "First Name", Inline: 1 },
         LastName: { Required: true, DisplayName: "Last Name", Inline: 1 },
+        AllowContact: { DisplayName: "Allow contact", Type: "switch", TextBefore: "No", TextAfter: "Yes" },
 
         SecondSection: { Type: "section", DisplayName: "Address"},
         Desc: { _: "p", innerHTML: "Please fill in your address below"},

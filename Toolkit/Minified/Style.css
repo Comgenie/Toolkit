@@ -712,3 +712,57 @@ th.toolkitHasFilter > .toolkitFilterButton {
     .toolkitImageEditor .Element-DropArea:hover svg path, .toolkitImageEditor .Element-DropArea:hover svg rect, .toolkitImageEditor .Element-DropArea:hover svg ellipse, .toolkitImageEditor .Element-DropArea:hover svg circle {
         fill: #999 !important;
     }
+
+.toolkitSwitch .Element-SwitchContainer {
+    display: inline-block;
+    background-color: #eee;
+    border-radius: 15px;
+    width: 50px;
+    height: 20px;
+    padding: 2px;
+    cursor: pointer;
+    opacity: 0.9;
+    transition: all ease-in-out 0.2s;
+    border: 1px solid #666;
+}
+
+.toolkitSwitch .Element-Indicator {
+    display: inline-block;
+    background-color: #999;
+    width: 20px;
+    height: 20px;
+    border-radius: 10px;
+    margin-left: 0px;
+    transition: all ease-in-out 0.2s;
+}
+.toolkitSwitch.toolkitSwitchActive .Element-SwitchContainer:hover .Element-Indicator {
+    margin-left: 25px;
+}
+.toolkitSwitch.toolkitSwitchInactive .Element-SwitchContainer:hover .Element-Indicator {
+    margin-left: 5px;
+}
+.toolkitSwitch.toolkitSwitchActive .Element-SwitchContainer {
+    background-color: #f9f9ff;
+    opacity: 1;
+    border-color: #1a73d4;
+}
+.toolkitSwitch .Element-TextBefore {
+    display: inline-block;
+    padding: 5px;
+    font-size: 9pt;
+    padding-right: 5px;
+    position: relative;
+    top: -5px;
+}
+.toolkitSwitch .Element-TextAfter {
+    display: inline-block;
+    padding: 5px;
+    font-size: 9pt;
+    padding-left: 5px;
+    position: relative;
+    top: -5px;
+}
+.toolkitSwitch.toolkitSwitchActive .Element-Indicator {
+    background-color: #1a73d4;
+    margin-left: 30px;
+}
