@@ -1,14 +1,26 @@
-﻿/* Form */
+﻿:root {
+    --toolkit-main-color: #1a73d4;
+    --toolkit-main-color-glow: rgba(20, 113, 182, 0.5);
+    --toolkit-main-color-light: #f9f9ff; /* Background of form elements */
+    --toolkit-main-color-dark: #0c417a;
+    --toolkit-border-color: #666; /* Border on form elements */
+    --toolkit-error-color: #ed5a5a;
+    --toolkit-error-color-light: #f8ecec;
+    --toolkit-font: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+
+/* Form */
 .toolkitForm, .toolkitTree, .toolkitHtmlEditor, .toolkitImageEditor {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: var(--toolkit-font);
 }
 
 .toolkitForm input[type=text], .toolkitForm input[type=password], .toolkitForm input[type=number], .toolkitForm input[type=date], .toolkitForm select {
-    border: 1px solid #666;
+    border: 1px solid var(--toolkit-border-color);
     border-radius: 2px;
     padding: 5px;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #f9f9ff;
+    font-family: var(--toolkit-font);
+    background-color: var(--toolkit-main-color-light);
 }
 .toolkitForm .withWidth input {
     width: 98%;
@@ -17,7 +29,7 @@
     width: 60px;
 }
 .toolkitForm input[type=text]:focus, .toolkitForm input[type=password]:focus, .toolkitForm input[type=number]:focus, .toolkitForm input[type=date]:focus, .toolkitForm select:hover {
-    box-shadow: rgba(20, 113, 182, 0.5) 0px 0px 3px;
+    box-shadow: var(--toolkit-main-color-glow) 0px 0px 3px;
 } 
 
 .toolkitForm label {
@@ -51,7 +63,7 @@
 }
 .toolkitForm button, .toolkitButtonBar button {
     padding: 7px 15px;
-    background-color: #1a73d4;
+    background-color: var(--toolkit-main-color);
     color: #fff;
     border: 0;
     border-radius: 2px;
@@ -68,15 +80,15 @@
     opacity: 0.8;
 }
 .toolkitForm .validationError {
-    border: 1px solid #ed5a5a;
+    border: 1px solid var(--toolkit-error-color);
     padding: 5px;
     border-radius: 2px;
-    background-color: #f8ecec;
+    background-color: var(--toolkit-error-color-light);
     font-size: 10pt;
 }
 .toolkitForm .subForms {
     position: relative;
-    background-color: #f9f9ff;
+    background-color: var(--toolkit-main-color-light);
     padding: 5px;
     padding-bottom: 35px;
     border: 1px solid #eee;
@@ -140,8 +152,8 @@
         cursor: pointer;
     }
 .toolkitPopup > .Element-CloseButton:hover {
-    border: 1px solid #1a73d4;
-    color: #1a73d4;
+    border: 1px solid var(--toolkit-main-color);
+    color: var(--toolkit-main-color);
 }
 .toolkitPopup > .Element-PopupTitle {
     position: absolute;
@@ -151,10 +163,10 @@
     border-bottom: 1px solid #eee;
     padding: 5px;
     margin: 0;    
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: var(--toolkit-font);
     font-weight: 400;
     font-size: 16pt;
-    color: #1a73d4;
+    color: var(--toolkit-main-color);
     height: 30px;
 }
 .toolkitPopup > .Element-PopupTitle span {
@@ -182,7 +194,7 @@
     right: 5px;
     height: 30px;
     padding: 5px;
-    background-color: #f9f9ff;
+    background-color: var(--toolkit-main-color-light);
     text-align: right;
 }
 .toolkitButtonBar button {
@@ -205,7 +217,7 @@
     transition: all ease-in-out 0.2s;
 }
 .toolkitPopup > .Element-ResizeButton:hover {
-    background-color: #1a73d4;
+    background-color: var(--toolkit-main-color);
 }
 .toolkitPopup:hover > .Element-ResizeButton {
     opacity: 1;
@@ -247,7 +259,7 @@
     height: 18px;
 }
 .tkDashboardButton:hover svg path {
-    fill: #1a73d4 !important;
+    fill: var(--toolkit-main-color) !important;
 }
 .toolkitDashboard .Element-MoveButton {
     top: 0px;
@@ -291,8 +303,8 @@
 /* DateTime */
 .toolkitDateTimeSelector {
     width: 200px;
-    border: 1px solid #999;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    border: 1px solid var(--toolkit-border-color);
+    font-family: var(--toolkit-font);
     position: absolute;
     z-index: 1000;
     background-color: #fff;
@@ -300,16 +312,16 @@
 }
 .toolkitDateTimeSelector .previousButton, .toolkitDateTimeSelector .nextButton {
     background-color: transparent;
-    color: #1a73d4;
+    color: var(--toolkit-main-color);
     font-weight: 600;
     border: 0;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: var(--toolkit-font);
 }
 .toolkitDateTimeSelector .previousButton:hover, .toolkitDateTimeSelector .nextButton:hover {
     background-color: #eee;
 }
 .toolkitDateTime input.invalidDate {
-    background-color: #fadede;
+    background-color: var(--toolkit-error-color-light);
 }
 .toolkitDateTimeSelector .previousButton {
     position: absolute;
@@ -336,7 +348,7 @@
     background-color: transparent;
     color: #333;
     padding: 3px;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: var(--toolkit-font);
 }
 .toolkitDateTimeSelector .dayItem.otherMonth {
     color: #CCC;
@@ -345,12 +357,11 @@
     text-align: left;
 }
 .toolkitDateTimeSelector .dayItem:hover, .toolkitDateTimeSelector .dayItem.selected {
-    color: #1a73d4;
+    color: var(--toolkit-main-color);
     background-color: #eee;
 }
 .toolkitDateTimeSelector .buttonLine {
-    position: relative;
-        
+    position: relative;        
     text-align: center;
 }
 
@@ -388,7 +399,7 @@
     display: inline-block;
     background-color: #fff;
     border: 1px dotted #ccc;
-    color: #1a73d4;
+    color: var(--toolkit-main-color);
 }
 .toolkitDateTimeSelector .toolkitApplyButton {
     margin: 5px;
@@ -413,7 +424,7 @@
     padding: 2px 5px;
     font-size: 8pt;
     color: #333;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: var(--toolkit-font);
     cursor: default;
 }
 .toolkitDateTime .timeZoneInfo:hover, .toolkitDateTimeSelector .switchUTCButton:hover {
@@ -423,6 +434,9 @@
     border: 1px solid #ccc;
     padding: 5px;
     display: inline-block;    
+}
+.toolkitDateTime {
+    display: inline-block;
 }
 .toolkitDateTime .dateTimeContainer input {
     border: 0;
@@ -481,7 +495,7 @@ th:hover > .toolkitFilterButton {
 }
 .toolkitFilterBox td, .toolkitFilterBox th {
     border-collapse: collapse;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: var(--toolkit-font);
     font-size: 10pt;
     padding: 0px;
     padding-right: 5px;
@@ -493,14 +507,14 @@ th.toolkitHasFilter > .toolkitFilterButton {
     opacity: 1;
 }
 .toolkitActive {
-    color: #1a73d4;
+    color: var(--toolkit-main-color);
 }
 
 .toolkitInterface {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: var(--toolkit-font);
 }
     .toolkitInterface > .Element-Header {
-        background-color: #1a73d4;
+        background-color: var(--toolkit-main-color);
         color: #fff;
         transition: all ease-in-out 0.2s;
         overflow: hidden;
@@ -530,7 +544,7 @@ th.toolkitHasFilter > .toolkitFilterButton {
     fill: #555 !important;
 }
 .toolkitInterface .Element-Menu > li:hover path, .toolkitInterface .Element-Menu > li:hover rect, .toolkitInterface .Element-Menu > li:hover text, .toolkitInterface .Element-Menu > li:hover circle, .toolkitInterface .Element-Menu .toolkitActive path, .toolkitInterface .Element-Menu .toolkitActive rect, .toolkitInterface .Element-Menu .toolkitActive text, .toolkitInterface .Element-Menu .toolkitActive circle {
-    fill: #1a73d4 !important;
+    fill: var(--toolkit-main-color) !important;
 }
 .toolkitInterface .Element-Menu > li.toolkitActive {
     background-color: #ccc;
@@ -631,11 +645,11 @@ th.toolkitHasFilter > .toolkitFilterButton {
 }
 
 .toolkitToast {
-    background-color: #1a73d4;
+    background-color: var(--toolkit-main-color);
     color: #fff;
     border-radius: 5px;
     box-shadow: rgba(0,0,0,0.3) 0px 5px 5px;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: var(--toolkit-font);
     font-size: 10pt;
     padding: 0;
     opacity: 0;
@@ -662,31 +676,31 @@ th.toolkitHasFilter > .toolkitFilterButton {
 .toolkitHtmlEditor {
     border: 1px solid #ccc;
 }
-    .toolkitHtmlEditor .Element-MenuBar {
-        background-color: #eee;
-        user-select: none;
-        -ms-user-select: none;
-    }
-    .toolkitHtmlEditor .Element-MenuBar > div {
-        width: 25px;
-        height: 25px;
-        padding: 5px;
-        display: inline-block;
-        user-select: none;
-    }
-    .toolkitHtmlEditor .Element-MenuBar svg {
-        width: 24px;
-    }
-    .toolkitHtmlEditor .Element-MenuBar > div:hover {
-        background-color: #ccc;
-    }
-    .toolkitHtmlEditor .Element-Editor {
-        padding: 5px;
-        overflow: auto;
-    }
-    .toolkitHtmlEditor .Element-Editor:focus {
-        outline: 0px solid transparent;
-    }
+.toolkitHtmlEditor .Element-MenuBar {
+    background-color: #eee;
+    user-select: none;
+    -ms-user-select: none;
+}
+.toolkitHtmlEditor .Element-MenuBar > div {
+    width: 25px;
+    height: 25px;
+    padding: 5px;
+    display: inline-block;
+    user-select: none;
+}
+.toolkitHtmlEditor .Element-MenuBar svg {
+    width: 24px;
+}
+.toolkitHtmlEditor .Element-MenuBar > div:hover {
+    background-color: #ccc;
+}
+.toolkitHtmlEditor .Element-Editor {
+    padding: 5px;
+    overflow: auto;
+}
+.toolkitHtmlEditor .Element-Editor:focus {
+    outline: 0px solid transparent;
+}
 
 .toolkitImageEditor .Element-DropArea {
     border: 3px dashed #ccc;
@@ -703,16 +717,19 @@ th.toolkitHasFilter > .toolkitFilterButton {
     background-repeat: no-repeat;
     background-position: center center;
 }
-    .toolkitImageEditor .Element-DropArea svg path, .toolkitImageEditor .Element-DropArea svg rect, .toolkitImageEditor .Element-DropArea svg ellipse, .toolkitImageEditor .Element-DropArea svg circle {
-        fill: #ccc !important;
-    }
+.toolkitImageEditor .Element-DropArea svg path, .toolkitImageEditor .Element-DropArea svg rect, .toolkitImageEditor .Element-DropArea svg ellipse, .toolkitImageEditor .Element-DropArea svg circle {
+    fill: #ccc !important;
+}
 .toolkitImageEditor .Element-DropArea:hover {
     border-color: #999;
 }
-    .toolkitImageEditor .Element-DropArea:hover svg path, .toolkitImageEditor .Element-DropArea:hover svg rect, .toolkitImageEditor .Element-DropArea:hover svg ellipse, .toolkitImageEditor .Element-DropArea:hover svg circle {
-        fill: #999 !important;
-    }
+.toolkitImageEditor .Element-DropArea:hover svg path, .toolkitImageEditor .Element-DropArea:hover svg rect, .toolkitImageEditor .Element-DropArea:hover svg ellipse, .toolkitImageEditor .Element-DropArea:hover svg circle {
+    fill: #999 !important;
+}
 
+.toolkitSwitch {
+    display: inline-block;
+}
 .toolkitSwitch .Element-SwitchContainer {
     display: inline-block;
     background-color: #eee;
@@ -723,7 +740,7 @@ th.toolkitHasFilter > .toolkitFilterButton {
     cursor: pointer;
     opacity: 0.9;
     transition: all ease-in-out 0.2s;
-    border: 1px solid #666;
+    border: 1px solid var(--toolkit-border-color);
 }
 
 .toolkitSwitch .Element-Indicator {
@@ -742,9 +759,9 @@ th.toolkitHasFilter > .toolkitFilterButton {
     margin-left: 5px;
 }
 .toolkitSwitch.toolkitSwitchActive .Element-SwitchContainer {
-    background-color: #f9f9ff;
+    background-color: var(--toolkit-main-color-light);
     opacity: 1;
-    border-color: #1a73d4;
+    border-color: var(--toolkit-main-color);
 }
 .toolkitSwitch .Element-TextBefore {
     display: inline-block;
@@ -763,6 +780,28 @@ th.toolkitHasFilter > .toolkitFilterButton {
     top: -5px;
 }
 .toolkitSwitch.toolkitSwitchActive .Element-Indicator {
-    background-color: #1a73d4;
+    background-color: var(--toolkit-main-color);
     margin-left: 30px;
 }
+
+.toolkitSlider {
+    display: inline-block;
+}
+.toolkitSlider .Element-SliderContainer{
+    position: relative;
+    background-color: #ccc;
+    border-radius: 5px;
+    height: 10px;
+    margin-left: 10px;
+    margin-right: 10px;
+}
+
+.toolkitSlider .Element-Indicator {
+    position: absolute;
+    background-color: var(--toolkit-main-color);
+    width: 10px;
+    height: 10px;
+    border-radius: 5px;
+    transform: translate(-5px, 0px) scale(2);
+    cursor: grab;
+} 
