@@ -217,7 +217,6 @@
     Model: {
         FirstName: "",
         LastName: "",
-        AllowContact: false,
         Street: "",
         Postcode: "",
         City: "",
@@ -227,7 +226,6 @@
         FirstSection: { Type: "section", DisplayName: "Name"},        
         FirstName: { Required: true,DisplayName: "First Name", Inline: 1 },
         LastName: { Required: true, DisplayName: "Last Name", Inline: 1 },
-        AllowContact: { DisplayName: "Allow contact", Type: "switch", TextBefore: "No", TextAfter: "Yes" },
 
         SecondSection: { Type: "section", DisplayName: "Address"},
         Desc: { _: "p", innerHTML: "Please fill in your address below"},
@@ -240,6 +238,27 @@
             { Text: "United Kingdom", Value: "UK" },
         ]}
 
+    },
+    Save: function(newModel) {
+        alert(JSON.stringify(newModel));
+    }
+}
+</pre>
+
+    <p>It is also possible to use the property .LabelWidth (both on field as form) to place the labels on the left side of fields.</p>
+    <pre>
+{
+    _: TK.Form,
+    LabelWidth: 200,
+    Model: {
+        FirstName: "",
+        LastName: "",
+        AllowContact: false
+    },
+    Fields: {    
+        FirstName: { Required: true,DisplayName: "First Name" },
+        LastName: { Required: true, DisplayName: "Last Name" },
+        AllowContact: { DisplayName: "Allow contact", Type: "switch", TextBefore: "No", TextAfter: "Yes" }
     },
     Save: function(newModel) {
         alert(JSON.stringify(newModel));

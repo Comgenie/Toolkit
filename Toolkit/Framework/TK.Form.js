@@ -8,7 +8,8 @@ window.TK.Form = {
     Fields: null, // fieldName: { Required: false, DisplayName: "Field1", Type: "number", Template: {..} }
     SortByFields: false,
     IgnoreRest: false,
-    CurrentFields: null,     
+    CurrentFields: null,
+    LabelWidth: 0, // when non-zero number: width of labels in px, when string: width of label with unit (ex. 50%), when 0/null: the labels will be displayed as 'block' and fill the complete line.
     SaveButtonText: "Save",
     AutoSave: false,
     RequiredText: "The following fields are required: ",
@@ -151,7 +152,16 @@ window.TK.Form = {
             type: "checkbox",
             Init: function () {
                 this.checked = this.Data;
+
                 this.Parent.Elements.DataLabel.insertBefore(this, this.Parent.Elements.DataLabel.childNodes[0]); // Put the text behind the checkbox and make the text clickable
+
+                if (this.Parent.Elements.DataLabel.style.width) {
+                    // Insert dummy container in the place where the label used to be
+                    var dummy = this.Add({ style: { display: "inline-block", width: this.Parent.Elements.DataLabel.style.width } });
+                    this.Parent.insertBefore(dummy, this.Parent.Elements.DataLabel);
+                    this.Parent.Elements.DataLabel.style.width = "auto";
+                }
+                
             },
             GetValue: function () { return this.checked; }
         },
@@ -382,7 +392,7 @@ window.TK.Form = {
                     style: { },
                     className: "fieldRow field-" + name + (isRequired ? " fieldRequired" : "") + " " + (this.Fields && this.Fields[name] && this.Fields[name].Inline ? "inlineBlock" : ""),                    
                     Elements: {
-                        DataLabel: { innerHTML: (this.Fields && this.Fields[name] && this.Fields[name].DisplayName ? this.Fields[name].DisplayName : name) },
+                        DataLabel: { innerHTML: (this.Fields && this.Fields[name] && this.Fields[name].DisplayName ? this.Fields[name].DisplayName : name), style: {} },
                         DataField: {
                             _: (this.Fields && this.Fields[name] && this.Fields[name].Template ? this.Fields[name].Template : defaultTemplate),
                             /* required: isRequired, */
@@ -400,15 +410,27 @@ window.TK.Form = {
                         }
                     }
                 };
-                if (this.Fields && this.Fields[name] && this.Fields[name].Width) {
-                    row.className += " withWidth";
-                    row.style.width = this.Fields[name].Width;
+
+                if (this.LabelWidth) {
+                    row.Elements.DataLabel.style.display = "inline-block";
+                    row.Elements.DataLabel.style.width = this.LabelWidth + (this.LabelWidth.substr ? "" : "px");
                 }
-                if (this.Fields && this.Fields[name] && this.Fields[name].IsVisible) {
-                    row.style.display = this.Fields[name].IsVisible(model) ? "" : "none";
-                    callIsVisible = true;                    
+
+                if (this.Fields && this.Fields[name]) {
+                    if (this.Fields[name].Width) {
+                        row.className += " withWidth";
+                        row.style.width = this.Fields[name].Width;
+                    }
+                    if (this.Fields[name].IsVisible) {
+                        row.style.display = this.Fields[name].IsVisible(model) ? "" : "none";
+                        callIsVisible = true;
+                    }
+                    if (this.Fields[name].LabelWidth) {
+                        row.Elements.DataLabel.style.display = "inline-block";
+                        row.Elements.DataLabel.style.width = this.LabelWidth + (this.LabelWidth.substr ? "" : "px");
+                    }
                 }
-                
+
                 row.Elements.DataField.origOnBlur = row.Elements.DataField.onblur;
                 row.Elements.DataField.onblur = function () {
                     if (this.origOnBlur)
