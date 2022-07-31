@@ -27,22 +27,13 @@ window.TK.DateTime = {
         AsiaTokyo: "JP",        
     },
     
-    Init: function () {        
+    Init: function () {
         if (this.DataSettings) {
-            if (this.DataSettings.ValueIsEpoch !== undefined)
-                this.ValueIsEpoch = this.DataSettings.ValueIsEpoch;
-            if (this.DataSettings.EnableTime !== undefined)
-                this.EnableTime = this.DataSettings.EnableTime;
-            if (this.DataSettings.EnableTimeZone !== undefined)
-                this.EnableTimeZone = this.DataSettings.EnableTimeZone;
-            if (this.DataSettings.EnableRelative !== undefined)
-                this.EnableRelative = this.DataSettings.EnableRelative;
-            if (this.DataSettings.TimeZone !== undefined)
-                this.TimeZone = this.DataSettings.TimeZone;
-            if (this.DataSettings.UseGlobalTimeZone !== undefined)
-                this.UseGlobalTimeZone = this.DataSettings.UseGlobalTimeZone;
-            //if (this.DataSettings.onchange !== undefined)
-            //    this.onchange = this.DataSettings.onchange;
+            var fields = ["ValueIsEpoch", "EnableTime", "EnableTimeZone", "EnableRelative", "TimeZone", "WeekStart", "UseGlobalTimeZone"];
+            for (var i = 0; i < fields.length; i++) {
+                if (this.DataSettings[fields[i]] !== undefined)
+                    this[fields[i]] = this.DataSettings[fields[i]];
+            }
         }
         if (this.EnableRelative && this.Data == "now") {
             this.Data = "|";

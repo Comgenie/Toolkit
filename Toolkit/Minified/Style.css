@@ -1,8 +1,13 @@
 ﻿:root {
+    /* Main (navigation) color */
     --toolkit-main-color: #1a73d4;
     --toolkit-main-color-glow: rgba(20, 113, 182, 0.5);
     --toolkit-main-color-light: #f9f9ff; /* Background of form elements */
     --toolkit-main-color-dark: #0c417a;
+
+    /* Secondary (decorative) color */
+    --toolkit-secondary-color: #f1a45b;
+
     --toolkit-border-color: #666; /* Border on form elements */
     --toolkit-error-color: #ed5a5a;
     --toolkit-error-color-light: #f8ecec;
@@ -763,21 +768,19 @@ th.toolkitHasFilter > .toolkitFilterButton {
     opacity: 1;
     border-color: var(--toolkit-main-color);
 }
-.toolkitSwitch .Element-TextBefore {
+.toolkitSwitch .Element-TextBefore, .toolkitSwitch .Element-TextAfter, .toolkitSlider .Element-TextBefore, .toolkitSlider .Element-TextAfter {
     display: inline-block;
     padding: 5px;
     font-size: 9pt;
-    padding-right: 5px;
     position: relative;
     top: -5px;
+    font-family: var(--toolkit-font);
 }
-.toolkitSwitch .Element-TextAfter {
-    display: inline-block;
-    padding: 5px;
-    font-size: 9pt;
+.toolkitSwitch .Element-TextBefore, .toolkitSlider .Element-TextBefore {
+    padding-right: 5px;
+}
+.toolkitSwitch .Element-TextAfter, .toolkitSlider .Element-TextAfter {
     padding-left: 5px;
-    position: relative;
-    top: -5px;
 }
 .toolkitSwitch.toolkitSwitchActive .Element-Indicator {
     background-color: var(--toolkit-main-color);
@@ -792,8 +795,8 @@ th.toolkitHasFilter > .toolkitFilterButton {
     background-color: #ccc;
     border-radius: 5px;
     height: 10px;
-    margin-left: 10px;
-    margin-right: 10px;
+    margin: 5px 10px;
+    display: inline-block;
 }
 
 .toolkitSlider .Element-Indicator {
@@ -805,3 +808,21 @@ th.toolkitHasFilter > .toolkitFilterButton {
     transform: translate(-5px, 0px) scale(2);
     cursor: grab;
 } 
+.toolkitSlider .Element-FillBar {
+    position: absolute;
+    left: 0px;
+    top: 0px;
+    background-color: var(--toolkit-secondary-color);
+    height: 10px;
+}
+.toolkitSlider .Element-Steps > div {
+    position: absolute;
+    background-color: #aaa;
+    width: 8px;
+    height: 8px;
+    border-radius: 4px;
+    transform: translate(-4px, 0px) scale(2);
+}
+    .toolkitSlider .Element-Steps > div.stepActive {
+        background-color: var(--toolkit-secondary-color);
+    }

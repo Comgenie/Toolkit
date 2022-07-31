@@ -85,6 +85,8 @@
     <Content Include="Examples\DragDrop.html" />
     <Content Include="Examples\Chart.html" />
     <Content Include="Examples\Event.html" />
+    <Content Include="Examples\Switch.html" />
+    <Content Include="Examples\Slider.html" />
     <Content Include="Examples\ServerStorage.html" />
     <Content Include="Examples\ServerChannel.html" />
     <Content Include="Examples\Toast.html" />
@@ -96,6 +98,7 @@
     <Content Include="Framework\Ajax.js" />
     <Content Include="Framework\ArrayExtensions.js" />
     <Content Include="Framework\TK.AjaxList.js" />
+    <Content Include="Framework\TK.Slider.js" />
     <Content Include="Framework\TK.Switch.js" />
     <Content Include="Framework\TK.ImageEditor.js" />
     <Content Include="Framework\TK.HtmlEditor.js" />
