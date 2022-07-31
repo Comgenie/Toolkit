@@ -4,14 +4,19 @@ window.TK.Switch = {
     TextAfter: "",
     Data: false,
     className: "toolkitSwitch",
-
     onchange: function () { },
+    readOnly: false,
+    disabled: false,
 
     onclick: function () {
         this.Toggle();
     },
     Toggle: function () {
+        if (this.readOnly || this.disabled)
+            return;
         this.Data = !this.Data;
+        if (this.onchange)
+            this.onchange();
         this.Init();
     },
     Init: function () {
