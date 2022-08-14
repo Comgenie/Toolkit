@@ -349,6 +349,7 @@ TK.Draw.DrawableObject = {
     Anchor: TK.Draw.AnchorLeft | TK.Draw.AnchorTop,
     ZIndex: 1,
     X: 0, Y: 0, W: 0, H: 0,
+    Opacity: 1,
     Transform: function (c) {
         if (this.DrawAndTransformDisabled) {
             c.setTransform(c.Scale, 0, 0, c.Scale, c.OffsetX * c.Scale, c.OffsetY * c.Scale);
@@ -393,6 +394,8 @@ TK.Draw.DrawableObject = {
             c.shadowBlur = 0;
         }
 
+        c.globalAlpha = this.Opacity;
+
         if (this.Fill) {
             c.fillStyle = this.Fill;
             if (!this.DrawAndTransformDisabled)
@@ -405,14 +408,16 @@ TK.Draw.DrawableObject = {
         if (!this.ShadowForLine) {
             c.shadowColor = "rgba(0,0,0,0)";
             c.shadowBlur = 0;
-        }
+        }        
 
         c.lineWidth = this.LineWidth;
         if (this.Stroke) {
             c.strokeStyle = this.Stroke;
             if (!this.DrawAndTransformDisabled)
                 c.stroke();
-        }        
+        }
+
+        c.globalAlpha = 1;
     },
     Animate: function (propName, targetValue, ms, easing) {        
         if (!easing)
@@ -901,7 +906,9 @@ TK.Draw.Image = {
         this.Transform(c);
         this.DrawFS(c);
         try {
+            c.globalAlpha = this.Opacity;
             c.drawImage(this.Img, this.X, this.Y, this.W, this.H);
+            c.globalAlpha = 1;
         } catch (errie) { }
         c.closePath();        
     }
