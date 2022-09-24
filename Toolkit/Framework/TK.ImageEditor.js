@@ -14,6 +14,10 @@ TK.ImageEditor = {
     StoragePath: undefined,
     onchange: null,
 
+    // Auto resize when image is larger than width and/or height
+    MaxWidth: null, 
+    MaxHeight: null,
+
     Init: function () {
         var obj = this;
         if (this.DataSettings) {
@@ -291,7 +295,7 @@ TK.ImageEditor = {
                     var offsetX = ((canvas.Elements.Image.X - canvas.Elements.Image.W / 2) - canvas.CropTL[0]) / canvas.Ratio;
                     var offsetY = ((canvas.Elements.Image.Y - canvas.Elements.Image.H / 2) - canvas.CropTL[1]) / canvas.Ratio;
                     var context = resizeAndCropCanvas.getContext("2d");
-
+                    context.imageSmoothingQuality = 'high';
                     // TODO: Rotation canvas.Elements.Image.Rotate
                     if (canvas.Elements.Image.Rotate) {                        
                         var translateX = offsetX + (canvas.Elements.Image.Img.width / 2);
@@ -305,6 +309,36 @@ TK.ImageEditor = {
                     context.drawImage(canvas.Elements.Image.Img, offsetX, offsetY, canvas.Elements.Image.Img.width, canvas.Elements.Image.Img.height);
 
                     var inst = popup.ImageEditorInstance;
+
+                    // Resize if needed
+                    if ((inst.MaxWidth !== null && canvas.Elements.Image.Img.width > inst.MaxWidth) || (inst.MaxHeight !== null && canvas.Elements.Image.Img.height > inst.MaxHeight)) {
+                        var ratioW = 9999;
+                        var ratioH = 9999;
+                        var newWidth = 0;
+                        var newHeight = 0;
+
+                        if (inst.MaxWidth !== null)
+                            ratioW = inst.MaxWidth / resizeAndCropCanvas.width ; // 200 / 800 = 0.25
+                        if (inst.MaxHeight !== null)
+                            ratioH = inst.MaxHeight / resizeAndCropCanvas.height; // 200 / 1000 = 0.2
+
+                        if (ratioW < ratioH) {
+                            newWidth = inst.MaxWidth;
+                            newHeight = Math.floor(ratioW * resizeAndCropCanvas.height);
+                        } else {
+                            newWidth = Math.floor(ratioH * resizeAndCropCanvas.width);
+                            newHeight = inst.MaxHeight;
+                        }
+
+                        var resizeAndCropCanvas2 = document.createElement("CANVAS");
+                        resizeAndCropCanvas2.width = newWidth;
+                        resizeAndCropCanvas2.height = newHeight;
+                        var context2 = resizeAndCropCanvas2.getContext("2d");
+                        context2.imageSmoothingQuality = 'high';
+                        context2.drawImage(resizeAndCropCanvas, 0, 0, newWidth, newHeight);
+
+                        resizeAndCropCanvas = resizeAndCropCanvas2;
+                    }
                     
                     if (inst.ValueType && inst.StorageHandlers[inst.ValueType]) {
                         inst.StorageHandlers[inst.ValueType](inst, resizeAndCropCanvas, function (value) {
