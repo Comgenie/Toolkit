@@ -193,6 +193,9 @@ window.TK.Dashboard = {
                             if (obj.DashboardElement.EnableLimitX && totalWidth > 0 && (newLeft * size) + startWidth > totalWidth) newLeft = Math.floor((totalWidth - startWidth) / size);
                             if (obj.DashboardElement.EnableLimitY && totalHeight > 0 && (newTop * size) + startHeight > totalHeight) newTop = Math.floor((totalHeight - startHeight) / size);
 
+                            if (newLeft < 0) newLeft = 0;
+                            if (newTop < 0) newTop = 0;
+
                             obj.Left = newLeft;
                             obj.Top = newTop;
                             obj.SetSize();
@@ -361,6 +364,9 @@ window.TK.Dashboard = {
 
                             if (obj.DashboardElement.EnableLimitX && totalWidth > 0 && (newLeft * size) + startWidth > totalWidth) newLeft = Math.floor((totalWidth - startWidth) / size);
                             if (obj.DashboardElement.EnableLimitY && totalHeight > 0 && (newTop * size) + startHeight > totalHeight) newTop = Math.floor((totalHeight - startHeight) / size);
+
+                            if (newLeft < 0) newLeft = 0;
+                            if (newTop < 0) newTop = 0;
 
                             if (newLeft == obj.Left && newTop == obj.Top)
                                 return;
