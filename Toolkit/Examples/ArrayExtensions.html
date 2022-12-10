@@ -13,6 +13,7 @@
 
     <h1>ArrayExtensions</h1>
     <p>The ArrayExtensions are included in the framework and offer some extensions to the Array object in javascript. The ArrayExtensions are inspired by Linq.</p>
+    <p>In all recent browsers, the arrow function can be used instead of the inline function declaration.</p>
     <h2>Sorting: OrderBy, OrderByDesc</h2>
     <pre>
 {
@@ -20,6 +21,8 @@
         var items = [{ Id: 1, Name: "Number one" }, { Id: 3, Name: "Number three" }, { Id: 2, Name: "Number two" }];
 
         items = items.OrderBy(function(a){ return a.Id; });
+        // OR
+        items = items.OrderBy(a => a.Id);
 
         for (var i = 0; i &lt; items.length; i++) {
             this.Add({
@@ -37,7 +40,7 @@
     Init: function() {
         var items = [{ Id: 1, Name: "A" }, { Id: 2, Name: "B" }, { Id: 3, Name: "C" }];
 
-        items = items.Where(function(a){ return a.Id >= 2; });
+        items = items.Where(a => a.Id >= 2);
 
         for (var i = 0; i &lt; items.length; i++) {
             this.Add({
@@ -72,7 +75,7 @@
     Init: function() {
         var items = [{ Id: 1, Name: "A" }, { Id: 2, Name: "B" }, { Id: 3, Name: "C" }];
 
-        items = items.Select(function(a) { return a.Id + 10; });
+        items = items.Select(a => a.Id + 10);
 
         for (var i = 0; i &lt; items.length; i++) {
             this.Add({
