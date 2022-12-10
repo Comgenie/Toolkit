@@ -250,7 +250,7 @@ window.TK.Table = {
                 continue;
             }
             
-            if (this.CurrentFilter == "" || this.CurrentFilter == null || !row.innerText || (this.CurrentFilter && this.CurrentFilter.toLowerCase && row.innerText.toLowerCase().indexOf(this.CurrentFilter) >= 0) || (this.CurrentFilter && !this.CurrentFilter.toLowerCase && this.CurrentFilter(row.Row))) {
+            if (this.CurrentFilter == "" || this.CurrentFilter == null || !row.innerText || (this.CurrentFilter && this.CurrentFilter.toLowerCase && row.innerText.toLowerCase().indexOf(this.CurrentFilter) >= 0) || (this.CurrentFilter && !this.CurrentFilter.toLowerCase && this.CurrentFilter(row.Row, row))) {
                 row.style.display = "";
                 if (row.subTr)
                     row.subTr.style.display = "";
@@ -432,16 +432,22 @@ window.TK.Table = {
 
                                         if (!obj.ColumnFilter)
                                             obj.ColumnFilter = {};
-                                        var filterFunc = function (rowObj) {
+                                        var filterFunc = function (rowObj, trObj) {
                                             for (var name in obj.ColumnFilter) {
                                                 if (!obj.ColumnFilter[name])
                                                     continue;
-                                                if (obj.ColumnFilter[name].toLowerCase) {
-                                                    if (rowObj[name].toString().toLowerCase().indexOf(obj.ColumnFilter[name].toLowerCase()) < 0)
+                                                                                                
+                                                if (obj.ColumnFilter[name].toLowerCase) { // text match, match if any of the text is in there
+                                                    var lowerColumnSearch = obj.ColumnFilter[name].toLowerCase();
+
+                                                    var foundInFieldValue = rowObj[name] && rowObj[name].toString().toLowerCase().indexOf(lowerColumnSearch) >= 0;
+                                                    var foundInTdText = trObj.Elements && trObj.Elements[name] && trObj.Elements[name].innerText && trObj.Elements[name].innerText.toLowerCase().indexOf(lowerColumnSearch) >= 0;
+                                                    if (!foundInFieldValue && !foundInTdText)
                                                         return false;
                                                     continue;
                                                 }
-                                                if (obj.ColumnFilter[name].indexOf(rowObj[name]) < 0)
+
+                                                if (obj.ColumnFilter[name] == rowObj[name]) // match exact, for numbers etc.
                                                     return false;
                                             }
                                             return true;
