@@ -28,7 +28,11 @@ window.TK.Popup = {
 
         this.Add({
             _: "h2",
-            innerHTML: "<span>" + this.Title + "</span>",
+            Elements: {
+                TitleSpan: {
+                    innerText: this.Title
+                }
+            },
             onselectstart: function () { return false; },
             ondblclick: function () {
                 if (!obj.EnableResize)
