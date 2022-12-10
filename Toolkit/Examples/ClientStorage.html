@@ -1,0 +1,73 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>TK.ClientStorage</title>
+    <link href="../Style.css" rel="stylesheet" />
+    <script src="/Framework/TK.Main.js"></script>
+    <script src="/Framework/Ajax.js"></script>
+    <script src="/Framework/ArrayExtensions.js"></script>
+    <script src="/Framework/TK.Table.js"></script>
+    <script src="/Framework/TK.ClientStorage.js"></script>
+    <script src="Example.js"></script>
+</head>
+<body>
+    <a href="/" class="home">Toolkit</a>
+
+    <h1>TK.ClientStorage</h1>
+    <p>This component can be used to store data (text, blobs, files and byte arrays) in the browser. It try to use IndexedDB when available, and falls back to localStorage (lower storage limits).</p>
+    <p>The .Retrieve, .Delete, .GetUrl and .Store methods are called the same way as the TK.ServerStorage component. However, the .List call will return an array of paths instead.</p>
+    <p>A prefix setting is available in case multiple sites are hosted within the same domain.</p>
+
+    <h2>Example</h2>
+    <pre>
+{
+    Init: function() {
+        this.Elements.Files.Refresh();
+    },
+    Elements: {
+        Storage: {
+            _: TK.ClientStorage,
+        },
+        Files: {
+            Refresh: function() {
+                var obj = this;
+                this.Clear();
+                this.Parent.Elements.Storage.List(function(paths) {
+                    obj.Add({
+                        _: TK.Table,
+                        EnableRemoveButton: true,
+                        Rows: paths.Select(function(a) { return { Path: a } }),
+                        RowClick: function(item) {
+                            obj.Near("Storage").GetUrl(item.Path, function(url) {
+                                window.open(url, "_blank");
+                            }); 
+                            
+                        },
+                        Save: function(item, remove) {
+                            obj.Near("Storage").Delete(item.Path, function(isDeleted) {
+                                obj.Refresh();
+                            });                            
+                            return false;
+                        }
+                    });
+                });
+            }
+        },
+        File: {
+            _: "input",
+            type: "file",
+            onchange: function() {
+                var obj = this;
+                if (this.files.length == 0)
+                    return;
+                this.Near("Storage").Store(this.files[0].name, this.files[0], function(fileMetaData) {
+                    obj.Near("Files").Refresh();
+                });
+            }
+        }
+    }
+}
+</pre>
+</body>
+</html>

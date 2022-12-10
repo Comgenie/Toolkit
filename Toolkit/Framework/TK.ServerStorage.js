@@ -3,6 +3,7 @@
 /* Minify Order(100) */
 
 // Component to save and retrieve files, using the Toolkit API
+// This component has the same methods as TK.ClientStorage
 TK.ServerStorage = {
     _: "component",
     Container: null, // null is only for public file storage/retrieval, use a https:// link for a private storage container with rights check based on the clientId

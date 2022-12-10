@@ -20,6 +20,7 @@
         <p>Content uploaded to the public Toolkit API is scanned periodically to detect and remove aforementioned material.</p>
     </div>
     <p>Using this component files can be saved and retrieved using the Toolkit API. This service is made for storing small files like photos (profile images) or JSON files. The <em>Url</em> property can be set to use a different back-end.</p>
+    <p>The .Retrieve, .Delete, .GetUrl and .Store methods are used the same way as the TK.ClientStorage component. However, the .List call will return an array of objects instead with some extra information about the uploaded file.</p>
 
     <h2>Simple anonymous storage</h2>
     <p>By default, files will be stored using a randomized name which can only be retrieved by knowing the exact name.</p>
