@@ -6,6 +6,15 @@ TK.HtmlEditor = {
     Buttons: ["IncreaseFontSize", "DecreaseFontSize", "Bold", "Italic", "Underline", "AlignLeft", "AlignCenter", "AlignRight", "Indent", "Outdent", "Paragraph", "Header1", "Header2", "Header3", "CodeBlock", "QuoteBlock"],
     __RecursivePropertiesButtonTemplates: true,
     EnableHTMLPasting: true,
+    RemoveScripts: true,
+    RemoveScriptsHandler: function (html) {
+        var len = -1;
+        while (len != html.length) {
+            len = html.length;
+            html = html.replace(/<(script|link|iframe|noscript|meta|object|embed|frameset|style)/ig, "<r ").replace(/javascript:/ig, "removed:").replace(/ (href|src)=(?!"http|"\/)/ig, " r=\"").replace(/\/\*[\S]*\*\//ig, "").replace(/\&\#(010|X0A);/ig, "").replace(/expression\(/ig, "r(").replace(/( |\/)on(\w+)( *)=/ig, " r=");
+        }
+        return html;
+    },
     ButtonTemplates: {
         IncreaseFontSize: {
             innerHTML: Svg.Icons.TextIncrease,
@@ -133,7 +142,7 @@ TK.HtmlEditor = {
     Data: null,
     Init: function () {
         if (this.Data)
-            this.Elements.Editor.innerHTML = this.Data;
+            this.Elements.Editor.innerHTML = this.RemoveScripts ? this.RemoveScriptsHandler(this.Data) : this.Data;
         if (this.FillContainer) {
             this.style.position = "absolute";
             this.style.top = "0px";
@@ -184,7 +193,7 @@ TK.HtmlEditor = {
                     if (this.Parent.EnableHTMLPasting && e.clipboardData.types && e.clipboardData.types.indexOf("text/html") >= 0) {
                         try {
                             var html = e.clipboardData.getData("text/html");
-                            document.execCommand("insertHTML", false, html);
+                            document.execCommand("insertHTML", false, this.Parent.RemoveScripts ? this.Parent.RemoveScriptsHandler(html) : html);
                             return;
                         } catch (errie) { } // If insertHTML is not supported for any reason, we will still paste it as text                        
                     }
