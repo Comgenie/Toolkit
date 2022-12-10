@@ -259,3 +259,5 @@ paket-files/
 # Python Tools for Visual Studio (PTVS)
 __pycache__/
 *.pyc
+/Toolkit/Properties/ServiceDependencies/Toolkit - Web Deploy1/profile.arm.json
+/Toolkit/Properties/PublishProfiles/Toolkit - Web Deploy1.pubxml
