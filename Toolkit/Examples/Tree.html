@@ -30,5 +30,47 @@
 }
 </pre>
 
+    <h2>Filter</h2>
+    <p>Use the following method to filter the contents of the tree: .ApplyFilter(filter, showAllChildNodes, callBackFoundRows), last 2 are optional parameters.</p>
+    <pre>
+{
+    Elements: {
+        SearchInput: {
+            onkeyup: function() {
+                // Second parameter is to always show all elements below
+                this.Near("Tree").ApplyFilter(this.value, true);
+            }
+        },
+        Tree: {
+            _: TK.Tree,
+            Rows: [
+                { Id: 1, ParentId: null, Text: "Fruit"},
+                {  Id: 2, ParentId: 1, Text: "Citrus"},
+                {   Id: 3, ParentId: 2, Text: "Orange"},
+                {   Id: 4, ParentId: 2, Text: "Grapefruit"},
+                {   Id: 5, ParentId: 2, Text: "Mandarin"},
+                {   Id: 6, ParentId: 2, Text: "Lime"},
+                {  Id: 7, ParentId: 1, Text: "Berries"},
+                {   Id: 8, ParentId: 7, Text: "Strawberries"},
+                {   Id: 9, ParentId: 7, Text: "Raspberries"},
+                {   Id: 10,ParentId: 7, Text: "Blueberries"},
+                {   Id: 11,ParentId: 7, Text: "Kiwifruit"},
+                {  Id: 12, ParentId: 1, Text: "Apple"},
+                { Id: 13, ParentId: null, Text: "Vegetables"},
+                {  Id: 14, ParentId: 13, Text: "Leafy green"},
+                {   Id: 15, ParentId: 14, Text: "Lettuce"},
+                {   Id: 16, ParentId: 14, Text: "Spinach"},
+                {  Id: 17, ParentId: 13, Text: "Cruciferous"},
+                {   Id: 18, ParentId: 17, Text: "Cabbage"},
+                {   Id: 19, ParentId: 17, Text: "Cauliflower"}
+            ],
+            RowClick: function(row) {
+                alert(JSON.stringify(row));
+            }
+        }
+    }
+}
+</pre>
+
 </body>
 </html>
