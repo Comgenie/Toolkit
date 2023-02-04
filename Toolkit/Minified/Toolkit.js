@@ -355,8 +355,8 @@ if(!obj.ColumnFilter)
 obj.ColumnFilter={};var filterFunc=function(rowObj,trObj){for(var name in obj.ColumnFilter){if(!obj.ColumnFilter[name])
 continue;if(obj.ColumnFilter[name].toLowerCase){var lowerColumnSearch=obj.ColumnFilter[name].toLowerCase();var foundInFieldValue=rowObj[name]&&rowObj[name].toString().toLowerCase().indexOf(lowerColumnSearch)>=0;var foundInTdText=trObj.Elements&&trObj.Elements[name]&&trObj.Elements[name].innerText&&trObj.Elements[name].innerText.toLowerCase().indexOf(lowerColumnSearch)>=0;if(!foundInFieldValue&&!foundInTdText)
 return false;continue;}
-if(obj.ColumnFilter[name]==rowObj[name])
-return false;}
+if(Array.isArray(obj.ColumnFilter[name])&&rowObj[name]!==undefined){if(obj.ColumnFilter[name].indexOf(rowObj[name])<0)
+return false;}else if(obj.ColumnFilter[name]!=rowObj[name]){return false;}}
 return true;};if(values.length<obj.ThresholdFilterMultiselect){values=values.OrderBy(function(a){return a;});var filterTable={_:TK.Table,EnableFilter:false,Rows:[],Templates:obj.Templates,EnableCheckBoxes:true,ColumnTitles:{},CheckboxCheck:function(){var rows=this.SelectedRows();if(rows.length!=this.Rows.length){var allowed=[];for(var i=0;i<rows.length;i++)
 allowed.push(rows[i][currentHeader.DataColumnName]);obj.ColumnFilter[currentHeader.DataColumnName]=allowed;}else{obj.ColumnFilter[currentHeader.DataColumnName]=null;}
 obj.ApplyFilter(filterFunc);var ttnc=obj.Near(".toolkitTableNavigationContainer");if(ttnc)
