@@ -298,7 +298,7 @@ TK.Draw.EaseStrong = function (a, b, r) {
     return a + ((b - a) * (r * r * r * r * r));
 };
 
-var getColor = function (s) {
+TK.Draw.GetColor = function (s) {
     if (s.substr(0, 4) == "rgba") {
         return s.replace("rgba(", "").replace(")", "").split(",").Select(function (a) { return parseFloat(a); });
     } else if (s.substr(0, 3) == "rgb") {
@@ -311,9 +311,9 @@ var getColor = function (s) {
         return [(c >> 16) & 255, (c >> 8) & 255, c & 255, 1];
     }
 };
-var colorToDifferentColor = function (s, s2, ratio) {
-    s = getColor(s);
-    s2 = getColor(s2);
+TK.Draw.ColorToDifferentColor = function (s, s2, ratio) {
+    s = TK.Draw.GetColor(s);
+    s2 = TK.Draw.GetColor(s2);
     if (s.length < 4)
         s.push(1);
     if (s2.length < 4)
@@ -341,6 +341,7 @@ TK.Draw.Group = {
 TK.Draw.DrawableObject = {
     Fill: null, // Color
     Stroke: null, // Color
+    BlendMode: null, // Any value of globalCompositeOperation
     LineWidth: 1,
     LineCap: null,
     Rotate: null,
@@ -384,6 +385,9 @@ TK.Draw.DrawableObject = {
         }
     },
     DrawFS: function (c) {
+        if (this.BlendMode) {
+            c.globalCompositeOperation = this.BlendMode;
+        }
         if (this.Shadow) {
             c.shadowOffsetX = this.Shadow[0];
             c.shadowOffsetY = this.Shadow[1];
@@ -418,6 +422,9 @@ TK.Draw.DrawableObject = {
         }
 
         c.globalAlpha = 1;
+        if (this.BlendMode) {
+            c.globalCompositeOperation = "source-over"; // default
+        }
     },
     Animate: function (propName, targetValue, ms, easing) {        
         if (!easing)
@@ -438,7 +445,7 @@ TK.Draw.DrawableObject = {
             
             if (typeof this[propName] === 'string' && typeof targetValue === 'string') {
                 // Colors                      
-                this.Parent.Animations.push({ I: this, P: propName, O: getColor(this[propName]), T: getColor(targetValue), L: ms, E: easing, S: new Date().getTime() });
+                this.Parent.Animations.push({ I: this, P: propName, O: TK.Draw.GetColor(this[propName]), T: TK.Draw.GetColor(targetValue), L: ms, E: easing, S: new Date().getTime() });
             } else if (Array.isArray(this[propName])) {
                 this.Parent.Animations.push({ I: this, P: propName, O: JSON.parse(JSON.stringify(this[propName])), T: targetValue, L: ms, E: easing, S: new Date().getTime() });                
             } else {
@@ -678,7 +685,7 @@ TK.Draw.Rect = {
             if (this.Extrude > 0) {
                 // Outside, Draw lighter color above, darker color on the right
                 c.beginPath();
-                c.fillStyle = this.FillExtrudeLightColor ? this.FillExtrudeLightColor : colorToDifferentColor(this.Fill, "#FFF", 0.4);
+                c.fillStyle = this.FillExtrudeLightColor ? this.FillExtrudeLightColor : TK.Draw.ColorToDifferentColor(this.Fill, "#FFF", 0.4);
                 c.moveTo(this.X, this.Y);
                 c.lineTo(this.X + this.Extrude, this.Y - this.Extrude);
                 c.lineTo(this.X + this.W + this.Extrude, this.Y - this.Extrude);
@@ -688,7 +695,7 @@ TK.Draw.Rect = {
                 c.closePath();
 
                 c.beginPath();
-                c.fillStyle = this.FillExtrudeDarkColor ? this.FillExtrudeDarkColor : colorToDifferentColor(this.Fill, "#000", 0.4);
+                c.fillStyle = this.FillExtrudeDarkColor ? this.FillExtrudeDarkColor : TK.Draw.ColorToDifferentColor(this.Fill, "#000", 0.4);
                 c.moveTo(this.X + this.W, this.Y);
                 c.lineTo(this.X + this.W + this.Extrude, this.Y - this.Extrude);
                 c.lineTo(this.X + this.W + this.Extrude, this.Y + this.H - this.Extrude);
@@ -700,7 +707,7 @@ TK.Draw.Rect = {
                 // Inside
                 c.beginPath();
                 //c.fillStyle = colorToDifferentColor(this.Fill, "#FFF", 0.4);
-                c.fillStyle = this.FillExtrudeDarkColor ? this.FillExtrudeDarkColor : colorToDifferentColor(this.Fill, "#000", 0.4);                
+                c.fillStyle = this.FillExtrudeDarkColor ? this.FillExtrudeDarkColor : TK.Draw.ColorToDifferentColor(this.Fill, "#000", 0.4);                
                 c.moveTo(this.X, this.Y);
                 c.lineTo(this.X + -this.Extrude, this.Y);
                 c.lineTo(this.X + -this.Extrude, this.Y + this.H - -this.Extrude);
@@ -710,7 +717,7 @@ TK.Draw.Rect = {
                 c.closePath();
 
                 c.beginPath();
-                c.fillStyle = this.FillExtrudeLightColor ? this.FillExtrudeLightColor : colorToDifferentColor(this.Fill, "#000", 0.1);
+                c.fillStyle = this.FillExtrudeLightColor ? this.FillExtrudeLightColor : TK.Draw.ColorToDifferentColor(this.Fill, "#000", 0.1);
                 c.moveTo(this.X, this.Y + this.H);
                 c.lineTo(this.X + -this.Extrude, this.Y + this.H - -this.Extrude);
                 c.lineTo(this.X + this.W, this.Y + this.H - -this.Extrude);
