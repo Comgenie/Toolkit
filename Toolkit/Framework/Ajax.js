@@ -179,13 +179,10 @@ window.ajax = function () {
     this.nextRequest = function () {
         this.busy = false;
         if (this.queue.length == 0) {
-        //    console.log("Queue is now empty");
             return;
         }
 
         var nextRequestInfo = this.queue.shift();
-       // console.log("Executing next request in queue ( current length: " + this.queue.length + " )");
-       // console.log(nextRequestInfo);
         this.do(nextRequestInfo.get, nextRequestInfo.post, nextRequestInfo.callBack, nextRequestInfo.callBackData, nextRequestInfo.extraSettings);
     };
     this.do = function (get, post, callBack, callBackData, extraSettings) {
@@ -213,7 +210,6 @@ window.ajax = function () {
             return;
         }
 
-
         if (extraSettings && extraSettings.cacheResults && this.cached["page" + this.hashString(get)]) {
             var content = this.cached["page" + this.hashString(get)];
             if (callBack) {
@@ -225,15 +221,13 @@ window.ajax = function () {
             if (!this.busy)
                 this.nextRequest();
             return;
-        }        
-        
+        }                
 
         if (this.busy) {
-         //   console.log("* * * Pushing request to queue: " + requestInfo.get + " ( current length: " + this.queue.length + " )");
             this.queue.push(requestInfo);
             return;
         }
-      //  console.log("Executing request: " + requestInfo.get);
+
         this.busy = true;
         this.currentRequestInfo = requestInfo;
         if (post == null) {
