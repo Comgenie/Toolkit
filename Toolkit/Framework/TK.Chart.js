@@ -62,6 +62,9 @@ TK.Chart = {
     Scale: 2,
     MinChartPadding: 35,
     EnableNavigator: false,
+    NavigatorStartValue: null,
+    NavigatorEndValue: null,
+    FixedNavigator: false,
     Navigate: function (minValue, maxValue, final) {
         
     },
@@ -139,7 +142,7 @@ TK.Chart = {
         this.RefreshAxises();
         this.RefreshData();
         if (this.EnableNavigator) {
-            this.AddNavigator();
+            this.AddNavigator(this.NavigatorStartValue, this.NavigatorEndValue);
         } else {
             delete this.AxisesDetected;
         }
@@ -165,7 +168,7 @@ TK.Chart = {
         if (till !== undefined && till !== null)
             tillPX = d.ValueToPX(till);
         var cObj = this.Elements.Canvas.Elements;
-        if (cObj.NavigatorMaxBlock) {
+        if (cObj.NavigatorCenterBlock) {
             // Already added, just update
             cObj.NavigatorMinBlock.X = fromPX;
             cObj.NavigatorMaxBlock.X = tillPX;
@@ -252,8 +255,12 @@ TK.Chart = {
         this.Elements.Canvas.Add({ _: outsideConfig, X: tillPX, W: maxPX - tillPX }, "NavigatorMaxOutside");
         this.Elements.Canvas.Add({ _: lineConfig, X: fromPX }, "NavigatorMinLine");
         this.Elements.Canvas.Add({ _: lineConfig, X: tillPX }, "NavigatorMaxLine");
-        var minBlock = this.Elements.Canvas.Add({ _: blockConfig, X: fromPX, LeftSide: true }, "NavigatorMinBlock");
-        var maxBlock = this.Elements.Canvas.Add({ _: blockConfig, Anchor: TK.Draw.AnchorLeft | TK.Draw.AnchorTop, X: tillPX, LeftSide: false }, "NavigatorMaxBlock");
+        var minBlock, maxBlock;
+        if (!this.FixedNavigator) {
+            minBlock = this.Elements.Canvas.Add({ _: blockConfig, X: fromPX, LeftSide: true }, "NavigatorMinBlock");
+            maxBlock = this.Elements.Canvas.Add({ _: blockConfig, Anchor: TK.Draw.AnchorLeft | TK.Draw.AnchorTop, X: tillPX, LeftSide: false }, "NavigatorMaxBlock");
+        }
+
         this.Elements.Canvas.Add({
             _: TK.Draw.Rect,
             X: fromPX,
@@ -261,21 +268,55 @@ TK.Chart = {
             W: (tillPX - fromPX),
             H: heightPX,
             Fill: "rgba(0,0,0,0)",
-            MouseDown: function (x, y) {
-                minBlock.MouseDown(x, y);
-                maxBlock.MouseDown(x, y);
-                return true;
+            MouseOver: function () {
+                obj.Elements.Canvas.style.cursor = "grab";
             },
-            MouseMove: function (x, y) {
-                if (minBlock.MouseMove)
-                    minBlock.MouseMove(x, y);
-                if (maxBlock.MouseMove)
-                    maxBlock.MouseMove(x, y);
+            MouseOut: function () {
+                obj.Elements.Canvas.style.cursor = "";
+            },
+            MouseDown: function (x, y) {                
+                var offsetX = this.X - x;
+                obj.Elements.Canvas.style.cursor = "grabbing";
+                this.MouseMove = function (x2, y2) {
+
+                    this.X = x2 + offsetX;
+                    if (this.X < minPX)
+                        this.X = minPX;
+                    if (this.X + this.W > maxPX)
+                        this.X = maxPX - this.W;
+
+                    cObj.NavigatorMinLine.X = this.X;
+                    cObj.NavigatorMinOutside.W = this.X - minPX;
+                    if (minBlock)
+                        minBlock.X = this.X;
+                    if (maxBlock)
+                        maxBlock.X = this.X + this.W;
+
+                    cObj.NavigatorMaxLine.X = this.X + this.W;
+                    cObj.NavigatorMaxOutside.X = this.X + this.W;
+                    cObj.NavigatorMaxOutside.W = maxPX - (this.X + this.W);
+                    
+                    if (obj.Navigate)
+                        obj.Navigate(cObj.NavigatorCenterBlock.GetPositionAsValue(true), cObj.NavigatorCenterBlock.GetPositionAsValue(false), false);
+                    return true;
+                };
                 return true;
             },
             MouseUp: function (x, y) {
-                minBlock.MouseUp(x, y);
-                maxBlock.MouseUp(x, y);
+                this.MouseMove = null;
+                obj.Elements.Canvas.style.cursor = "grab";
+                if (obj.Navigate)
+                    obj.Navigate(this.GetPositionAsValue(true), this.GetPositionAsValue(false), true);
+            },
+            GetPositionAsValue: function (start) { // Convert X value to actual value
+                var x = (this.X + (start ? 0 : this.W));
+
+                var r = (x - minPX) / (maxPX - minPX);
+                if (x - 3 < minPX) // If its near start end, pick the start value
+                    r = 0;
+                if (x + 3 > maxPX) // If its near the end, pick the end value
+                    r = 1;
+                return (r * (d.ScaleMax - d.ScaleMin)) + d.ScaleMin;
             }
         }, "NavigatorCenterBlock");
     },
@@ -892,7 +933,7 @@ TK.Chart = {
                         if (value.toLowerCase) {
                             pos[n][3] = value;
                         } else {
-                            var colorA = getColor(d.RangeResult[0]), colorB = getColor(d.RangeResult[1]);
+                            var colorA = TK.Draw.GetColor(d.RangeResult[0]), colorB = TK.Draw.GetColor(d.RangeResult[1]);
                             
                             for (var n2 = 0; n2 < colorA.length; n2++) {
                                 if (d.Max == d.Min) {

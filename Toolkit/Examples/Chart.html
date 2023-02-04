@@ -257,5 +257,45 @@
     ]
 }
 </pre>
+
+    <h2>Navigator with fixed and default period</h2>
+    <pre>
+{
+    _: TK.Chart,
+    Height: 200,
+    style: { width: "800px", height: "200px"},
+    LabelSpacing: 20,
+
+    EnableNavigator: true,
+    FixedNavigator: true,
+
+    // epochs and (ISO) date strings can be used
+    NavigatorStartValue: new Date("2010-01-02").getTime(),
+    NavigatorEndValue: "2010-01-03", 
+
+    LegendLocation: -1,
+    Navigate: function(from, till, final) {
+        if (final) { // Check if the mouse button is not pressed anymore
+            alert("Selected area: " + new Date(from) + " - " + new Date(till));
+        }
+    },
+    Axis: {
+        Y1: {
+            Location: 5 // Hidden Y
+        }
+    },
+    Series: [
+        {
+            Title: "Line Series",
+            Axis: "X,Y1",
+            Color: "#0081D5",
+            Style: 1+4,
+            Smoothing: 1,
+            LineWidth: 2,
+            Data: [["2010-01-01", 100], ["2010-01-02", 100], ["2010-01-03", 50], ["2010-01-04", 100], ["2010-01-05", 75]]
+        }
+    ]
+}
+</pre>
 </body>
 </html>
