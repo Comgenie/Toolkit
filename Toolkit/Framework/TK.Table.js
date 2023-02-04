@@ -447,8 +447,12 @@ window.TK.Table = {
                                                     continue;
                                                 }
 
-                                                if (obj.ColumnFilter[name] == rowObj[name]) // match exact, for numbers etc.
+                                                if (Array.isArray(obj.ColumnFilter[name]) && rowObj[name] !== undefined) {
+                                                    if (obj.ColumnFilter[name].indexOf(rowObj[name]) < 0)
+                                                        return false;
+                                                } else if (obj.ColumnFilter[name] != rowObj[name]) { // match exact, for numbers etc.
                                                     return false;
+                                                }
                                             }
                                             return true;
                                         };
