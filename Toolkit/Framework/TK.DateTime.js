@@ -10,6 +10,7 @@ window.TK.DateTime = {
     EnableRelative: false,
     TimeZone: "Local", // UTC, Local
     UseGlobalTimeZone: true, // If true, the time zone will be based on the static TK.DateTime.TimeZone , and not this instance
+    AlwaysNavigateToStartOfDay: false, // When set to true, selecting a day will always set time to 00:00, even if there was already a value or the day is today
     WeekStart: 1, // 0 Sunday, 1 Monday
     ValueIsEpoch: false,
     Data: null,
@@ -546,7 +547,7 @@ window.TK.DateTime = {
             dayItem.onclick = function (e) {
                 dateObj.setDate(this.DateIndex);
                 dateObj.setMilliseconds(0);
-                if (!obj.Data && (dateObj.getDate() != new Date().getDate() || dateObj.getDay() != new Date().getDay() || dateObj.getFullYear() != new Date().getFullYear())) {                    
+                if (obj.AlwaysNavigateToStartOfDay || (!obj.Data && (dateObj.getDate() != new Date().getDate() || dateObj.getDay() != new Date().getDay() || dateObj.getFullYear() != new Date().getFullYear()))) {                    
                     // Different day, default to 00:00:00
                     dateObj.setHours(0);
                     dateObj.setMinutes(0);
