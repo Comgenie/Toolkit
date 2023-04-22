@@ -331,6 +331,7 @@ window.TK.DateTime = {
                 selectPart.appendChild(new Option("Day", "d"));
                 selectPart.appendChild(new Option("Hour", "H"));
                 selectPart.appendChild(new Option("Minute", "m"));
+                selectPart.appendChild(new Option("Weekday", "w"));
                 selectPart.value = p.substr(0, 1);
                 p = p.substr(1);
                 line.appendChild(selectPart);
@@ -624,6 +625,21 @@ window.TK.DateTimeRelativeToDateObj = function (dateStr, timeZone) {
                 dateObj.setMinutes(dateObj.getMinutes() + value);
             else if (parts[i][0] == "s")
                 dateObj.setSeconds(dateObj.getSeconds() + value);
+            else if (parts[i][0] == "w") {
+                var realModification = Math.abs(value);
+                if (realModification == 7)
+                    realModification = 0;
+
+                dateObj.setDate(dateObj.getDate() + (realModification - dateObj.getDay()));
+                if (dateObj.getDay() < realModification) {
+                    if (value < 0)
+                        dateObj.setDate(dateObj.getDate() - 7);
+                }
+                else {
+                    if (value > 0)
+                        dateObj.setDate(dateObj.getDate() + 7);
+                }
+            }
         } else { // Set
             var value = parseInt(parts[i].substr(1));
             if (parts[i][0] == "y")
@@ -638,6 +654,12 @@ window.TK.DateTimeRelativeToDateObj = function (dateStr, timeZone) {
                 dateObj.setMinutes(value);
             else if (parts[i][0] == "s")
                 dateObj.setSeconds(value);
+            else if (parts[i][0] == "w") {
+                var isoDay = dateObj.getDay();
+                if (isoDay == 0)
+                    isoDay = 7;
+                dateObj.setDate(dateObj.getDate() + (value - isoDay));
+            }
         }
     }
     return dateObj;
