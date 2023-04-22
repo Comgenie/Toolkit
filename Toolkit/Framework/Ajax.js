@@ -71,19 +71,29 @@ window.ajax = function () {
             }
 
             // Everything seems to be ok! 
+            var curReq = obj.currentRequestInfo;
+
             obj.retryCount = 0;
 
+            var callBacks = [];            
+            if (curReq.callBack)
+                callBacks.push(curReq.callBack);
+
+            var pageCacheHash = responseIsText && (obj.getSetting("saveResults") || obj.getSetting("cacheResults")) ? "page" + obj.hashString(curReq.get) : "";
             if (responseIsText && obj.getSetting("saveResults")) {
-                window.localStorage["page" + obj.hashString(obj.currentRequestInfo.get)] = obj.ajaxObject.responseText;
-            }
-            if (responseIsText && obj.getSetting("cacheResults")) {
-                obj.cached["page" + obj.hashString(obj.currentRequestInfo.get)] = obj.ajaxObject.responseText;
+                window.localStorage[pageCacheHash] = obj.ajaxObject.responseText;
             }
 
-            // check for callback
-            if (obj.currentRequestInfo.callBack) {
-                // make a copy since the callback is called in timeout (currentRequestInfo can be changed)
-                var copyCurrentRequestInfo = obj.currentRequestInfo;
+            if (responseIsText && obj.getSetting("cacheResults")) {
+                if (obj.cached[pageCacheHash] !== undefined && Array.isArray(obj.cached[pageCacheHash]))
+                    callBacks = callBacks.concat(obj.cached[pageCacheHash]); // There were possibly multiple calls waiting for this response
+                obj.cached[pageCacheHash] = obj.ajaxObject.responseText;
+            }
+
+            // check for callback            
+            for (var i = 0; i < callBacks.length; i++) {
+                let cb = callBacks[i];
+
                 var responseData = null;
                 if (responseIsText) {
                     responseData = obj.ajaxObject.responseText;
@@ -93,10 +103,7 @@ window.ajax = function () {
                 } else {
                     responseData = obj.ajaxObject.response;
                 }
-
-                // Do this as a timeout, so it doesn't mess with our ajax code
-                setTimeout(function () { copyCurrentRequestInfo.callBack(responseData, copyCurrentRequestInfo.get, copyCurrentRequestInfo.post, copyCurrentRequestInfo.callBackData); }, 1);
-                
+                obj.executeCallBack(cb, responseData, curReq);                
             }
             obj.nextRequest();
         };
@@ -107,6 +114,10 @@ window.ajax = function () {
             obj.nextRequest();
         };
     };
+    this.executeCallBack = function (callBack, responseData, request) {
+        // Do this as a timeout, so it doesn't mess with our ajax code
+        setTimeout(function () { callBack(responseData, request.get, request.post, request.callBackData); }, 1);                
+    }
 
     this.getAvailableAjaxObject = function () {
         // Modern browsers
@@ -153,13 +164,12 @@ window.ajax = function () {
             // Use saved result instead
             if (this.currentRequestInfo.callBack) {
                 // make a copy since the callback is called in timeout (currentRequestInfo can be changed)
-                var copyCurrentRequestInfo = this.currentRequestInfo;
+                var curReq = this.currentRequestInfo;
                 var content = window.localStorage["page" + this.hashString(this.currentRequestInfo.get)];
                 if (this.getSetting("parseJSONResponse") && content && (content.substr(0, 1) == "{" || content.substr(0, 1) == "\"" || content.substr(0, 1) == "[")) {
                     content = JSON.parse(content);
                 }
-                // Do this as a timeout, so it doesn't mess with our ajax code
-                setTimeout(function () { copyCurrentRequestInfo.callBack(content, copyCurrentRequestInfo.get, copyCurrentRequestInfo.post, copyCurrentRequestInfo.callBackData); }, 1);
+                obj.executeCallBack(curReq.callBack, content, curReq);                
             }
             this.nextRequest();
             return;
@@ -210,18 +220,34 @@ window.ajax = function () {
             return;
         }
 
-        if (extraSettings && extraSettings.cacheResults && this.cached["page" + this.hashString(get)]) {
-            var content = this.cached["page" + this.hashString(get)];
-            if (callBack) {
-                if (!(typeof post === "string" || post instanceof String) && this.parseJSONResponse !== false && content && (content.substr(0, 1) == "{" || content.substr(0, 1) == "\"" || content.substr(0, 1) == "[")) {
-                    content = JSON.parse(content);
+        if (extraSettings && extraSettings.cacheResults) {
+            var pageHash = ["page" + this.hashString(get)];
+            var content = this.cached[pageHash];
+            var done = 0;
+            if (content !== undefined && Array.isArray(content)) {
+                // This request is already on its way, add us to the callbacks
+                content.push(callBack);
+                done = 1;
+            } else if (content) {
+                if (callBack) {
+                    if (!(typeof post === "string" || post instanceof String) && this.parseJSONResponse !== false && content && (content.substr(0, 1) == "{" || content.substr(0, 1) == "\"" || content.substr(0, 1) == "[")) {
+                        content = JSON.parse(content);
+                    }
+                    obj.executeCallBack(callBack, content, requestInfo);
                 }
-                setTimeout(function () { callBack(content, get, post, callBackData); }, 1);
+                done = 1;
+            } else {
+                // We will execute this request, so add a temp array all next callback can be added to
+                if (!this.busy)
+                    this.cached[pageHash] = [];
             }
-            if (!this.busy)
-                this.nextRequest();
-            return;
-        }                
+
+            if (done) {
+                if (!this.busy)
+                    this.nextRequest();
+                return;
+            }
+        }
 
         if (this.busy) {
             this.queue.push(requestInfo);
