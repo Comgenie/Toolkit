@@ -11,7 +11,7 @@ TK.HtmlEditor = {
         var len = -1;
         while (len != html.length) {
             len = html.length;
-            html = html.replace(/<(script|link|iframe|noscript|meta|object|embed|frameset|style)/ig, "<r ").replace(/javascript:/ig, "removed:").replace(/ (href|src)=(?!"http|"\/)/ig, " r=\"").replace(/\/\*[\S]*\*\//ig, "").replace(/\&\#(010|X0A);/ig, "").replace(/expression\(/ig, "r(").replace(/( |\/)on(\w+)( *)=/ig, " r=");
+            html = html.replace(/<(script|link|iframe|noscript|meta|object|embed|frameset|style)/ig, "<r ").replace(/javascript:/ig, "removed:").replace(/ (href|src)=(?!"http|"data|"\/)/ig, " r=\"").replace(/\/\*[\S]*\*\//ig, "").replace(/\&\#(010|X0A);/ig, "").replace(/expression\(/ig, "r(").replace(/( |\/)on(\w+)( *)=/ig, " r=");
         }
         return html;
     },
