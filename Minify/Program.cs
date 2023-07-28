@@ -27,7 +27,7 @@ namespace Minify
             var sourceFiles = new List<SourceFile>();
             StringBuilder sb = new StringBuilder();
             sb.AppendLine("/* Minify Order(50) */");
-            sb.AppendLine("window.Svg = {};");
+            sb.AppendLine("if (!window.Svg) { window.Svg = {}; }");
             var hadSvg = false;
 
 

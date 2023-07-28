@@ -47,13 +47,18 @@ window.TK.Table = {
                 type: "checkbox",
                 className: "tableRowCheckBox",
                 onclick: function (event) {
+                    this.Parent.Table.LastCheckBoxRange = null;
                     if (event.shiftKey && this.Parent.Table.PreviousCheckBox) {
                         // Select everything in between
+                        this.Parent.Table.LastCheckBoxRange = [];
                         var curIndex = this.Parent.Parent.RowIndex;
                         var otherIndex = this.Parent.Table.PreviousCheckBox.Parent.Parent.RowIndex;
-                        for (var i = (curIndex < otherIndex ? curIndex + 1 : curIndex - 1); i != otherIndex; i = (curIndex < otherIndex ? i + 1 : i - 1)) {
+                        for (var i = curIndex; i != otherIndex; i = (curIndex < otherIndex ? i + 1 : i - 1)) {
                             var checkBoxElement = this.Parent.Table.querySelectorAll(".Element-row" + i + " input[type=checkbox].tableRowCheckBox")[0];
-                            checkBoxElement.checked = this.Parent.Table.PreviousCheckBox.checked;
+                            if (checkBoxElement.checked != this.Parent.Table.PreviousCheckBox.checked) {
+                                this.Parent.Table.LastCheckBoxRange.push(checkBoxElement.Parent.Row);
+                                checkBoxElement.checked = this.Parent.Table.PreviousCheckBox.checked;
+                            }                            
                             checkBoxElement.UpdateData();
                         }
                     }
@@ -71,8 +76,15 @@ window.TK.Table = {
                     }
 
                     if (this.Parent.Table.CheckboxCheck) {
-                        this.Parent.Table.CheckboxCheck();
+                        if (!this.Parent.Table.LastCheckBoxRange) {
+                            this.Parent.Table.CheckboxCheck([this.Parent.Row], this.checked);
+                        } else {
+                            if (this.Parent.Table.LastCheckBoxRange.indexOf(this.Parent.Row) < 0)
+                                this.Parent.Table.LastCheckBoxRange.push(this.Parent.Row);
+                            this.Parent.Table.CheckboxCheck(this.Parent.Table.LastCheckBoxRange, this.checked);
+                        }
                     }
+                    this.Parent.Table.LastCheckBoxRange = null;
                 },
                 UpdateData: function () {
                     this.Parent.Row["CheckBoxes"] = this.checked;
@@ -209,7 +221,7 @@ window.TK.Table = {
         });
         trElement.parentNode.insertBefore(trElement.subTr, trElement.nextSibling);
     },
-    CheckboxCheck: function () { },
+    CheckboxCheck: function (rowsChanged, isChecked) { },
     SelectedRows: function () {
         if (!this.EnableCheckBoxes)
             return [];
@@ -324,12 +336,16 @@ window.TK.Table = {
                                 var checkBoxElements = obj.Elements.tbody.Elements.ToArray()
                                     .Where(function (a) { return a.Elements.CheckBoxes && a.Elements.CheckBoxes.Elements.CheckBox; })
                                     .Select(function (a) { return a.Elements.CheckBoxes.Elements.CheckBox });
+                                var changedRange = [];
                                 for (var i = 0; i < checkBoxElements.length; i++) {
-                                    checkBoxElements[i].checked = this.checked;
+                                    if (checkBoxElements[i].checked != this.checked) {
+                                        changedRange.push(checkBoxElements[i].Parent.Row);
+                                        checkBoxElements[i].checked = this.checked;
+                                    }                                    
                                     checkBoxElements[i].UpdateData();
                                 }
                                 if (obj.CheckboxCheck)
-                                    obj.CheckboxCheck();
+                                    obj.CheckboxCheck(changedRange, this.checked);
                             }
                         });
 
