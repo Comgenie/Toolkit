@@ -8,7 +8,11 @@ window.TK.Initialize = function (obj, parentObj, nameChildObj, selfObj, taggedOb
 	var inits = [];
     var copyObj = {};
     var defaultInnerHTML = null;
-	var type = obj._;
+    var type = obj._;
+    if (!taggedObjects)
+        taggedObjects = {};
+    var childTagged = {};
+
 	// Allow types to point to different objects (overriding their properties)
 	while (type && (typeof type != "string" || type.indexOf(".") > 0)) {
 		if (typeof type == "string") {
@@ -132,23 +136,32 @@ window.TK.Initialize = function (obj, parentObj, nameChildObj, selfObj, taggedOb
         copyObj.style.position = p.length > 6 ? p[6] : "absolute";     
         
     }
-    if (taggedObjects) {
-        for (var name in taggedObjects) {
-            copyObj["$"+name] = taggedObjects[name]; // Tagged objects always start with a $ to make them easy to recognize
-        }
+
+    for (var name in taggedObjects) {
+        copyObj["$"+name] = taggedObjects[name]; // Tagged parent objects always start with a $ to make them easy to recognize
     }
 
     if (copyObj._Tag) {
+        if (copyObj._Tag === true && nameChildObj)
+            copyObj._Tag = nameChildObj;
+        
         var tag = copyObj._Tag.substr(0, 1) == "$" ? copyObj._Tag.substr(1) : copyObj._Tag;
-        if (!taggedObjects)
-            taggedObjects = {};
         taggedObjects[tag] = copyObj;
     }
+
+    //if (nameChildObj)
+    //    taggedObjects["Element_"+nameChildObj] = copyObj; // Speed up the 'Near' method. TODO: Need to test .Add performance impact first
 
 	// Add extra helper functions
 	copyObj.Add = function (obj, nameChildObj) {
 		// Add single child element
-        return window.TK.Initialize(obj, this, nameChildObj, null, taggedObjects);
+        var copyTagged = {};
+        for (var tagName in taggedObjects) {
+            if (childTagged[tagName]) // Make sure we don't pass other siblings childs
+                continue;
+            copyTagged[tagName] = taggedObjects[tagName];
+        }
+        return window.TK.Initialize(obj, this, nameChildObj, null, copyTagged);
 	};
 	copyObj.AddMultiple = function (obj, propertyArray, syncPropertyName, useVariable) {
 		// Add multiple child elements
@@ -175,7 +188,14 @@ window.TK.Initialize = function (obj, parentObj, nameChildObj, selfObj, taggedOb
 			} else {
 				toInitialize._ = obj;
             }
-            newObjs.push(window.TK.Initialize(toInitialize, this, null, null, taggedObjects));
+
+            var copyTagged = {};
+            for (var tagName in taggedObjects) {
+                if (childTagged[tagName]) // Make sure we don't pass other siblings childs
+                    continue;
+                copyTagged[tagName] = taggedObjects[tagName];
+            }
+            newObjs.push(window.TK.Initialize(toInitialize, this, null, null, copyTagged));
 		}
 		if (syncPropertyName) {
 			// Remove all old child elements which aren't in the new propertyArray 
@@ -220,23 +240,42 @@ window.TK.Initialize = function (obj, parentObj, nameChildObj, selfObj, taggedOb
 	};
 	copyObj.Near = function (name) {
         // Find the nearest element with this name, or classname, or id
-        if (name.substr(0, 1) == "$" && this[name]) // Search by tag
-            return this[name];
+        if (name.substr(0, 1) == "$") { // Search by tag            
+            var tmp = this;
+            while (tmp) {
+                if (tmp[name])
+                    return tmp[name];
+                tmp = tmp.Parent;
+            }
+        }
 
         var curEle = this;
         var findName = name;
-        if (name.substr(0, 1) != "." && name.substr(0, 1) != ".") {
+        if (name.substr(0, 1) != "." && name.substr(0, 1) != "#") {
             if (curEle.Elements && curEle.Elements[name])
-                return curEle.Elements[name];
+                return curEle.Elements[name]; // Direct child
+            if (curEle["$$" + name])
+                return curEle["$$" + name]; // Child somewhere in the tree
+            if (curEle["$" + name])
+                return curEle["$" + name]; // One of the parents
             findName = ".Element-" + findName;
         }		
 		var found = curEle.querySelector(findName);
 		if (found)
 			return found;
-		while (curEle.parentNode) {
-			curEle = curEle.parentNode;
+        while (curEle.Parent || curEle.parentNode) {            
+			curEle = curEle.Parent ? curEle.Parent : curEle.parentNode;
 			if (curEle._Name == name)
                 return curEle;
+            if (curEle["$$" + name])
+                return curEle["$$" + name];
+            if (curEle["$" + name])
+                return curEle["$" + name];
+            /*if (curEle["$$Element_" + name])   // Speed up the 'Near' method. TODO: Need to test .Add performance impact first
+                return curEle["$$Element_" + name];
+            if (curEle["$Element_" + name])
+                return curEle["$Element_" + name]; */ 
+
             if (curEle.className && "." + curEle.className == name)
                 return curEle;
             if (curEle.Elements && curEle.Elements[name])
@@ -345,8 +384,24 @@ window.TK.Initialize = function (obj, parentObj, nameChildObj, selfObj, taggedOb
 
 	// Create all sub elements    
     for (var name in elements) {
-        window.TK.Initialize(elements[name], copyObj, name, selfObj, taggedObjects);
+        var copyTagged = {};
+        for (var tagName in taggedObjects)
+            copyTagged[tagName] = taggedObjects[tagName];        
+        window.TK.Initialize(elements[name], copyObj, name, selfObj, copyTagged);
+
+        // The copyTagged object is now expanded with child objects, we will just keep the new childs
+        for (var name in copyTagged) {
+            if (taggedObjects[name] == copyTagged[name])
+                continue; // Old one we've already added as parent, or it is ourself
+            childTagged[name] = copyTagged[name];
+        }
     }
+
+    for (var name in childTagged) {
+        copyObj["$$" + name] = childTagged[name];
+        taggedObjects[name] = childTagged[name]; // Will also add it to our tagged object (but only at this step), so any of the didn't get the child elements of their siblings.
+    }
+
 
 	// Add this element to the child elements of a parent element (and get a reference to it)
 	if (parentObj) {

@@ -1,6 +1,7 @@
 ﻿"use strict";
 window.TK.Popup = {
-    _: "div",    
+    _: "div",
+    _Tag: "ToolkitPopup",
     Width: 400,
     Height: 500,
     MinWidth: 150,

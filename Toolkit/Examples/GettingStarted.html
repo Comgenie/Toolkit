@@ -242,7 +242,8 @@ var application = {
 </pre>
 
     <h2>Tags</h2>
-    <p>By filling the _Tag property with a name. The element will be made available for all child elements using $ + tag name.</p>
+    <p>By filling the _Tag property with a name. The element will be made available for all child elements using $ + tag name (Child -> Parent with tag). If the _Tag property is set to the value 'true', the name of the element used to add the element is used.</p>
+
     <pre>
 {
     _Tag: "Example",
@@ -253,10 +254,12 @@ var application = {
             onclick: function() {
                 this.$Example.style.borderTop = "5px solid #f00";
             }
-        }
+        },        
     }
 }
 </pre>
+
+    <p>It is also possible to reach a child element from the parent using the child's element tag, this is done using $$ + tagname (Parent -> Child with tag).</p>
 
     <h2>Other methods</h2>
     <p>The <strong>Near</strong> function can be used to find the nearest child element with a specific name. Note that this method comes with a small performance penalty.</p>
