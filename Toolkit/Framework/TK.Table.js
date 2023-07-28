@@ -111,9 +111,8 @@ window.TK.Table = {
                     if (this.Parent.Table.Save(thisRow, true) !== false) {
                         var thisRowNode = this.Parent.Parent;
                         // When the user was editing the row a form is showing on the next row. When this is the case remove that form as well.
-                        if (thisRowNode.nextSibling.getElementsByClassName("subView Element-Editor").length > 0) {
-                            thisRowNode.nextSibling.Remove();
-                        }
+                        if (thisRowNode.subTr)
+                            thisRowNode.subTr.Remove();
                         thisRowNode.Remove();
                     }
                 }
