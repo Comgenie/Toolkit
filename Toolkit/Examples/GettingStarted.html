@@ -212,7 +212,7 @@ var application = {
 }
 </pre>
     <h2>Self</h2>
-    <p>Use the .Self property to directly point to the main object which is added using .Add(), or the entry point initialized using TK.Initialize(). This can be useful to directly navigate to the main properties of a template without having to use a .Parent.Parent.Parent.. chain.</p>
+    <p>Use the .Self property to directly point to the main object which is added using .Add(), or the entry point initialized using TK.Initialize(). This can be useful to directly navigate to the main properties of a template without having to use a .Parent.Parent.Parent.. chain. If needed, an object can set _Self to true to make itself the .Self object.</p>
     <pre>
 {   
     Test: 123,

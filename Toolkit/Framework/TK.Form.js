@@ -395,6 +395,7 @@ window.TK.Form = {
                         DataLabel: { innerHTML: (this.Fields && this.Fields[name] && this.Fields[name].DisplayName ? this.Fields[name].DisplayName : name), style: {} },
                         DataField: {
                             _: (this.Fields && this.Fields[name] && this.Fields[name].Template ? this.Fields[name].Template : defaultTemplate),
+                            _Self: true,
                             /* required: isRequired, */
                             placeholder: (this.Fields && this.Fields[name] && this.Fields[name].PlaceHolder ? this.Fields[name].PlaceHolder : ""),
                             Data: model[name],                            

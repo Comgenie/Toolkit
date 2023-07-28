@@ -115,6 +115,9 @@ window.TK.Initialize = function (obj, parentObj, nameChildObj, selfObj, taggedOb
 	if (nameChildObj) {
 		copyObj._Name = nameChildObj;
     }
+
+    if (copyObj._Self) // When set to true, this forces this element to be marked as 'Self'
+        selfObj = copyObj;
     
     if (defaultInnerHTML && (!copyObj.innerHTML || copyObj.innerHTML == "")) {
         copyObj.innerHTML = defaultInnerHTML;
