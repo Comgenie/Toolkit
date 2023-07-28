@@ -1,4 +1,4 @@
-"use strict";window.TK={};window.TK.AutoTypeSelection=true;window.TK.Initialize=function(obj,parentObj,nameChildObj,selfObj){var reserved=['Parent','Add','AddMultiple','Clear','Near','Remove','SetHTML','_'];var allObjs=[obj];var inits=[];var copyObj={};var defaultInnerHTML=null;var type=obj._;while(type&&(typeof type!="string"||type.indexOf(".")>0)){if(typeof type=="string"){type=eval(type);}
+"use strict";window.TK={};window.TK.AutoTypeSelection=true;window.TK.Initialize=function(obj,parentObj,nameChildObj,selfObj,taggedObjects){var reserved=['Parent','Sibling','Add','AddMultiple','Clear','Near','Remove','SetHTML','_'];var allObjs=[obj];var inits=[];var copyObj={};var defaultInnerHTML=null;var type=obj._;while(type&&(typeof type!="string"||type.indexOf(".")>0)){if(typeof type=="string"){type=eval(type);}
 allObjs.push(type);type=type._;}
 var className=null;if(!type){type="div";if(nameChildObj&&window.TK.AutoTypeSelection){var autoTypes=["Input","TextButton","Button","Select","Label","Span","Textarea","H1","H2","H3","H4"];var endsWith=function(s,has){if(!s||!has||s.length<has)
 return false;return s.substr(s.length-has.length)==has;};for(var i=0;i<autoTypes.length;i++){if(endsWith(nameChildObj,autoTypes[i])){if(autoTypes[i]=="TextButton"){defaultInnerHTML=nameChildObj.substr(0,nameChildObj.length-10);type="button";}else{type=autoTypes[i].toLowerCase();}
@@ -19,10 +19,13 @@ if(defaultInnerHTML&&(!copyObj.innerHTML||copyObj.innerHTML=="")){copyObj.innerH
 if(copyObj._Position&&copyObj.style&&copyObj._Position.split){var p=copyObj._Position.split(',');copyObj.style.top=p[0];copyObj.style.right=p.length>1?p[1]:"";copyObj.style.bottom=p.length>2?p[2]:"";copyObj.style.left=p.length>3?p[3]:"";if(p.length>4)
 copyObj.style.width=p[4];if(p.length>5)
 copyObj.style.height=p[5];copyObj.style.position=p.length>6?p[6]:"absolute";}
-copyObj.Add=function(obj,nameChildObj){return window.TK.Initialize(obj,this,nameChildObj);};copyObj.AddMultiple=function(obj,propertyArray,syncPropertyName,useVariable){var newObjs=[];var allNewObjIds=[];var existingObjIds=[];if(syncPropertyName){existingObjIds=this.Elements.ToArray().Select(function(a){return useVariable?a[useVariable][syncPropertyName]:a[syncPropertyName];});}
+if(taggedObjects){for(var name in taggedObjects){copyObj["$"+name]=taggedObjects[name];}}
+if(copyObj._Tag){var tag=copyObj._Tag.substr(0,1)=="$"?copyObj._Tag.substr(1):copyObj._Tag;if(!taggedObjects)
+taggedObjects={};taggedObjects[tag]=copyObj;}
+copyObj.Add=function(obj,nameChildObj){return window.TK.Initialize(obj,this,nameChildObj,null,taggedObjects);};copyObj.AddMultiple=function(obj,propertyArray,syncPropertyName,useVariable){var newObjs=[];var allNewObjIds=[];var existingObjIds=[];if(syncPropertyName){existingObjIds=this.Elements.ToArray().Select(function(a){return useVariable?a[useVariable][syncPropertyName]:a[syncPropertyName];});}
 for(var i=0;i<propertyArray.length;i++){if(syncPropertyName){var objId=propertyArray[i][syncPropertyName];allNewObjIds.push(objId);var existingIndex=existingObjIds.indexOf(objId);if(existingIndex>=0){existingObjIds.splice(existingIndex,1);continue;}}
 var toInitialize=propertyArray[i];if(useVariable){toInitialize={_:obj};toInitialize[useVariable]=propertyArray[i];}else{toInitialize._=obj;}
-newObjs.push(window.TK.Initialize(toInitialize,this));}
+newObjs.push(window.TK.Initialize(toInitialize,this,null,null,taggedObjects));}
 if(syncPropertyName){for(var childName in this.Elements){if(typeof this.Elements[childName]!="function"&&allNewObjIds.indexOf(useVariable?this.Elements[childName][useVariable][syncPropertyName]:this.Elements[childName][syncPropertyName])<0){this.Elements[childName].Remove();}}}
 return newObjs;};copyObj.Remove=function(onlyExecuteCallback){if(this.Destroy){this.Destroy();}
 for(var childName in this.Elements){if(this.Elements[childName].Remove)
@@ -31,7 +34,8 @@ if(onlyExecuteCallback)
 return;if(this.Parent){if(this.parentNode)
 this.parentNode.removeChild(this);for(var childName in this.Parent.Elements){if(this.Parent.Elements[childName]==this){delete this.Parent.Elements[childName];break;}}
 delete this.Parent;}else{if(this.parentNode&&this.parentNode.removeChild)
-this.parentNode.removeChild(this);}};copyObj.Clear=function(){this.Elements.ToArray().Select(function(a){a.Remove();});};copyObj.Near=function(name){var curEle=this;var findName=name;if(name.substr(0,1)!="."&&name.substr(0,1)!="."){if(curEle.Elements&&curEle.Elements[name])
+this.parentNode.removeChild(this);}};copyObj.Clear=function(){this.Elements.ToArray().Select(function(a){a.Remove();});};copyObj.Near=function(name){if(name.substr(0,1)=="$"&&this[name])
+return this[name];var curEle=this;var findName=name;if(name.substr(0,1)!="."&&name.substr(0,1)!="."){if(curEle.Elements&&curEle.Elements[name])
 return curEle.Elements[name];findName=".Element-"+findName;}
 var found=curEle.querySelector(findName);if(found)
 return found;while(curEle.parentNode){curEle=curEle.parentNode;if(curEle._Name==name)
@@ -54,8 +58,8 @@ return curObj;});if(injectChilds){var items=this.querySelectorAll(".tkInternalPl
 arr.push(this[propName]);}
 return arr;};if(!selfObj)
 selfObj=copyObj;if(copyObj.Self===undefined)
-copyObj.Self=selfObj;for(var name in elements){window.TK.Initialize(elements[name],copyObj,name,selfObj);}
-if(parentObj){copyObj.Parent=parentObj;parentObj.Elements[nameChildObj?nameChildObj:("ele"+Math.random().toString())]=copyObj;if(copyObj.appendChild&&parentObj.appendChild){parentObj.appendChild(copyObj);}}
+copyObj.Self=selfObj;for(var name in elements){window.TK.Initialize(elements[name],copyObj,name,selfObj,taggedObjects);}
+if(parentObj){copyObj.Parent=parentObj;copyObj.Sibling=parentObj.Elements;parentObj.Elements[nameChildObj?nameChildObj:("ele"+Math.random().toString())]=copyObj;if(copyObj.appendChild&&parentObj.appendChild){parentObj.appendChild(copyObj);}}
 if(copyObj.HTML){copyObj.SetHTML(copyObj.HTML);}
 for(var i=0;i<resolveProperties.length;i++){var p=copyObj[resolveProperties[i]];if(!p.ToolkitPropertyReference)
 continue;if(p.Observe){getReference(p.ToolkitPropertyReference,{Name:resolveProperties[i],Obj:copyObj});var attachGetter=function(referencePath){Object.defineProperty(copyObj,resolveProperties[i],{get:function(){return getReference(referencePath);}});};attachGetter(p.ToolkitPropertyReference);}else{copyObj[resolveProperties[i]]=getReference(p.ToolkitPropertyReference);}}

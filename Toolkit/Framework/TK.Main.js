@@ -2,8 +2,8 @@
 /* Minify Order(1) */
 window.TK = {};
 window.TK.AutoTypeSelection = true;
-window.TK.Initialize = function (obj, parentObj, nameChildObj, selfObj) {
-	var reserved = ['Parent', 'Add', 'AddMultiple', 'Clear', 'Near', 'Remove', 'SetHTML', '_'];
+window.TK.Initialize = function (obj, parentObj, nameChildObj, selfObj, taggedObjects) {
+    var reserved = ['Parent', 'Sibling', 'Add', 'AddMultiple', 'Clear', 'Near', 'Remove', 'SetHTML', '_'];
 	var allObjs = [obj];
 	var inits = [];
     var copyObj = {};
@@ -132,11 +132,23 @@ window.TK.Initialize = function (obj, parentObj, nameChildObj, selfObj) {
         copyObj.style.position = p.length > 6 ? p[6] : "absolute";     
         
     }
+    if (taggedObjects) {
+        for (var name in taggedObjects) {
+            copyObj["$"+name] = taggedObjects[name]; // Tagged objects always start with a $ to make them easy to recognize
+        }
+    }
+
+    if (copyObj._Tag) {
+        var tag = copyObj._Tag.substr(0, 1) == "$" ? copyObj._Tag.substr(1) : copyObj._Tag;
+        if (!taggedObjects)
+            taggedObjects = {};
+        taggedObjects[tag] = copyObj;
+    }
 
 	// Add extra helper functions
 	copyObj.Add = function (obj, nameChildObj) {
 		// Add single child element
-		return window.TK.Initialize(obj, this, nameChildObj);
+        return window.TK.Initialize(obj, this, nameChildObj, null, taggedObjects);
 	};
 	copyObj.AddMultiple = function (obj, propertyArray, syncPropertyName, useVariable) {
 		// Add multiple child elements
@@ -162,8 +174,8 @@ window.TK.Initialize = function (obj, parentObj, nameChildObj, selfObj) {
 				toInitialize[useVariable] = propertyArray[i];
 			} else {
 				toInitialize._ = obj;
-			}
-			newObjs.push(window.TK.Initialize(toInitialize, this));
+            }
+            newObjs.push(window.TK.Initialize(toInitialize, this, null, null, taggedObjects));
 		}
 		if (syncPropertyName) {
 			// Remove all old child elements which aren't in the new propertyArray 
@@ -207,7 +219,10 @@ window.TK.Initialize = function (obj, parentObj, nameChildObj, selfObj) {
 		this.Elements.ToArray().Select(function (a) { a.Remove(); });
 	};
 	copyObj.Near = function (name) {
-		// Find the nearest element with this name, or classname, or id
+        // Find the nearest element with this name, or classname, or id
+        if (name.substr(0, 1) == "$" && this[name]) // Search by tag
+            return this[name];
+
         var curEle = this;
         var findName = name;
         if (name.substr(0, 1) != "." && name.substr(0, 1) != ".") {
@@ -330,12 +345,13 @@ window.TK.Initialize = function (obj, parentObj, nameChildObj, selfObj) {
 
 	// Create all sub elements    
     for (var name in elements) {
-        window.TK.Initialize(elements[name], copyObj, name, selfObj);
+        window.TK.Initialize(elements[name], copyObj, name, selfObj, taggedObjects);
     }
 
 	// Add this element to the child elements of a parent element (and get a reference to it)
 	if (parentObj) {
         copyObj.Parent = parentObj;
+        copyObj.Sibling = parentObj.Elements;
         parentObj.Elements[nameChildObj ? nameChildObj : ("ele"+Math.random().toString())] = copyObj;
 		if (copyObj.appendChild && parentObj.appendChild) {
 			// This and parent element are html nodes
@@ -372,7 +388,7 @@ window.TK.Initialize = function (obj, parentObj, nameChildObj, selfObj) {
         }
     }
 
-	// Call all init functions, lowest level goes first, all the 'overrides' go after
+	// Call all init functions of inheritance objects, lowest level goes first, all the 'overrides' go after
 	for (var i = 0; i < inits.length; i++) {
 		inits[i].call(copyObj);
 	}

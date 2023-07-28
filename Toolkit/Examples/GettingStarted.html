@@ -98,13 +98,16 @@ var application = {
 
 
     <h2>Children</h2>
-    <p>Using the Elements property, child elements can be defined with their own name. These children and their parents can be reached using the .Elements and .Parent property.</p>
+    <p>Using the Elements property, child elements can be defined with their own name. These children and their parents can be reached using the .Elements, .Parent and .Sibling properties.</p>
     <pre>
 {   
     innerHTML: "Parent",
     Elements: {
         FirstChild: {
-            innerHTML: "I am child one"
+            innerHTML: "I am child one",
+            onclick: function() {
+                alert(this.Sibling.SecondChild.innerHTML);
+            }
         },
         SecondChild: {
             innerHTML: "I am child two",
@@ -232,6 +235,23 @@ var application = {
                         }
                     }
                 }
+            }
+        }
+    }
+}
+</pre>
+
+    <h2>Tags</h2>
+    <p>By filling the _Tag property with a name. The element will be made available for all child elements using $ + tag name.</p>
+    <pre>
+{
+    _Tag: "Example",
+    Elements: {
+        Text: "Tag example",
+        ExampleButton: {
+            innerText: "Click me to change the element with the _Tag set to 'Example'",
+            onclick: function() {
+                this.$Example.style.borderTop = "5px solid #f00";
             }
         }
     }
