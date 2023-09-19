@@ -55,6 +55,8 @@ window.TK.Table = {
                         var otherIndex = this.Parent.Table.PreviousCheckBox.Parent.Parent.RowIndex;
                         for (var i = curIndex; i != otherIndex; i = (curIndex < otherIndex ? i + 1 : i - 1)) {
                             var checkBoxElement = this.Parent.Table.querySelectorAll(".Element-row" + i + " input[type=checkbox].tableRowCheckBox")[0];
+                            if (checkBoxElement.Parent.Parent.style.display == "none")
+                                continue; // Skip filtered rows
                             if (checkBoxElement.checked != this.Parent.Table.PreviousCheckBox.checked) {
                                 this.Parent.Table.LastCheckBoxRange.push(checkBoxElement.Parent.Row);
                                 checkBoxElement.checked = this.Parent.Table.PreviousCheckBox.checked;
