@@ -33,6 +33,8 @@ window.TK.Tree = {
                 _: this.Template,
                 Data: this.Rows[i],
                 onclick: function (e) {
+                    if (e && e.target && (e.target.tagName == "INPUT" || e.target.tagName == "SELECT" || e.target.tagName == "TEXTAREA" || e.target.PreventRowClick))
+                        return;
                     obj.RowClick(this.Data);                    
                     if (obj.EnableFullRowExpand && this.ExpandCollapseButton) {
                         this.ExpandCollapseButton.click();
