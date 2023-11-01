@@ -73,7 +73,10 @@ window.TK.Table = {
                     if (this.Parent.Table.EnableSelectAllCheckBox) {
                         var selectAll = this.Parent.Table.querySelectorAll(".tableSelectAllCheckBox")[0];
                         if (selectAll) {
-                            selectAll.checked = this.Parent.Table.Rows.length == this.Parent.Table.SelectedRows().length;
+                            var checkBoxElements = this.Parent.Table.Elements.tbody.Elements.ToArray()
+                                .Where(function (a) { return a.Elements.CheckBoxes && a.Elements.CheckBoxes.Elements.CheckBox && a.style.display != "none"; })
+                                .Select(function (a) { return a.Elements.CheckBoxes.Elements.CheckBox });
+                            selectAll.checked = checkBoxElements.length == this.Parent.Table.SelectedRows().length;
                         }
                     }
 
@@ -291,6 +294,11 @@ window.TK.Table = {
         }
         this.Elements.tbody.style.display = "";
         this.VisibleRowCount = rows;
+
+        var ttnc = this.Near(".toolkitTableNavigationContainer");
+        if (ttnc)
+            ttnc.Init();
+
         return rows;
     },
     Refresh: function () {
@@ -336,7 +344,7 @@ window.TK.Table = {
                             },
                             onchange: function (event) {
                                 var checkBoxElements = obj.Elements.tbody.Elements.ToArray()
-                                    .Where(function (a) { return a.Elements.CheckBoxes && a.Elements.CheckBoxes.Elements.CheckBox; })
+                                    .Where(function (a) { return a.Elements.CheckBoxes && a.Elements.CheckBoxes.Elements.CheckBox && a.style.display != "none"; })
                                     .Select(function (a) { return a.Elements.CheckBoxes.Elements.CheckBox });
                                 var changedRange = [];
                                 for (var i = 0; i < checkBoxElements.length; i++) {
@@ -503,10 +511,6 @@ window.TK.Table = {
                                                         obj.ColumnFilter[currentHeader.DataColumnName] = null;
                                                     }
                                                     obj.ApplyFilter(filterFunc);                           
-                                                    var ttnc = obj.Near(".toolkitTableNavigationContainer");
-                                                    if (ttnc)
-                                                        ttnc.Init();
-                                                    
                                                 }
                                             };
                                             filterTable.ColumnTitles[currentHeader.DataColumnName] = "Filter";
@@ -527,9 +531,6 @@ window.TK.Table = {
 
                                                     obj.ColumnFilter[currentHeader.DataColumnName] = (this.value == "") ? null : this.value;
                                                     obj.ApplyFilter(filterFunc);    
-                                                    var ttnc = obj.Near(".toolkitTableNavigationContainer");
-                                                    if (ttnc)
-                                                        ttnc.Init();
 
                                                     var x = event.which || event.keyCode;
                                                     if (x == 13) {
