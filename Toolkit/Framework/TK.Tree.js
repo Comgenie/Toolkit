@@ -3,9 +3,12 @@ window.TK.Tree = {
     _: "ul",    
     IdField: "Id",
     ParentIdField: "ParentId",
+    CurrentFilter: null,
     Rows: [],
+    CurRows: null,
     className: "tree toolkitTree",
     EnableFullRowExpand: false,
+    AutoExpandChildNodesDuringFilter: true, // When applying filter with showAllChildNodes=true and this setting is set to false, the child rows will be visible but not expanded
     Template: {
         _: "li",
         Data: null,
@@ -16,26 +19,78 @@ window.TK.Tree = {
             Text: { _: "span" }
         }
     },
+    Expanded: function (row, byUserClick, rowElement) {
+
+    },
+    Collapsed: function (row, byUserClick, rowElement) {
+
+    },    
     Init: function () {
         if (this.Rows.length == 0)
             return;
         this.Refresh();
-    },
-    Refresh: function () {
-        this.Clear();
-        var curRows = {};
+    },    
+    AddExpandButtonToRowElement: function (rowElement) {
         var obj = this;
+        if (rowElement.SubList)
+            return; // Already has an expand button
+        rowElement.SubList = document.createElement("UL");
+        rowElement.SubList.style.display = "none";
+        rowElement.className += " collapsed";
+        rowElement.appendChild(rowElement.SubList);
+        var expandButton = document.createElement("SPAN");
+
+        expandButton.className = "expandCollapseButton";
+        var collapsed = window.SvgPath("M3,2L7,6L3,10", 12, 12, "#999");
+        expandButton.innerHTML = collapsed;
+        expandButton.Update = function () {
+            if (this.parentNode.className.indexOf("expanded") >= 0) {
+                this.innerHTML = window.SvgPath("M2,3L6,7L10,3", 12, 12, "#999");
+            } else {
+                this.innerHTML = collapsed;
+            }
+        };
+        expandButton.onclick = function (e) {
+            if (this.parentNode.className.indexOf("expanded") >= 0) {
+                obj.Collapsed(this.parentNode.Data, true, this.parentNode);
+                this.parentNode.SubList.style.display = "none";
+                this.parentNode.className = this.parentNode.className.replace(/expanded/g, "") + " collapsed";
+            } else {
+                obj.Expanded(this.parentNode.Data, true, this.parentNode);
+                this.parentNode.SubList.style.display = "";
+                this.parentNode.className = this.parentNode.className.replace(/collapsed/g, "") + " expanded";
+            }
+            this.Update();
+            if (e)
+                e.stopPropagation();
+            return false;
+        };
+        rowElement.ExpandCollapseButton = expandButton;
+        rowElement.insertBefore(expandButton, rowElement.firstChild);
+    },
+    AddRows: function (rows) {
+        var obj = this;
+        if (!this.CurRows)
+            this.CurRows = {};
 
         // First add all the rows
-        for (var i = 0; i < this.Rows.length; i++) {
-            var rowId = this.Rows[i][this.IdField];
-            curRows["id" + rowId] = this.Add({
+        var ignoredRows = [];
+        var addedRows = [];
+
+        for (var i = 0; i < rows.length; i++) {
+            var rowId = rows[i][this.IdField];
+
+            if (this.CurRows["id" + rowId]) { // Won't insert duplicated id's
+                ignoredRows.push(rows[i]);
+                continue;
+            }
+            var rowElement = this.Add({
                 _: this.Template,
-                Data: this.Rows[i],
+                Data: rows[i],
                 onclick: function (e) {
                     if (e && e.target && (e.target.tagName == "INPUT" || e.target.tagName == "SELECT" || e.target.tagName == "TEXTAREA" || e.target.PreventRowClick))
                         return;
-                    obj.RowClick(this.Data);                    
+                    obj.RowClick(this.Data);
                     if (obj.EnableFullRowExpand && this.ExpandCollapseButton) {
                         this.ExpandCollapseButton.click();
                     }
@@ -43,54 +98,58 @@ window.TK.Tree = {
                     return false;
                 }
             });
+
+            if (rows[i].AlwaysShowExpandButton) {
+                this.AddExpandButtonToRowElement(rowElement);
+            }
+
+            if (this.CurrentFilter && rowElement.innerText.toLowerCase().indexOf(this.CurrentFilter) < 0) {
+                rowElement.style.display = "none";
+            }
+            this.CurRows["id" + rowId] = rowElement;            
+            addedRows.push(rows[i]);
+            this.Rows.push(rows[i]);
         }
 
         // Then move them to the right items
-        for (var i = 0; i < this.Rows.length; i++) {
-            var rowId = this.Rows[i][this.IdField];
-            var parentId = this.Rows[i][this.ParentIdField];
+        for (var i = 0; i < rows.length; i++) {            
+            if (ignoredRows.indexOf(rows[i]) >= 0)
+                continue;
+            var rowId = rows[i][this.IdField];
+            var parentId = rows[i][this.ParentIdField];
 
-            if (!parentId || !curRows["id" + parentId])
+            if (!parentId || !this.CurRows["id" + parentId])
                 continue;
 
+            // Add expand button to the parent item
+            var parent = this.CurRows["id" + parentId];
+            this.AddExpandButtonToRowElement(parent);
+
             // Move this item to the right parent element
-            var parent = curRows["id" + parentId];
-            if (!parent.SubList) {
-                parent.SubList = document.createElement("UL");
-                parent.SubList.style.display = "none";
-                parent.className += " collapsed";
-                parent.appendChild(parent.SubList);
-                var expandButton = document.createElement("SPAN");
-                
-                expandButton.className = "expandCollapseButton";
-                var collapsed = window.SvgPath("M3,2L7,6L3,10", 12, 12, "#999");
-                expandButton.innerHTML = collapsed;
-                expandButton.Update = function () {
-                    if (this.parentNode.className.indexOf("expanded") >= 0) {
-                        this.innerHTML = window.SvgPath("M2,3L6,7L10,3", 12, 12, "#999");
-                    } else {
-                        this.innerHTML = collapsed;                        
-                    }
-                };
-                expandButton.onclick = function (e) {
-                    if (this.parentNode.className.indexOf("expanded") >= 0) {
-                        this.parentNode.SubList.style.display = "none";
-                        this.parentNode.className = this.parentNode.className.replace(/expanded/g, "") + " collapsed";
-                    } else {
-                        this.parentNode.SubList.style.display = "";
-                        this.parentNode.className = this.parentNode.className.replace(/collapsed/g, "") + " expanded";
-                    }
-                    this.Update();
-                    if (e)
-                        e.stopPropagation();
-                    return false;
-                };
-                parent.ExpandCollapseButton = expandButton;
-                parent.insertBefore(expandButton, parent.firstChild);
-            }
-            parent.SubList.appendChild(curRows["id" + rowId]);
+            parent.SubList.appendChild(this.CurRows["id" + rowId]);
         }
-        this.CurRows = curRows;
+
+        return addedRows;
+    },
+    RemoveRows: function (rows) {
+        for (var i = 0; i < rows.length; i++) {
+            var rowId = rows[i][this.IdField];
+            var rowElement = this.CurRows["id" + rowId];
+
+            if (rowElement)
+                rowElement.parentNode.removeChild(rowElement);
+            var posIndex = this.Rows.indexOf(rows[i]);
+            if (posIndex >= 0) {
+                this.Rows.splice(posIndex, 1);
+            }
+        }
+    },
+    Refresh: function () {
+        this.Clear();
+        var rows = this.Rows;
+        this.Rows = []; // Will be filled again
+        this.CurRows = {};
+        this.AddRows(rows);
     },
     ApplyFilter: function (filter, showAllChildNodes, callBackFoundRows) {
         filter = filter.toLowerCase();
@@ -127,31 +186,55 @@ window.TK.Tree = {
                 if (txt.toLowerCase().indexOf(filterParts[i]) >= 0) {
                     row.style.display = "";
                     foundRows.push(row);
+
+                    if (!this.AutoExpandChildNodesDuringFilter && row.className.indexOf("collapsed") < 0) {
+                        row.className = row.className.replace(/expanded/g, "") + " collapsed";
+                        if (row.ExpandCollapseButton)
+                            row.ExpandCollapseButton.Update();
+                    }
                     
                     if (showAllChildNodes && row.SubList) {                        
                         var subLists = [row.SubList];
                         for (var j = 0; j < subLists.length; j++) {
                             var curList = subLists[j];
-                            if (curList.className.indexOf("expanded") < 0) {
-                                curList.className = curList.className.replace(/collapsed/g, "") + " expanded";
-                                if (curList.ExpandCollapseButton)
-                                    curList.ExpandCollapseButton.Update();
+                            var addClass = "expanded";
+                            var removeClass = "collapsed";
+                            var setStyle = "";
+
+                            if (!this.AutoExpandChildNodesDuringFilter) {
+                                addClass = "collapsed";
+                                removeClass = "expanded";
+                                setStyle = "none";
                             }
-                            curList.style.display = "";
+
+                            curList.style.display = setStyle;
 
                             for (var n = 0; n < curList.childNodes.length; n++) {
-                                if (curList.childNodes[n].style)
-                                    curList.childNodes[n].style.display = "";
-                                if (curList.childNodes[n].SubList)
-                                    subLists.push(curList.childNodes[n].SubList);
+                                var li = curList.childNodes[n];
+                                if (li.className.indexOf(addClass) < 0) {
+                                    li.className = li.className.replace(removeClass, "") + " " + addClass;
+                                    if (addClass == "expanded")
+                                        this.Expanded(li.Data, false, curList);
+                                    else
+                                        this.Collapsed(li.Data, false, curList);
+
+                                    if (li.ExpandCollapseButton)
+                                        li.ExpandCollapseButton.Update();
+                                }
+                                if (li.style)
+                                    li.style.display = "";
+                                if (li.SubList)
+                                    subLists.push(li.SubList);
                             }
                         }
                     }
 
+                    // Expand all items above
                     while (row.parentNode.Rows == undefined) {
                         row = row.parentNode;
                         if (row.SubList && row.className.indexOf("expanded") < 0) {
                             row.className = row.className.replace(/collapsed/g, "") + " expanded";
+                            this.Expanded(row.Data, false, row);
                             if (row.ExpandCollapseButton)
                                 row.ExpandCollapseButton.Update();
                         }
@@ -180,13 +263,16 @@ window.TK.Tree = {
 
         row.style.display = "";
         if (row.SubList) {
-            row.className = row.className.replace(/collapsed/g, "") + " expanded";
+            this.Expanded(row.Data, false, row);
+            row.className = row.className.replace(/collapsed/g, "") + " expanded";            
             row.SubList.style.display = "";
         }
         while (row.parentNode.Rows == undefined) {
             row = row.parentNode;
-            if (row.SubList)
+            if (row.SubList) {
+                this.Expanded(row.Data, false, row);
                 row.className = row.className.replace(/collapsed/g, "") + " expanded";
+            }
             row.style.display = "";
         }
         currentRow.scrollIntoView();

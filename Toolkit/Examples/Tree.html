@@ -72,5 +72,32 @@
 }
 </pre>
 
+    <h2>Dynamic add items when expanded</h2>
+    <pre>
+{
+    _: TK.Tree,
+    EnableFullRowExpand: true,
+    Rows: [
+        { Id: "a", ParentId: null, Text: "Item 1", AlwaysShowExpandButton: true},
+        { Id: "b", ParentId: null, Text: "Item 2", AlwaysShowExpandButton: true}
+    ],
+    Expanded: function(row, byUserClick, rowElement) {
+        if (!row.SubRows) {
+            row.SubRows = [
+                { Id: row.Id+"/a", ParentId: row.Id, Text: "Dynamic item 1" },
+                { Id: row.Id+"/b", ParentId: row.Id, Text: "Dynamic item 2" }
+            ];
+            this.AddRows(row.SubRows);
+        }
+    },
+    Collapsed: function(row, byUserClick, rowElement) {
+        
+    },
+    RowClick: function(row) {
+        alert(JSON.stringify(row));
+    }
+}
+</pre>
+
 </body>
 </html>
