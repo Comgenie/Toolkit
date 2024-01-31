@@ -90,7 +90,7 @@ window.TK.Tree = {
                 onclick: function (e) {
                     if (e && e.target && (e.target.tagName == "INPUT" || e.target.tagName == "SELECT" || e.target.tagName == "TEXTAREA" || e.target.PreventRowClick))
                         return;
-                    obj.RowClick(this.Data);
+                    obj.RowClick(this.Data, e, this);
                     if (obj.EnableFullRowExpand && this.ExpandCollapseButton) {
                         this.ExpandCollapseButton.click();
                     }
@@ -279,7 +279,7 @@ window.TK.Tree = {
 
         return currentRow;
     },
-    RowClick: function (rowObj) { }
+    RowClick: function (rowObj, jsEvent) { }
 };
 window.TK.AjaxTree = {
     _: window.TK.Tree,
