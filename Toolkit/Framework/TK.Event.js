@@ -15,6 +15,8 @@ window.TK.Event = {
         }
     },
     Send: function (eventType, eventData) {
+        if (!window.TK.EventHandlers)
+            return;
         for (var i = 0; i < window.TK.EventHandlers.length; i++) {
             if (window.TK.EventHandlers[i].Subscribe.indexOf(eventType) >= 0) {
                 window.TK.EventHandlers[i].Receive(eventType, eventData);
