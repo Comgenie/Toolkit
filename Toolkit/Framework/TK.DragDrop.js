@@ -35,7 +35,7 @@ window.TK.DragDrop = {
         var elementOrTemplateToAdd = null;
         var passedThreshold = false;
         var aboveContainer = null;
-        var aboveContainerPosition = null;
+        var aboveContainerPosition = null;        
         window.onmousemove = function (e) {
             var x, y;
             try { x = e.clientX; y = e.clientY; } catch (errie) { var e2 = window.event; x = e2.clientX; y = e2.clientY; }
@@ -63,7 +63,7 @@ window.TK.DragDrop = {
                         continue;
                     if (containers[i].CanDrop && !containers[i].CanDrop(elementOrTemplateToAdd))
                         continue;
-
+                    containers[i].className += " toolkitDragDropContainerArea";
                     positions.push({ Element: containers[i], Position: containers[i].getBoundingClientRect() });
                 }
 
@@ -80,7 +80,7 @@ window.TK.DragDrop = {
             var cursorX = newLeft + cursorOffsetX;
             var cursorY = newTop + cursorOffsetY;
 
-            var found = false;
+            var found = [];
             for (var i = 0; i < positions.length; i++) {
                 if (positions[i].Position.left <= cursorX && positions[i].Position.right >= cursorX && 
                     positions[i].Position.top <= cursorY && positions[i].Position.bottom >= cursorY) {
@@ -93,13 +93,25 @@ window.TK.DragDrop = {
                         aboveContainerPosition = positions[i].Position;
                         aboveContainer.className += " toolkitDragDropContainerHover";
                     }
-                    found = true;
+                    positions[i].TotalSize = positions[i].width + positions[i].height;
+                    found.push(positions[i]);
                     break;
                 }
             }
-            if (!found && aboveContainer != null) {
+            if (found.length == 0 && aboveContainer != null) {
                 aboveContainer.className = aboveContainer.className.replace(/toolkitDragDropContainerHover/g, "");
                 aboveContainer = null;
+            } else {
+                // We will pick the smallest element hovered over, as that will often work fine for nested elements
+                var newAboveContainer = found.OrderBy(function (a) { return a.TotalSize }).First().Element;
+                if (aboveContainer != newAboveContainer) {
+                    if (aboveContainer != null) {
+                        aboveContainer.className = aboveContainer.className.replace(/toolkitDragDropContainerHover/g, "");
+                    }
+                    aboveContainer = newAboveContainer;
+                    aboveContainerPosition = positions[i].Position;
+                    aboveContainer.className += " toolkitDragDropContainerHover";
+                }
             }
 
             obj.style.top = newTop + "px";
@@ -111,6 +123,11 @@ window.TK.DragDrop = {
             obj.style.left = "";
             obj.style.top = "";
             obj.style.position = "relative";
+
+            for (var i = 0; i < positions.length; i++) {
+                if (positions[i].Element.className)
+                    positions[i].Element.className = positions[i].Element.className.replace(/toolkitDragDropContainerArea/g, "");
+            }
 
             if (aboveContainer) {
                 aboveContainer.className = aboveContainer.className.replace(/toolkitDragDropContainerHover/g, "");
