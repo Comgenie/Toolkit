@@ -93,7 +93,7 @@ window.TK.DragDrop = {
                         aboveContainerPosition = positions[i].Position;
                         aboveContainer.className += " toolkitDragDropContainerHover";
                     }
-                    positions[i].TotalSize = positions[i].width + positions[i].height;
+                    positions[i].TotalSize = positions[i].Position.width + positions[i].Position.height;
                     found.push(positions[i]);
                     break;
                 }
@@ -101,7 +101,7 @@ window.TK.DragDrop = {
             if (found.length == 0 && aboveContainer != null) {
                 aboveContainer.className = aboveContainer.className.replace(/toolkitDragDropContainerHover/g, "");
                 aboveContainer = null;
-            } else {
+            } else if (found.length > 0) {
                 // We will pick the smallest element hovered over, as that will often work fine for nested elements
                 var newAboveContainer = found.OrderBy(function (a) { return a.TotalSize }).First().Element;
                 if (aboveContainer != newAboveContainer) {
