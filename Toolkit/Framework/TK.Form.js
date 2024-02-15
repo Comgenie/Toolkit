@@ -278,6 +278,7 @@ window.TK.Form = {
                     Fields: dataSettings.Fields,
                     IgnoreRest: dataSettings.IgnoreRest,
                     SortByFields: dataSettings.SortByFields,
+                    RequiredAsterisk: this.RequiredAsterisk
                   //  Init: dataSettings.Init
                 }, "Form");
             },
@@ -306,6 +307,7 @@ window.TK.Form = {
                                 Fields: obj.DataSettings.Fields,
                                 IgnoreRest: obj.DataSettings.IgnoreRest,
                                 SortByFields: obj.DataSettings.SortByFields,
+                                RequiredAsterisk: obj.RequiredAsterisk,
                                // Init: obj.DataSettings.Init,
                                 Elements: {
                                     RemoveButton: {
@@ -332,6 +334,7 @@ window.TK.Form = {
                         Fields: this.DataSettings.Fields,
                         IgnoreRest: this.DataSettings.IgnoreRest,
                         SortByFields: this.DataSettings.SortByFields,
+                        RequiredAsterisk: obj.RequiredAsterisk,
                         //Init: this.DataSettings.Init,
                         Elements: {
                             RemoveButton: {
@@ -407,7 +410,8 @@ window.TK.Form = {
                             disabled: isDisabled,
                             IsVisible: (this.Fields && this.Fields[name] && this.Fields[name].IsVisible ? this.Fields[name].IsVisible : null),
                             //Init: (this.Fields && this.Fields[name] && this.Fields[name].Init ? this.Fields[name].Init : undefined),
-                            Form: this 
+                            Form: this,
+                            RequiredAsterisk: (this.Fields && this.Fields[name] && this.Fields[name].RequiredAsterisk)
                         }
                     }
                 };

@@ -49,6 +49,7 @@
         Active: true,
         Age: 5,
         From: "2018-04-27",
+        Description: "Disabled description",
         Id: 99
     },
     Fields: {    
@@ -83,7 +84,8 @@
                     }
                 }
             }
-        }
+        },
+        Description: { disabled: true }
     },
     Save: function(newModel) {
         alert(JSON.stringify(newModel));
@@ -134,6 +136,7 @@
     Fields: {
         Food: {
             Type: "forms",
+            RequiredAsterisk: true,
             NewItem: { Name: "", Amount: 0 },
             AddButtonText: "ADD!", // Default: Add
             RemoveButtonText: "REMOVE!", // Default: Remove
