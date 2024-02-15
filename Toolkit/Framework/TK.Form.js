@@ -36,6 +36,7 @@ window.TK.Form = {
                 Data: null,
                 PlaceHolder: null,
                 Init: function () {
+                    this.Elements.Content.disabled = this.Parent?.disabled;
                     if (this.PlaceHolder) {
                         this.Elements.Content.value = this.PlaceHolder;
                         this.className += " newItem";
@@ -231,22 +232,15 @@ window.TK.Form = {
         datetimeasp: {
             className: "dateTimeAsp",
             Init: function () {
-                if (!this.Data) {
-                    this.Add({
-                        _: TK.DateTime,
-                        onchange: this.onchange,                        
-                        onfocus: this.onfocus,
-                        onblur: this.onblur,
-                        DataSettings: this.DataSettings
-                    }, "DateInput");
-                    return;
+                var isoString = null;
+                if (this.Data) {
+                    isoString = window.ConvertFromASPTime(this.Data);
+                    isoString = isoString ? isoString : new Date().toISOString();
                 }
-                var isoString = window.ConvertFromASPTime(this.Data);
-                if (!isoString)
-                    isoString = new Date().toISOString();
                 this.Add({
                     _: TK.DateTime,
                     Data: isoString,
+                    disabled: this.disabled,
                     onchange: this.onchange,
                     onfocus: this.onfocus,
                     onblur: this.onblur,
@@ -387,7 +381,8 @@ window.TK.Form = {
 
             if (type != "ignore") {
                 var defaultTemplate = this.DefaultTemplates[type] ? this.DefaultTemplates[type] : this.DefaultTemplates.text;
-                var isRequired = (this.Fields && this.Fields[name] && this.Fields[name].Required);                
+                var isRequired = (this.Fields && this.Fields[name] && this.Fields[name].Required);
+                var isDisabled = (this.Fields && this.Fields[name] && this.Fields[name].disabled);
                 var row = {
                     style: { },
                     className: "fieldRow field-" + name + (isRequired ? " fieldRequired" : "") + " " + (this.Fields && this.Fields[name] && this.Fields[name].Inline ? "inlineBlock" : ""),                    
@@ -398,13 +393,14 @@ window.TK.Form = {
                             _Self: true,
                             /* required: isRequired, */
                             placeholder: (this.Fields && this.Fields[name] && this.Fields[name].PlaceHolder ? this.Fields[name].PlaceHolder : ""),
-                            Data: model[name],                            
+                            Data: model[name],
                             DataName: name,
                             LinkedData: (this.Fields && this.Fields[name] && this.Fields[name].LinkField ? model[this.Fields[name].LinkField] : null),
                             DataSettings: (this.Fields && this.Fields[name] ? this.Fields[name] : null),
                             onfocus: (this.Fields && this.Fields[name] && this.Fields[name].onfocus ? this.Fields[name].onfocus : null),
                             onblur: (this.Fields && this.Fields[name] && this.Fields[name].onblur ? this.Fields[name].onblur : null),
                             onchange: (this.Fields && this.Fields[name] && this.Fields[name].onchange ? this.Fields[name].onchange : null),
+                            disabled: isDisabled,
                             IsVisible: (this.Fields && this.Fields[name] && this.Fields[name].IsVisible ? this.Fields[name].IsVisible : null),
                             //Init: (this.Fields && this.Fields[name] && this.Fields[name].Init ? this.Fields[name].Init : undefined),
                             Form: this 
