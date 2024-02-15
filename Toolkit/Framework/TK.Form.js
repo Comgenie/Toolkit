@@ -15,6 +15,7 @@ window.TK.Form = {
     RequiredText: "The following fields are required: ",
     ApplyToModelDirectly: false,
     RemoveValueOfNotVisibleFields: true, // If false, a field hidden by IsVisible will still keep its value when saving
+    RequiredAsterisk: false, // If true an asterisk will be shown in front of the label of the required fields
     CustomValidation: function (model, callBackResult) { callBackResult([]); }, // Callback with an array of errors. If the array is empty or undefined, the validation is seen as passed.
     DefaultTemplates: {
         text: {
@@ -387,7 +388,10 @@ window.TK.Form = {
                     style: { },
                     className: "fieldRow field-" + name + (isRequired ? " fieldRequired" : "") + " " + (this.Fields && this.Fields[name] && this.Fields[name].Inline ? "inlineBlock" : ""),                    
                     Elements: {
-                        DataLabel: { innerHTML: (this.Fields && this.Fields[name] && this.Fields[name].DisplayName ? this.Fields[name].DisplayName : name), style: {} },
+                        DataLabel: {
+                            innerHTML: (obj.RequiredAsterisk && isRequired ? '<span class="Required-Asterisk">*</span>' : '') +
+                                (this.Fields && this.Fields[name] && this.Fields[name].DisplayName ? this.Fields[name].DisplayName : name), style: {}
+                        },
                         DataField: {
                             _: (this.Fields && this.Fields[name] && this.Fields[name].Template ? this.Fields[name].Template : defaultTemplate),
                             _Self: true,
@@ -555,6 +559,7 @@ window.TK.Form = {
                     if (this.Fields && this.Fields[name] && this.Fields[name].Required && (newObj[name] === null || newObj[name] === "")) {
                         errors.push(this.Fields && this.Fields[name] && this.Fields[name].DisplayName ? this.Fields[name].DisplayName : name);
                         hasError = true;
+                        this.CurrentFields[name].Parent.className.replace("fieldError", "");
                         this.CurrentFields[name].Parent.className += " fieldError";
                     }
                 }

@@ -50,6 +50,9 @@
     font-weight: 600;
     padding-bottom: 2px;
 }
+.toolkitForm label > .Required-Asterisk {
+    color: var(--toolkit-error-color);
+}
 .toolkitForm .fieldRow {
     padding-bottom: 5px;        
 }
