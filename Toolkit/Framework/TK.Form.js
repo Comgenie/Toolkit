@@ -17,6 +17,7 @@ window.TK.Form = {
     RemoveValueOfNotVisibleFields: true, // If false, a field hidden by IsVisible will still keep its value when saving
     RequiredAsterisk: false, // If true an asterisk will be shown in front of the label of the required fields
     CustomValidation: function (model, callBackResult) { callBackResult([]); }, // Callback with an array of errors. If the array is empty or undefined, the validation is seen as passed.
+    Save: function (obj) {}, // Is called after custom validation and required validation. The new model is provided and can be saved to the database for example.
     DefaultTemplates: {
         text: {
             _: "input",
@@ -527,9 +528,7 @@ window.TK.Form = {
                 innerHTML: this.SaveButtonText
             }, "SaveButton");
         }
-    },
-    Save: function (obj) {
-    },
+    },    
     GetModel: function (errors, applyToModelDirectly) {
         if (applyToModelDirectly === undefined)
             applyToModelDirectly = this.ApplyToModelDirectly;
@@ -575,38 +574,37 @@ window.TK.Form = {
         }
         return newObj;
     },
+    SetError: function (errorText) {
+        if (this.Elements.ErrorText) {
+            this.Elements.ErrorText.innerHTML = errorText;
+        } else {
+            this.Add({ innerHTML: errorText, className: "validationError" }, "ErrorText");
+        }
+    },
     onsubmit: function () {
-        if (this.IsCurrentlySubmitting)
-            return false;
-        this.IsCurrentlySubmitting = true;
         var obj = this;
+        if (obj.IsCurrentlySubmitting)
+            return false;
+        obj.IsCurrentlySubmitting = true;
         var errors = [];
-        var newObj = this.GetModel(errors);
+        var newObj = obj.GetModel(errors);
         if (errors.length == 0) {
-            if (this.CustomValidation) {
-                this.CustomValidation(newObj, function (customErrors) {
+            if (obj.CustomValidation) {
+                obj.CustomValidation(newObj, function (customErrors) {
                     obj.IsCurrentlySubmitting = false;
                     if (!customErrors || customErrors.length == 0) {                        
                         obj.Save(newObj);                        
                     } else {
-                        if (obj.Elements.ErrorText) {
-                            obj.Elements.ErrorText.innerHTML = customErrors.join(", ");
-                        } else {
-                            obj.Add({ innerHTML: customErrors.join(", "), className: "validationError" }, "ErrorText");
-                        }
+                        obj.SetError(customErrors.join(", "));                        
                     }
                 });
             } else {
-                this.IsCurrentlySubmitting = false;
-                this.Save(newObj);
+                obj.IsCurrentlySubmitting = false;
+                obj.Save(newObj);
             }            
         } else {
-            if (this.Elements.ErrorText) {
-                this.Elements.ErrorText.innerHTML = this.RequiredText + errors.join(", ");
-            } else {
-                this.Add({ innerHTML: this.RequiredText + errors.join(", "), className: "validationError" }, "ErrorText");
-            }
-            this.IsCurrentlySubmitting = false;
+            obj.SetError(obj.RequiredText + errors.join(", "));
+            obj.IsCurrentlySubmitting = false;
         }        
         return false;
     }
