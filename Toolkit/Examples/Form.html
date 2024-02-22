@@ -10,6 +10,7 @@
     <script src="/Framework/TK.Form.js"></script>
     <script src="/Framework/TK.DateTime.js"></script>
     <script src="/Framework/TK.Switch.js"></script>
+    <script src="/Framework/TK.Toast.js"></script>
     <script src="Example.js"></script>
     <link href="/Minified/Style.css" rel="stylesheet" />
     <style>
@@ -393,6 +394,29 @@
             callBackResult(["At least 10 years or older!"]);
         else
             callBackResult(); // OK
+    },
+    Save: function(newModel) {
+        alert(JSON.stringify(newModel));
+    }
+}
+</pre>
+
+    <h3>Custom error display</h3>
+   <pre>
+{
+    _: TK.Form,
+    Model: {
+        Name: "",
+        Active: true,
+        Age: 5
+    },
+    Fields: {
+        Name: {
+            Required: true
+        }
+    },
+    RenderErrors: function(errors, textBefore) {
+        TK.Toast.Create("Could not save form", textBefore + ": " + errors.join(", "));
     },
     Save: function(newModel) {
         alert(JSON.stringify(newModel));

@@ -15,6 +15,8 @@ window.TK.DateTime = {
     ValueIsEpoch: false,
     Data: null,
     onchange: function () { },
+    readOnly: false,
+    disabled: false,
     DisplayCodes: {
         EuropeAmsterdam: "NL",
         EuropeParis: "FR",
@@ -154,7 +156,7 @@ window.TK.DateTime = {
                         this.Parent.Parent.RenderDateInput(this.Parent.Parent.Elements.Selection, tmpDateTime.toISOString());
                     },
                     onblur: function () {
-                        if (this.Parent.Parent.readOnly)
+                        if (this.Parent.Parent.readOnly || this.Parent.Parent.disabled)
                             return;
                         var obj = this;
                         if (obj.Parent.Parent.Elements.Selection.InRelativeEditor)
@@ -170,7 +172,7 @@ window.TK.DateTime = {
                         }, 250);
                     },
                     onfocus: function () {
-                        if (this.Parent.Parent.readOnly)
+                        if (this.Parent.Parent.readOnly || this.Parent.Parent.disabled)
                             return;
                         if (this.TimeOut)
                             clearTimeout(this.TimeOut);
@@ -674,5 +676,37 @@ if (window.TK.Form) {
     window.TK.Form.DefaultTemplates.date = {
         _: TK.DateTime,
         EnableTime: false
+    };
+    window.TK.Form.DefaultTemplates.datetimeasp = {
+        className: "dateTimeAsp",
+        Init: function () {
+            var isoString = null;
+            if (this.Data) {
+                isoString = window.ConvertFromASPTime(this.Data);
+                if (!isoString)
+                    isoString = new Date().toISOString();
+            }
+            this.Add({
+                _: TK.DateTime,
+                Data: isoString,
+                disabled: this.disabled,
+                readOnly: this.readOnly,
+                onchange: this.onchange,
+                onfocus: this.onfocus,
+                onblur: this.onblur,
+                DataSettings: this.DataSettings
+            }, "DateInput");
+        },
+        GetValue: function () {
+            var value = this.Elements.DateInput.GetValue();
+            if (!value)
+                return value;
+            var time = new Date(value).getTime();
+            if (isNaN(time)) {
+                alert("Date time value of " + value + " is not valid.");
+                throw "Date time value of " + value + " is not valid.";
+            }
+            return "/Date(" + time + ")/";
+        }
     };
 }

@@ -228,44 +228,6 @@ window.TK.Form = {
             Init: function () { this.value = this.Data; },
             GetValue: function () { return this.value; }
         },
-        datetimeasp: {
-            className: "dateTimeAsp",
-            Init: function () {
-                if (!this.Data) {
-                    this.Add({
-                        _: TK.DateTime,
-                        onchange: this.onchange,                        
-                        onfocus: this.onfocus,
-                        onblur: this.onblur,
-                        DataSettings: this.DataSettings
-                    }, "DateInput");
-                    return;
-                }
-                var isoString = window.ConvertFromASPTime(this.Data);
-                if (!isoString)
-                    isoString = new Date().toISOString();
-                this.Add({
-                    _: TK.DateTime,
-                    Data: isoString,
-                    onchange: this.onchange,
-                    onfocus: this.onfocus,
-                    onblur: this.onblur,
-                    DataSettings: this.DataSettings
-                }, "DateInput");
-            },
-            GetValue: function () {
-                var value = this.Elements.DateInput.GetValue();
-                if (!value)
-                    return value;
-                var time = new Date(value).getTime();
-                if (isNaN(time)) {
-                    alert("Date time value of " + value + " is not valid.");
-                    throw "Date time value of " + value + " is not valid.";
-                }
-                return "/Date(" + time + ")/";
-            },
-            
-        },
         form: {
             _: "div", 
             className: "subForm",
@@ -384,28 +346,34 @@ window.TK.Form = {
 
             if (this.IgnoreRest && (!this.Fields || !this.Fields[name]))
                 type = "ignore";
-
+            var getField = function (fieldName, fallBack) {
+                if (fallBack == undefined)
+                    fallBack = null;
+                return obj.Fields && obj.Fields[name] && obj.Fields[name][fieldName] ? obj.Fields[name][fieldName] : fallBack;
+            };
             if (type != "ignore") {
                 var defaultTemplate = this.DefaultTemplates[type] ? this.DefaultTemplates[type] : this.DefaultTemplates.text;
-                var isRequired = (this.Fields && this.Fields[name] && this.Fields[name].Required);                
+                var isRequired = getField("Required", false);                
                 var row = {
                     style: { },
-                    className: "fieldRow field-" + name + (isRequired ? " fieldRequired" : "") + " " + (this.Fields && this.Fields[name] && this.Fields[name].Inline ? "inlineBlock" : ""),                    
+                    className: "fieldRow field-" + name + (isRequired ? " fieldRequired" : "") + " " + (getField("Inline") ? "inlineBlock" : ""),                    
                     Elements: {
-                        DataLabel: { innerHTML: (this.Fields && this.Fields[name] && this.Fields[name].DisplayName ? this.Fields[name].DisplayName : name), style: {} },
+                        DataLabel: { innerHTML: getField("DisplayName",name), style: {} },
                         DataField: {
-                            _: (this.Fields && this.Fields[name] && this.Fields[name].Template ? this.Fields[name].Template : defaultTemplate),
+                            _: getField("Template", defaultTemplate),
                             _Self: true,
                             /* required: isRequired, */
-                            placeholder: (this.Fields && this.Fields[name] && this.Fields[name].PlaceHolder ? this.Fields[name].PlaceHolder : ""),
+                            placeholder: getField("PlaceHolder",""),
                             Data: model[name],                            
                             DataName: name,
-                            LinkedData: (this.Fields && this.Fields[name] && this.Fields[name].LinkField ? model[this.Fields[name].LinkField] : null),
+                            LinkedData: getField("LinkField") ? model[getField("LinkField")] : null,
                             DataSettings: (this.Fields && this.Fields[name] ? this.Fields[name] : null),
-                            onfocus: (this.Fields && this.Fields[name] && this.Fields[name].onfocus ? this.Fields[name].onfocus : null),
-                            onblur: (this.Fields && this.Fields[name] && this.Fields[name].onblur ? this.Fields[name].onblur : null),
-                            onchange: (this.Fields && this.Fields[name] && this.Fields[name].onchange ? this.Fields[name].onchange : null),
-                            IsVisible: (this.Fields && this.Fields[name] && this.Fields[name].IsVisible ? this.Fields[name].IsVisible : null),
+                            onfocus: getField("onfocus"),
+                            onblur: getField("onblur"),
+                            onchange: getField("onchange"),
+                            disabled: getField("disabled", false),
+                            readOnly: getField("readOnly"),
+                            IsVisible: getField("IsVisible"),
                             //Init: (this.Fields && this.Fields[name] && this.Fields[name].Init ? this.Fields[name].Init : undefined),
                             Form: this 
                         }
@@ -570,6 +538,13 @@ window.TK.Form = {
         }
         return newObj;
     },
+    RenderErrors: function (errors, textBefore) {
+        if (this.Elements.ErrorText) {
+            this.Elements.ErrorText.innerHTML = textBefore + errors.join(", ");
+        } else {
+            this.Add({ innerHTML: textBefore + errors.join(", "), className: "validationError" }, "ErrorText");
+        }
+    },
     onsubmit: function () {
         if (this.IsCurrentlySubmitting)
             return false;
@@ -584,11 +559,7 @@ window.TK.Form = {
                     if (!customErrors || customErrors.length == 0) {                        
                         obj.Save(newObj);                        
                     } else {
-                        if (obj.Elements.ErrorText) {
-                            obj.Elements.ErrorText.innerHTML = customErrors.join(", ");
-                        } else {
-                            obj.Add({ innerHTML: customErrors.join(", "), className: "validationError" }, "ErrorText");
-                        }
+                        obj.RenderErrors(customErrors, "");
                     }
                 });
             } else {
@@ -596,11 +567,7 @@ window.TK.Form = {
                 this.Save(newObj);
             }            
         } else {
-            if (this.Elements.ErrorText) {
-                this.Elements.ErrorText.innerHTML = this.RequiredText + errors.join(", ");
-            } else {
-                this.Add({ innerHTML: this.RequiredText + errors.join(", "), className: "validationError" }, "ErrorText");
-            }
+            this.RenderErrors(errors, this.RequiredText);
             this.IsCurrentlySubmitting = false;
         }        
         return false;
