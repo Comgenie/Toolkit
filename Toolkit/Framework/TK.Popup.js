@@ -9,6 +9,8 @@ window.TK.Popup = {
     Title: "Popup",
     EnableCloseButton: true,
     EnableBackDrop: false,
+    CloseWithEscapeButton: true,
+    CloseByClickingOutsideOfPopup: true,
     EnableResize: true,
     EnableSnapping: true,
     Maximized: false,
@@ -267,6 +269,25 @@ window.TK.Popup = {
             this.BackDrop.style.bottom = "0px";
             this.BackDrop.style.left = "0px";
             this.BackDrop.style.zIndex = (window.TK.Popup.StartZIndex++);
+            if (this.CloseByClickingOutsideOfPopup) {
+                this.BackDrop.onclick = function () {
+                    document.querySelector(".toolkitPopup").Remove();
+                }
+            };
+
+            if (this.CloseWithEscapeButton) {
+                document.onkeydown = function (evt) {
+                    var isEscape = false;
+                    if ("key" in evt) {
+                        isEscape = (evt.key === "Escape" || evt.key === "Esc");
+                    } else {
+                        isEscape = (evt.keyCode === 27);
+                    }
+                    if (isEscape && document.querySelector(".toolkitPopup")) {
+                        document.querySelector(".toolkitPopup").Remove();
+                    }
+                }
+            };
             document.body.appendChild(this.BackDrop);
         }
 
@@ -304,3 +325,11 @@ window.TK.PopupOpen = function (template, title, width, height) {
         Template: template
     });
 };
+
+
+
+
+
+
+
+
