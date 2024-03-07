@@ -95,7 +95,6 @@ window.TK.DragDrop = {
                     }
                     positions[i].TotalSize = positions[i].Position.width + positions[i].Position.height;
                     found.push(positions[i]);
-                    break;
                 }
             }
             if (found.length == 0 && aboveContainer != null) {
