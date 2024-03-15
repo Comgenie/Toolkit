@@ -271,7 +271,7 @@ window.TK.Popup = {
             this.BackDrop.style.zIndex = (window.TK.Popup.StartZIndex++);
             if (this.CloseByClickingOutsideOfPopup) {
                 this.BackDrop.onclick = function () {
-                    document.querySelector(".toolkitPopup").Remove();
+                    obj.Remove();
                 }
             };
 
@@ -283,8 +283,8 @@ window.TK.Popup = {
                     } else {
                         isEscape = (evt.keyCode === 27);
                     }
-                    if (isEscape && document.querySelector(".toolkitPopup")) {
-                        document.querySelector(".toolkitPopup").Remove();
+                    if (isEscape && obj != null) {
+                        obj.Remove();
                     }
                 }
             };
