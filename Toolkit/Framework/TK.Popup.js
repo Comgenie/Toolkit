@@ -222,7 +222,6 @@ window.TK.Popup = {
                 _: "button",
                 innerHTML: "x",
                 onclick: function () {
-                    //this.Parent.parentNode.removeChild(this.Parent);
                     this.Parent.Remove();
                 }
             }, "CloseButton");
@@ -276,18 +275,17 @@ window.TK.Popup = {
             };
 
             if (this.CloseWithEscapeButton) {
-                document.onkeydown = function (evt) {
-                    var isEscape = false;
-                    if ("key" in evt) {
-                        isEscape = (evt.key === "Escape" || evt.key === "Esc");
-                    } else {
-                        isEscape = (evt.keyCode === 27);
-                    }
-                    if (isEscape && obj != null) {
+
+                
+                obj.Keydown = function (evt) {
+                    if (evt.key === 'Escape' && obj != null) {
                         obj.Remove();
+
                     }
-                }
+                };
+                document.addEventListener('keydown', obj.Keydown)
             };
+
             document.body.appendChild(this.BackDrop);
         }
 
@@ -300,7 +298,10 @@ window.TK.Popup = {
     },
     Destroy: function () {
         if (this.BackDrop) {
-            this.BackDrop.parentNode.removeChild(this.BackDrop);
+            this.BackDrop.remove(); // parentNode.removeChild(this.BackDrop);
+        }
+        if (this.Keydown) {
+            document.removeEventListener('keydown', this.Keydown);
         }
         this.RestoreBodyOverflow();
     },
