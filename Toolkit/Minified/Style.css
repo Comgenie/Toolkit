@@ -840,3 +840,41 @@ th.toolkitHasFilter > .toolkitFilterButton {
 .toolkitSlider .Element-Steps > div.stepActive {
     background-color: var(--toolkit-secondary-color);
 }
+.toolkitButtonSwitcher {
+    display: inline-block;
+}
+
+.toolkitButtonSwitcher .toolkitButtonSwitchOption {
+    display: inline-block;
+    min-width: 25pt;
+    line-height: 20pt;
+    padding: 0pt 2pt;
+    text-align: center;
+    cursor: default;
+    background-color: #eee;
+    border: 1px solid #999;
+    color: #333;
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-size: 20pt;
+    border-right: 0;
+}
+
+.toolkitButtonSwitcher .toolkitButtonSwitchOption:first-child {
+    border-radius: 2pt 0 0 2pt;
+}
+
+.toolkitButtonSwitcher .toolkitButtonSwitchOption:last-child {
+    border-right: 1px solid #999;
+    border-radius: 0 2pt 2pt 0;
+}
+
+.toolkitButtonSwitcher .toolkitButtonSwitchOption:hover {
+    background-color: #ccc;
+}
+
+.toolkitButtonSwitcher .toolkitButtonSwitchOption.toolkitButtonSwitchActive {
+    background-color: var(--toolkit-main-color-light);
+    color: var(--toolkit-main-color);
+    
+}
