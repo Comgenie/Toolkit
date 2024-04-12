@@ -408,7 +408,7 @@ window.TK.Table = {
                     } else {
 
                         obj.Rows = obj.Rows.OrderBy(function (a) {
-                            if (a[thisTh.DataColumnName + "-SortValue"])
+                            if (a[thisTh.DataColumnName + "-SortValue"] !== undefined)
                                 return a[thisTh.DataColumnName + "-SortValue"];
                             return a[thisTh.DataColumnName];
                         });

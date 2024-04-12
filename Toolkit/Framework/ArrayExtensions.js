@@ -38,11 +38,20 @@ Array.prototype.Skip = function (count) {
 Array.prototype.OrderBy = function (func) {
     if (!func)
         func = function (a) { return a; };
-    return this.sort(function (a, b) {
-        
+    return this.sort(function (a, b) {        
         var a2 = func(a), b2 = func(b);
-        if (a2 && a2.localeCompare && b2 && b2.localeCompare) {
+
+        if (a2 === null || a2 === undefined)
+            a2 = 0;
+        if (b2 === null || b2 === undefined)
+            b2 = 0;
+
+        if (a2.localeCompare && b2.localeCompare) { // Both are string
             return a2.localeCompare(b2);
+        } else if (a2.localeCompare) { // Only a2 is a string
+            return a2.localeCompare(b2.toString());
+        } else if (b2.localeCompare) {
+            return a2.toString().localeCompare(b2); // Only b2 is a string
         }
         return a2 - b2;
     });
