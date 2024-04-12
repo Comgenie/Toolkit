@@ -25,8 +25,6 @@
             EnableCloseButton: true, // Default: True
             EnableBackDrop: true, // Default: false
             EnableResize: true, // Default: true
-            CloseWithEscapeButton: true,
-            CloseByClickingOutsideOfPopup: true,
             Width: 500, 
             Height: 250,
             Template: {
@@ -64,6 +62,30 @@
                         alert('Button pressed');
                     }            
                 }
+            }
+        });
+    }
+}
+</pre>
+
+    <h2>Popup with ability to close by pressing ESC or clicking on the backdrop</h2>
+    <pre>
+{
+    _: "button",
+    innerHTML: "Open popup",
+    onclick: function() {
+        this.Add({
+            _: TK.Popup,
+            Title: "Example Title",
+            EnableCloseButton: true, // Default: True
+            EnableBackDrop: true, // Default: false
+            EnableResize: true, // Default: true
+            CloseWithEscapeButton: true, // Default: false
+            CloseByClickingOutsideOfPopup: true, // Default: false
+            Width: 500, 
+            Height: 250,
+            Template: {
+                innerHTML: "This is the popup contents"
             }
         });
     }

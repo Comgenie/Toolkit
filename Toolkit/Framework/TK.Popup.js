@@ -9,8 +9,8 @@ window.TK.Popup = {
     Title: "Popup",
     EnableCloseButton: true,
     EnableBackDrop: false,
-    CloseWithEscapeButton: true,
-    CloseByClickingOutsideOfPopup: true,
+    CloseWithEscapeButton: false,
+    CloseByClickingOutsideOfPopup: false,
     EnableResize: true,
     EnableSnapping: true,
     Maximized: false,
@@ -275,17 +275,13 @@ window.TK.Popup = {
             };
 
             if (this.CloseWithEscapeButton) {
-
-                
                 obj.Keydown = function (evt) {
-                    if (evt.key === 'Escape' && obj != null) {
+                    if (evt && evt.key === 'Escape' && obj != null) {
                         obj.Remove();
-
                     }
                 };
                 document.addEventListener('keydown', obj.Keydown)
             };
-
             document.body.appendChild(this.BackDrop);
         }
 
@@ -298,7 +294,7 @@ window.TK.Popup = {
     },
     Destroy: function () {
         if (this.BackDrop) {
-            this.BackDrop.remove(); // parentNode.removeChild(this.BackDrop);
+            this.BackDrop.parentNode.removeChild(this.BackDrop);
         }
         if (this.Keydown) {
             document.removeEventListener('keydown', this.Keydown);
