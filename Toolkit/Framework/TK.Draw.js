@@ -19,10 +19,13 @@ TK.Draw = {
         this.width = this.Width * this.Scale;
         this.height = this.Height * this.Scale;
         this.style.width = this.Width + "px";
-        this.style.height = this.Height + "px"; 
-        this.Context = this.getContext("2d");
+        this.style.height = this.Height + "px";
+        this.Context = this.GetContext();
         this.Context.CanvasObj = this;
         this.Refresh();
+    },
+    GetContext: function () {
+        return this.getContext("2d");
     },
     Refresh: function (skipSortElements) {
         if (this.RefreshAlreadyQueued) {
@@ -35,45 +38,8 @@ TK.Draw = {
             this.height = this.Height;
         }
         var obj = this;
-        var ms = new Date().getTime();
         
-        // Process animations
-        var hasAnimation = false;
-        for (var i = 0; i < this.Animations.length; i++) {
-            if (!this.Animations[i])
-                continue;
-            var a = this.Animations[i];
-            var r = (ms - a.S) / a.L;
-            
-            if (r >= 1) {
-                r = 1;
-                if (a.I.AnimationEnded)
-                    a.I.AnimationEnded(a.P);
-                delete this.Animations[i];
-            }
-            if (Array.isArray(a.O)) {
-                var rgba = [0, 0, 0, 0];                
-                for (var j = 0; j < a.O.length; j++) {
-                    if (Array.isArray(a.O[j])) {
-                        // Point array                        
-                        for (var n = 0; n < a.O[j].length; n++) {
-                            a.I[a.P][j][n] = a.E(a.O[j][n], a.T[j][n], r);
-                            
-                        }
-                    } else if (a.O.length == 4) {
-                        // Colors
-                        rgba[j] = a.E(a.O[j], a.T[j], r);
-                    }
-                }
-                if (a.O.length == 4) {
-                    a.I[a.P] = "rgba(" + rgba.join(",") + ")";
-                }
-            } else {                
-                a.I[a.P] = a.E(a.O, a.T, r);
-            }
-            //a.I[a.P] = a.O + ((a.T - a.O) * r);            
-            hasAnimation = true;
-        }
+        var hasAnimation = this.ProcessAnimations();
 
         this.Context.setTransform(this.Scale, 0, 0, this.Scale , 0, 0);
         this.Context.clearRect(0, 0, this.Width, this.Height);        
@@ -94,6 +60,47 @@ TK.Draw = {
             this.RefreshAlreadyQueued = true;
             requestAnimationFrame(function () { obj.RefreshAlreadyQueued = false; obj.Refresh(true); });
         }
+    },
+    ProcessAnimations: function () {
+        // Process animations
+        var ms = new Date().getTime();
+        var hasAnimation = false;
+        for (var i = 0; i < this.Animations.length; i++) {
+            if (!this.Animations[i])
+                continue;
+            var a = this.Animations[i];
+            var r = (ms - a.S) / a.L;
+
+            if (r >= 1) {
+                r = 1;
+                if (a.I.AnimationEnded)
+                    a.I.AnimationEnded(a.P);
+                delete this.Animations[i];
+            }
+            if (Array.isArray(a.O)) {
+                var rgba = [0, 0, 0, 0];
+                for (var j = 0; j < a.O.length; j++) {
+                    if (Array.isArray(a.O[j])) {
+                        // Point array                        
+                        for (var n = 0; n < a.O[j].length; n++) {
+                            a.I[a.P][j][n] = a.E(a.O[j][n], a.T[j][n], r);
+
+                        }
+                    } else if (a.O.length == 4) {
+                        // Colors
+                        rgba[j] = a.E(a.O[j], a.T[j], r);
+                    }
+                }
+                if (a.O.length == 4) {
+                    a.I[a.P] = "rgba(" + rgba.join(",") + ")";
+                }
+            } else {
+                a.I[a.P] = a.E(a.O, a.T, r);
+            }
+            //a.I[a.P] = a.O + ((a.T - a.O) * r);            
+            hasAnimation = true;
+        }
+        return hasAnimation;
     },
     SortElements: function () {
         this.ForceSortElements = false;
