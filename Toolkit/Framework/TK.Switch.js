@@ -1,4 +1,5 @@
 ﻿"use strict";
+/* Minify Order(200) */
 window.TK.Switch = {
     TextBefore: "",
     TextAfter: "",

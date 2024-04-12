@@ -1,4 +1,6 @@
 ﻿"use strict";
+
+/* Minify Order(200) */
 window.TK.ButtonSwitcher = {
     className: "toolkitButtonSwitcher",
     Data: null,
@@ -73,5 +75,7 @@ window.TK.ButtonSwitcher = {
 };
 
 if (window.TK.Form) {
-    window.TK.Form.DefaultTemplates.buttonSwitcher = window.TK.ButtonSwitcher;
+    window.TK.Form.DefaultTemplates.buttonSwitcher = {
+        _: TK.ButtonSwitcher
+    };
 }
