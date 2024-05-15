@@ -36,6 +36,7 @@ window.TK.Form = {
                 Data: null,
                 PlaceHolder: null,
                 Init: function () {
+                    this.Elements.Content.disabled = this.Parent ? this.Parent.disabled : false;
                     if (this.PlaceHolder) {
                         this.Elements.Content.value = this.PlaceHolder;
                         this.className += " newItem";
