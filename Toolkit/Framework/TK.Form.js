@@ -192,7 +192,7 @@ window.TK.Form = {
                     obj.Values = JSON.parse(response);
                     if (obj.DataSettings.Options && obj.DataSettings.Options.length > 0) {
                         obj.Values = obj.DataSettings.Options.concat(obj.Values);
-                    }                    
+                    }
                     obj.GenerateOptions();
                 }, null, { cacheResults: true });
             },
@@ -204,12 +204,21 @@ window.TK.Form = {
                     optionEle.ValueObj = this.Values[i];
                     this.appendChild(optionEle);
                 }
-                if (this.Data)
-                    this.value = this.Data.toString();
+                if (this.Data) {
+                    this.value = this.DataSettings.ValueIsText ? this.Data.toString() : this.Data;
+                    // Set Data to null so GetValue will return value from here on
+                    this.Data = null;
+                }
                 else
                     this.value = this.DataSettings.ValueIsText ? "" : 0;
             },
-            GetValue: function () { return this.value; }
+            GetValue: function () {
+                // When Data is set and options are being retrieved we can return the Data.
+                // The user was not able to change the value up to this point so the Data is accurate.
+                if (this.Data)
+                    return this.DataSettings.ValueIsText ? this.Data.toString() : this.Data;
+                return this.value;
+            }
         },
         date: {
             _: "input",
