@@ -179,7 +179,11 @@ window.TK.Form = {
                 else
                     this.value = this.DataSettings.ValueIsText ? "" : 0;
             },
-            GetValue: function () { return this.DataSettings.ValueIsText ? this.value : parseInt(this.value); }
+            GetValue: function () { 
+                return this.DataSettings.ValueIsText ? this.value : 
+                    this.value !== null && this.value !== undefined ? parseInt(this.value) :
+                    0;
+            }
         },
         ajaxselect: {
             _: "select",
@@ -205,7 +209,7 @@ window.TK.Form = {
                     this.appendChild(optionEle);
                 }
                 if (this.Data) {
-                    this.value = this.DataSettings.ValueIsText ? this.Data.toString() : this.Data;
+                    this.value = this.Data.toString(); // Always set a string for compatibility reasons
                     // Set Data to null so GetValue will return value from here on
                     this.Data = null;
                 }
@@ -215,9 +219,12 @@ window.TK.Form = {
             GetValue: function () {
                 // When Data is set and options are being retrieved we can return the Data.
                 // The user was not able to change the value up to this point so the Data is accurate.
-                if (this.Data)
-                    return this.DataSettings.ValueIsText ? this.Data.toString() : this.Data;
-                return this.value;
+                if (this.Data !== null && this.Data !== undefined) {
+                    return this.Data;
+                } else if (this.value !== null && this.value !== undefined) {
+                    return this.DataSettings.ValueIsText ? this.value.toString() : parseInt(this.value);
+                }
+                return this.DataSettings.ValueIsText ? "" : 0;
             }
         },
         date: {
