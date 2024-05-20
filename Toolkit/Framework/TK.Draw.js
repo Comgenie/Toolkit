@@ -332,6 +332,7 @@ TK.Draw.ColorToDifferentColor = function (s, s2, ratio) {
 };
 // Draws all child elements
 TK.Draw.Group = {
+    DrawType: "Group",
     X: 0,
     Y: 0,
     Draw: function (c) {
@@ -346,6 +347,7 @@ TK.Draw.Group = {
     }
 };
 TK.Draw.DrawableObject = {
+    DrawType: "DrawableObject",
     Fill: null, // Color
     Stroke: null, // Color
     BlendMode: null, // Any value of globalCompositeOperation
@@ -488,6 +490,7 @@ TK.Draw.DrawableObject = {
     }
 };
 TK.Draw.Line = {
+    DrawType: "Line",
     _: TK.Draw.DrawableObject,
     Draw: function (c) {        
         c.beginPath();
@@ -504,6 +507,7 @@ TK.Draw.Line = {
     }
 };
 TK.Draw.LineThroughPoints = {
+    DrawType: "LineThroughPoints",
     _: TK.Draw.DrawableObject,
     Points: [], // [ [x,y], [x, y] ]
     Heights: [], // Array with heights, for creating an area
@@ -647,6 +651,7 @@ TK.Draw.LineThroughPoints = {
 };
 
 TK.Draw.Rect = {
+    DrawType: "Rect",
     _: TK.Draw.DrawableObject,
     //RoundCorners: [15,15,15,15],
     ShadeSize: 0,    
@@ -763,6 +768,7 @@ TK.Draw.Rect = {
     }
 };
 TK.Draw.Circle = {
+    DrawType: "Circle",
     _: TK.Draw.DrawableObject,
     Angle: 0, Size: null, DonutSize: null, Extrude: 0,
     Draw: function (c) {
@@ -810,6 +816,7 @@ TK.Draw.Circle = {
     }
 };
 TK.Draw.Text = {
+    DrawType: "Text",
     _: TK.Draw.DrawableObject,
     DrawAndTransformDisabled: true,
     Text: "Blabla", Font: "30pt Arial", 
@@ -897,11 +904,11 @@ TK.Draw.Text = {
 
 
 TK.Draw.Image = {
+    DrawType: "Image",
     _: TK.Draw.DrawableObject,
     //RoundCorners: [15,15,15,15],
     Img: null,
     Src: null,
-    
     Draw: function (c) {
         var obj = this;
         if (!this.Img && this.Src) {
