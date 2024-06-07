@@ -68,6 +68,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Builder\Builder.Main.js" />
+    <Content Include="Builder\Index.html" />
     <Content Include="Examples\ArrayExtensions.html" />
     <Content Include="Examples\ImageEditor.html" />
     <Content Include="Examples\HtmlEditor.html" />
@@ -87,6 +89,7 @@
     <Content Include="Examples\Event.html" />
     <Content Include="Examples\ClientStorage.html" />
     <Content Include="Examples\ButtonSwitcher.html" />
+    <Content Include="Examples\Dropdown.html" />
     <Content Include="Examples\Switch.html" />
     <Content Include="Examples\Slider.html" />
     <Content Include="Examples\ServerStorage.html" />
@@ -103,6 +106,7 @@
     <Content Include="Framework\TK.ButtonSwitcher.js" />
     <Content Include="Framework\TK.ClientStorage.js" />
     <Content Include="Framework\TK.Slider.js" />
+    <Content Include="Framework\TK.Dropdown.js" />
     <Content Include="Framework\TK.Switch.js" />
     <Content Include="Framework\TK.ImageEditor.js" />
     <Content Include="Framework\TK.HtmlEditor.js" />
@@ -132,7 +136,9 @@
     <Content Include="Minified\Style.css" />
     <Content Include="Minified\Svg.js" />
     <Content Include="Minified\Toolkit.js" />
+    <Content Include="Minified\Toolkit.js.txt" />
     <Content Include="Minified\ToolkitFull.js" />
+    <Content Include="Minified\ToolkitFull.js.txt" />
     <Content Include="Style.css" />
     <Content Include="Web.config">
       <SubType>Designer</SubType>

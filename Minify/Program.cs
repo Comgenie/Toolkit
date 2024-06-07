@@ -156,6 +156,8 @@ namespace Minify
                 result.Append(file.Source);
             }
 
+            File.WriteAllText(pathToResult + ".txt", result.ToString()); // Not minified
+
             using (var reader = new StringReader(result.ToString()))
             {
                 var resultMinified = new JsMin().Minify(reader);
