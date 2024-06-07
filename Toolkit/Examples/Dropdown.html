@@ -1,0 +1,47 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>TK.Dropdown</title>
+    <link href="../Style.css" rel="stylesheet" />
+    <script src="/Framework/TK.Main.js"></script>
+    <script src="/Framework/TK.Dropdown.js"></script>
+    <script src="/Framework/ArrayExtensions.js"></script>
+    <script src="Example.js"></script>
+    <link href="/Minified/Style.css" rel="stylesheet" />
+</head>
+<body>
+    <a href="/" class="home">Toolkit</a>
+
+    <h1>TK.Dropdown</h1>
+    <h2>Dropdown component</h2>
+    <p>Also available as form element using type 'dropdown'.</p>
+    <pre>
+{
+    _: TK.Dropdown,
+    Options: [
+        { Value: 1, Text: "Option 1" },
+        { Value: 2, Text: "Option 2" },
+        { Value: 3, Text: "Option 3" },
+        { Value: 4, Text: "Option 4" },
+        { Value: 5, Text: "Option 5" },
+        { Value: 6, Text: "Option 6" },
+        { Value: 7, Text: "Option 7" },
+        { Value: 8, Text: "Option 8" },
+        { Value: 9, Text: "Option 9" },
+        { Value: 10, Text: "Option 10" },
+        { Value: 11, Text: "Option 11" },
+        { Value: 12, Text: "Option 12" },
+        { Value: 13, Text: "Option 13" },
+        { Value: 14, Text: "Option 14" },
+        { Value: 15, Text: "Option 15" },
+    ],
+    Multiple: true, // Allow multiple selections
+    onchange: function() {
+        console.log("Selected values:", this.GetValue());
+    }
+}
+</pre>
+
+</body>
+</html>
