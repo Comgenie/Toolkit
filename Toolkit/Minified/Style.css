@@ -878,3 +878,49 @@ th.toolkitHasFilter > .toolkitFilterButton {
     color: var(--toolkit-main-color);
     
 }
+.toolkitDropdown {
+    font-family: var(--toolkit-font);
+}
+.toolkitDropdown .toolkitDropdownDisplay {
+    border: 1px solid var(--toolkit-border-color);
+    padding: 5pt;
+    height: 14pt;
+    line-height: 14pt;
+    max-width: 200pt;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+    background-color: var(--toolkit-main-color-light);
+    border-radius: 2px;
+    cursor: default;
+}
+.toolkitDropdown .toolkitDropdownDisplay:hover {
+    box-shadow: var(--toolkit-main-color-glow) 0px 0px 5px;
+}
+.toolkitDropdown .toolkitDropdownDisplay  .Element-SelectedItems li {
+    display: inline;
+}
+
+.toolkitDropdown .toolkitDropdownOptions {
+    position: absolute;
+    z-index: 100;
+    border: 1px solid #ccc;
+    box-shadow: rgba(0,0,0,0.2) 2px 2px 2px;
+    background-color: #fff;
+    overflow: auto;
+    min-width: 200pt;
+}
+.toolkitDropdown .toolkitDropdownOptions li {
+    padding: 5pt 15pt;
+    color: #333;
+    cursor: default;
+    border-left: 5px solid rgba(0,0,0,0);
+    white-space: nowrap;
+}
+.toolkitDropdown .toolkitDropdownOptions li:hover {
+    background-color: var(--toolkit-main-color-light);
+}
+.toolkitDropdown .toolkitDropdownOptions li.toolkitDropdownSelected {
+    border-left: 5px solid var(--toolkit-main-color);
+    color: var(--toolkit-main-color);
+}
