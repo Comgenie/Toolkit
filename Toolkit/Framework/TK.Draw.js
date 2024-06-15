@@ -203,7 +203,7 @@ TK.Draw = {
                     break;
                 }
             }
-            if (match || (r[0] < x && r[0] + r[2] > x && r[1] < y && r[1] + r[3] > y) && !stoppedPropagation) {                                                                    
+            if (match || (r[0] < x && r[0] + r[2] > x && r[1] < y && r[1] + r[3] > y && (!el.CheckMouseOver || el.CheckMouseOver(x, y))) && !stoppedPropagation) {                                                                    
                 if (func != "MouseOut" && (func != "MouseOver" || !el.CurrentlyMouseOver) ) {                    
                     if (el[func](x, y) === true) {
                         stoppedPropagation = true;
@@ -257,6 +257,15 @@ TK.Draw.AnchorRight = 4;
 TK.Draw.AnchorTop = 8;
 TK.Draw.AnchorMiddle = 16;
 TK.Draw.AnchorBottom = 32;
+
+TK.Draw.SmoothNone = 0;
+TK.Draw.SmoothQuadratic = 1; // Quadratic curvers with the center in between the two points
+TK.Draw.SmoothCorners = 2; // Only use horizontal and vertical lines, or small 90 degree corners
+
+TK.Draw.DirectionTop = 0;
+TK.Draw.DirectionRight = 1;
+TK.Draw.DirectionBottom = 2;
+TK.Draw.DirectionLeft = 3;
 
 TK.Draw.EaseLinear = function (a, b, r) { return a + ((b - a) * r); };
 TK.Draw.EaseExponential = function (a, b, r) {
@@ -439,6 +448,8 @@ TK.Draw.DrawableObject = {
         if (!easing)
             easing = TK.Draw.EaseLinear;
         var p = this.Parent;
+        while (p !== undefined && p.ProcessAnimations === undefined) // find the TK.Draw component
+            p = p.Parent;
         if (!TK.Draw.AnimationsEnabled) {
             this[propName] = targetValue;
             if (this.AnimationEnded)
@@ -448,19 +459,19 @@ TK.Draw.DrawableObject = {
             return this;
         }
 
-        if (this.Parent) {
-            if (this.Parent.Animations.length > 100) // Clear all deleted animations from the array
-                this.Parent.Animations = this.Parent.Animations.Where(function (a) { return a; });
+        if (p) {
+            if (p.Animations.length > 100) // Clear all deleted animations from the array
+                p.Animations = p.Animations.Where(function (a) { return a; });
             
             if (typeof this[propName] === 'string' && typeof targetValue === 'string') {
                 // Colors                      
-                this.Parent.Animations.push({ I: this, P: propName, O: TK.Draw.GetColor(this[propName]), T: TK.Draw.GetColor(targetValue), L: ms, E: easing, S: new Date().getTime() });
+                p.Animations.push({ I: this, P: propName, O: TK.Draw.GetColor(this[propName]), T: TK.Draw.GetColor(targetValue), L: ms, E: easing, S: new Date().getTime() });
             } else if (Array.isArray(this[propName])) {
-                this.Parent.Animations.push({ I: this, P: propName, O: JSON.parse(JSON.stringify(this[propName])), T: targetValue, L: ms, E: easing, S: new Date().getTime() });                
+                p.Animations.push({ I: this, P: propName, O: JSON.parse(JSON.stringify(this[propName])), T: targetValue, L: ms, E: easing, S: new Date().getTime() });                
             } else {
-                this.Parent.Animations.push({ I: this, P: propName, O: parseFloat(this[propName]), T: targetValue, L: ms, E: easing, S: new Date().getTime() });                
+                p.Animations.push({ I: this, P: propName, O: parseFloat(this[propName]), T: targetValue, L: ms, E: easing, S: new Date().getTime() });                
             }
-            this.Parent.Refresh();
+            p.Refresh();
         }
         return this;
     },
@@ -509,16 +520,11 @@ TK.Draw.Line = {
 TK.Draw.LineThroughPoints = {
     DrawType: "LineThroughPoints",
     _: TK.Draw.DrawableObject,
-    Points: [], // [ [x,y], [x, y] ]
-    Heights: [], // Array with heights, for creating an area
-    Smoothing: 0, // 0 None, 1 quadratic, 2 arrow and straight lines
-    ArrowStartDirection: 1, // 0 = from the top (arrow down), 1= from the right (arrow left), 2 = from the bottom (arrow up), 3= from the left (arrow right)
-    ArrowEndDirection: 3, 
-    ArrowStartSize: 20,
-    ArrowEndSize: 20,
-    ArrowStartLineSize: 50,
-    ArrowEndLineSize: 50,
-
+    Points: [], // [ [x,y], [x, y] ], optionally a third parameter (direction) can be passed as well [x, y, direction]
+    Heights: [], // Array with heights for each point, for creating an area chart or sankey lines
+    Smoothing: TK.Draw.SmoothNone,
+    DefaultDirection: TK.Draw.DirectionRight, // Default direction if not set at point level, used for smoothing
+    CornerRadius: 10, 
     Draw: function (c) {
         c.beginPath();
         if (!this.W) {
@@ -531,118 +537,167 @@ TK.Draw.LineThroughPoints = {
             }
         }
         this.Transform(c);
-        
-        if (!this.Smoothing) {
-            for (var i = 0; i < this.Points.length; i++) {
+        var obj = this;
+
+        var passes = this.Heights && this.Heights.length >= this.Points.length ? 2 : 1;
+        var points = this.Points.slice();
+        var cornersEndPos = function (point, otherPoint, reverseDir) {
+            point = point.slice();
+            var dir = point.length > 2 && point[2] !== null && point[2] !== undefined ? point[2] : obj.DefaultDirection;
+            var cornerSize = obj.CornerRadius;
+
+            if (reverseDir)
+                dir = (dir + 2) % 4;
+            if (dir == TK.Draw.DirectionTop) {
+                point[2] = otherPoint[0] >= point[0] ? TK.Draw.DirectionRight : TK.Draw.DirectionLeft;
+                point[1] -= cornerSize;
+                point[0] += otherPoint[0] >= point[0] ? cornerSize : -cornerSize;
+            } else if (dir == TK.Draw.DirectionRight) {
+                point[2] = otherPoint[1] >= point[1] ? TK.Draw.DirectionBottom : TK.Draw.DirectionTop;
+                point[1] += otherPoint[1] >= point[1] ? cornerSize : -cornerSize;
+                point[0] += cornerSize;
+            } else if (dir == TK.Draw.DirectionBottom) {
+                point[2] = otherPoint[0] >= point[0] ? TK.Draw.DirectionRight : TK.Draw.DirectionLeft;
+                point[1] += cornerSize;
+                point[0] += otherPoint[0] >= point[0] ? cornerSize : -cornerSize;
+            } else if (dir == TK.Draw.DirectionLeft) {
+                point[2] = otherPoint[1] >= point[1] ? TK.Draw.DirectionBottom : TK.Draw.DirectionTop;
+                point[1] += otherPoint[1] >= point[1] ? cornerSize : -cornerSize;
+                point[0] -= cornerSize;
+            }
+            return point;
+        };
+        var cornersDrawCurve = function (point, otherPoint, dir) {
+            // Dir should be the direction after the curve
+            if (dir == TK.Draw.DirectionTop || dir == TK.Draw.DirectionBottom) {
+                c.quadraticCurveTo(otherPoint[0] + obj.X, point[1] + obj.Y, otherPoint[0] + obj.X, otherPoint[1] + obj.Y);
+            } else {
+                c.quadraticCurveTo(point[0] + obj.X, otherPoint[1] + obj.Y, otherPoint[0] + obj.X, otherPoint[1] + obj.Y);
+            }
+            //c.lineTo(otherPoint[0], otherPoint[1]);
+        };
+        for (var pass = 0; pass < passes; pass++) {
+            if (pass == 1) {
+                // If the heights for all points is set, we will loop through the points a second time
+                // in reverse order with the added heights and reversed directions so we can make a full closed loop.
+                points = points.map(function (p, index) {
+                    var newP = p.slice();
+                    newP[1] += obj.Heights[index];
+                    newP[2] = ((newP[2] !== undefined && newP[2] !== null ? newP[2] : obj.DefaultDirection) + 2) % 4;
+                    return newP;
+                });
+                points = points.reverse();
+            }
+
+            for (var i = 0; i < points.length; i++) {
+                var p = points[i];
+                var dir = p.length >= 3 && p[2] !== null && p[2] !== undefined ? p[2] : this.DefaultDirection;
+                
                 if (i == 0) {
-                    c.moveTo(this.Points[i][0] + this.X, this.Points[i][1] + this.Y);
+                    if (pass == 0)
+                        c.moveTo(p[0] + this.X, p[1] + this.Y);
+                    else
+                        c.lineTo(p[0] + this.X, p[1] + this.Y);
                     continue;
                 }
-                c.lineTo(this.Points[i][0] + this.X, this.Points[i][1] + this.Y);
-            }
+                var lp = points[i - 1];
+                var ldir = lp.length >= 3 && lp[2] !== null && lp[2] !== undefined ? lp[2] : this.DefaultDirection;
 
-            if (this.Heights && this.Heights.length >= this.Points.length) {
-                for (var i = this.Points.length - 1; i >= 0; i--) {
-                    c.lineTo(this.Points[i][0] + this.X, this.Points[i][1] + (this.Heights[i]) + this.Y);
+                var x_mid = (lp[0] + p[0]) / 2;
+                var y_mid = (lp[1] + p[1]) / 2;
+
+                if (!this.Smoothing) {
+                    c.lineTo(p[0] + this.X, p[1] + this.Y);
+                } else if (this.Smoothing == TK.Draw.SmoothQuadratic) {
+                    if (ldir == TK.Draw.DirectionRight || ldir == TK.Draw.DirectionLeft) {
+                        var cp_x1 = (x_mid + lp[0]) / 2;
+                        var cp_x2 = (x_mid + p[0]) / 2;
+                        c.quadraticCurveTo(cp_x1 + this.X, lp[1] + this.Y, x_mid + this.X, y_mid + this.Y);
+                        c.quadraticCurveTo(cp_x2 + this.X, p[1] + this.Y, p[0] + this.X, p[1] + this.Y);
+                    } else if (ldir == TK.Draw.DirectionTop || ldir == TK.Draw.DirectionBottom) {
+                        var cp_y1 = (y_mid + lp[1]) / 2;
+                        var cp_y2 = (y_mid + p[1]) / 2;
+                        c.quadraticCurveTo(lp[0] + this.X, cp_y1 + this.Y, x_mid + this.X, y_mid + this.Y);
+                        c.quadraticCurveTo(p[0] + this.X, cp_y2 + this.Y, p[0] + this.X, p[1] + this.Y);
+                    }
+                } else if (this.Smoothing == TK.Draw.SmoothCorners) {
+                    // TODO:
+                    // - Check if it's nearby, we might need to reduce the corner radius
+                    // - Do multiple corners if we are not in the correct direction yet
+                    //var startPoint = cornersEndPos(lp, p);
+                    var startPoint = [lp[0], lp[1], ldir];
+                    var endPoint = cornersEndPos(p, lp, true);
+                    var revDirEnd = (endPoint[2] + 2) % 4;
+
+                    
+                    var max = 100;
+                    while (startPoint[0] != endPoint[0] || startPoint[1] != endPoint[1]) {
+                        max--;
+                        if (max == 0) {
+                            console.log("max reached");
+                            break;
+                        }
+                        var startDirHorizontal = startPoint[2] == TK.Draw.DirectionLeft || startPoint[2] == TK.Draw.DirectionRight;
+                        if (startPoint[2] == revDirEnd && startDirHorizontal && startPoint[1] == endPoint[1]) {
+                            // If already at the right height, just need 1 line to connect
+                            c.lineTo(endPoint[0] + this.X, endPoint[1] + this.Y);
+                            break;
+                        } else if (startPoint[2] == revDirEnd && !startDirHorizontal && startPoint[0] == endPoint[0]) {
+                            // If already at the right x pos, just need 1 line to connect
+                            c.lineTo(endPoint[0] + this.X, endPoint[1] + this.Y);
+                            break;
+                        } else {
+                            // Make a line towards the right direction
+                            var newPos = startPoint.slice();
+                            if (startPoint[2] == TK.Draw.DirectionRight) {
+                                if (endPoint[2] == TK.Draw.DirectionLeft)
+                                    newPos[0] = endPoint[0] - (2 * this.CornerRadius);
+                                else if (endPoint[2] == TK.Draw.DirectionTop || endPoint[2] == TK.Draw.DirectionBottom)
+                                    newPos[0] = endPoint[0] - this.CornerRadius;
+                                else
+                                    newPos[0] = endPoint[0];
+                                startPoint[0] = newPos[0] > startPoint[0] ? newPos[0] : startPoint[0];
+                            } else if (startPoint[2] == TK.Draw.DirectionLeft) {
+                                if (endPoint[2] == TK.Draw.DirectionRight)
+                                    newPos[0] = endPoint[0] + (2 * this.CornerRadius);
+                                else if (endPoint[2] == TK.Draw.DirectionTop || endPoint[2] == TK.Draw.DirectionBottom)
+                                    newPos[0] = endPoint[0] + this.CornerRadius;
+                                else
+                                    newPos[0] = endPoint[0];
+                                startPoint[0] = newPos[0] < startPoint[0] ? newPos[0] : startPoint[0];
+                            } else if (startPoint[2] == TK.Draw.DirectionBottom) {
+                                if (endPoint[2] == TK.Draw.DirectionTop)
+                                    newPos[1] = endPoint[1] - (2 * this.CornerRadius);
+                                else if (endPoint[2] == TK.Draw.DirectionLeft || endPoint[2] == TK.Draw.DirectionRight)
+                                    newPos[1] = endPoint[1] - this.CornerRadius;
+                                else
+                                    newPos[1] = endPoint[1];
+                                startPoint[1] = newPos[1] > startPoint[1] ? newPos[1] : startPoint[1];
+                            } else if (startPoint[2] == TK.Draw.DirectionTop) {
+                                if (endPoint[2] == TK.Draw.DirectionRight)
+                                    newPos[1] = endPoint[1] + (2 * this.CornerRadius);
+                                else if (endPoint[2] == TK.Draw.DirectionLeft || endPoint[2] == TK.Draw.DirectionRight)
+                                    newPos[1] = endPoint[1] + this.CornerRadius;
+                                else
+                                    newPos[1] = endPoint[1];
+                                startPoint[1] = newPos[1] < startPoint[1] ? newPos[1] : startPoint[1];
+                            }
+
+                            c.lineTo(startPoint[0] + this.X, startPoint[1] + this.Y);
+
+                            // Corner into the right direction and update our start pos
+                            var newStartPoint = cornersEndPos(startPoint, p);
+                            cornersDrawCurve(startPoint, newStartPoint, newStartPoint[2]);
+                            startPoint = newStartPoint;
+                        }
+                    }
+                    //c.moveTo(p[0],p[1])
+                    cornersDrawCurve(startPoint, p, dir);
                 }
+            }
+            if (pass == 1 && this.Points.length > 0) {
                 c.lineTo(this.Points[0][0] + this.X, this.Points[0][1] + this.Y);
             }
-        } else if (this.Smoothing == 1 || this.Smoothing == 2 || this.Smoothing == 3) {
-            for (var i = 0; i < this.Points.length - 1; i++) {
-                if (i == 0)
-                    c.moveTo(this.Points[i][0] + this.X, this.Points[i][1] + this.Y);
-
-                var x_mid = (this.Points[i][0] + this.Points[i + 1][0]) / 2;
-                var y_mid = (this.Points[i][1] + this.Points[i + 1][1]) / 2;
-                
-                if (this.Smoothing == 1) { // Horizontal smoothing                                
-                    var cp_x1 = (x_mid + this.Points[i][0]) / 2;
-                    var cp_x2 = (x_mid + this.Points[i + 1][0]) / 2;                        
-                    c.quadraticCurveTo(cp_x1 + this.X, this.Points[i][1] + this.Y, x_mid + this.X, y_mid + this.Y);
-                    c.quadraticCurveTo(cp_x2 + this.X, this.Points[i + 1][1] + this.Y, this.Points[i + 1][0] + this.X, this.Points[i + 1][1] + this.Y);
-                } else if (this.Smoothing == 2) { // Vertical smoothing                    
-                    var cp_y1 = (y_mid + this.Points[i][1]) / 2;
-                    var cp_y2 = (y_mid + this.Points[i + 1][1]) / 2;
-                    c.quadraticCurveTo(this.Points[i][0] + this.X, cp_y1 + this.Y, x_mid + this.X, y_mid + this.Y);
-                    c.quadraticCurveTo(this.Points[i + 1][0] + this.X, cp_y2 +  this.Y, this.Points[i + 1][0] + this.X, this.Points[i + 1][1] + this.Y);
-                } else if (this.Smoothing == 3) { // Horizontal start, vertical in between
-                    if (i == 0) {
-                        c.quadraticCurveTo(this.Points[i + 1][0] + this.X, this.Points[i][1] + this.Y, this.Points[i + 1][0] + this.X, this.Points[i + 1][1] + this.Y);
-                    } else if (i + 2 == this.Points.length) {
-                        c.quadraticCurveTo(this.Points[i][0] + this.X, this.Points[i + 1][1] + this.Y, this.Points[i + 1][0] + this.X, this.Points[i + 1][1] + this.Y);
-                    } else {
-                        var cp_y1 = (y_mid + this.Points[i][1]) / 2;
-                        var cp_y2 = (y_mid + this.Points[i + 1][1]) / 2;
-                        c.quadraticCurveTo(this.Points[i][0] + this.X, cp_y1 + this.Y, x_mid + this.X, y_mid + this.Y);
-                        c.quadraticCurveTo(this.Points[i + 1][0] + this.X, cp_y2 + this.Y, this.Points[i + 1][0] + this.X, this.Points[i + 1][1] + this.Y);
-                    }
-                }                              
-            }
-
-            if (this.Heights && this.Heights.length >= this.Points.length) {
-                for (var i = this.Points.length - 1; i > 0; i--) {
-                    if (i == this.Points.length - 1) {
-                        c.lineTo(this.Points[i][0] + this.X, this.Points[i][1] + this.Heights[i] + this.Y);
-                    }
-                    var x_mid = (this.Points[i][0] + this.Points[i - 1][0]) / 2;
-                    var y_mid = (this.Points[i][1] + this.Heights[i] + this.Points[i - 1][1] + this.Heights[i - 1]) / 2;
-                    var cp_x1 = (x_mid + this.Points[i][0]) / 2;
-                    //var cp_y1 = (y_mid + this.Points[i][1]) / 2;
-                    var cp_x2 = (x_mid + this.Points[i - 1][0]) / 2;
-                    //var cp_y2 = (y_mid + this.Points[i + 1][1]) / 2;
-                    c.quadraticCurveTo(cp_x1 + this.X, this.Points[i][1] + this.Heights[i] + this.Y, x_mid + this.X, y_mid + this.Y);
-                    c.quadraticCurveTo(cp_x2 + this.X, this.Points[i - 1][1] + this.Y + this.Heights[i - 1], this.Points[i - 1][0] + this.X, this.Points[i - 1][1] + this.Y + this.Heights[i - 1]);
-                }
-                c.lineTo(this.Points[0][0] + this.X, this.Points[0][1] + this.Heights[0] + this.Y);
-            }
-        } else if (this.Smoothing == 4) { // Only horizontal and vertical lines with max 2 corners between 2 points
-            /*for (var i = 0; i < this.Points.length; i++) {
-                if (i == 0) {
-                    c.moveTo(this.Points[i][0] + this.X, this.Points[i][1] + this.Y);                    
-
-                    if (ArrowStartDirection == 0) {
-                        c.lineTo(this.Points[i][0] + this.X, this.Points[i][1] + this.Y + -this.ArrowStartLineSize);
-                    } else if (ArrowStartDirection == 1) {
-                        c.lineTo(this.Points[i][0] + this.X + this.ArrowStartLineSize, this.Points[i][1] + this.Y);
-                    } else if (ArrowStartDirection == 2) {
-                        c.lineTo(this.Points[i][0] + this.X, this.Points[i][1] + this.Y + this.ArrowStartLineSize);
-                    } else if (ArrowStartDirection == 3) {
-                        c.lineTo(this.Points[i][0] + this.X + -this.ArrowStartLineSize, this.Points[i][1] + this.Y);
-                    }                    
-
-                    // TODO draw arrow
-
-                    continue;
-                }
-                // line from this.Points[i-1][0], this.Points[i-1][1]  to this.Points[i][0], this.Points[i][1]  to                 
-                
-                if (i < this.Points.length) {
-                    c.lineTo(this.Points[i][0] + this.X, this.Points[i][1] + this.Y);
-                } else {
-                    // Last line and arrow
-                    if (this.ArrowEndDirection == 0) {
-                        c.lineTo(this.Points[i][0] + this.X, this.Points[i][1] + this.Y + -this.ArrowEndLineSize);
-                    } else if (this.ArrowEndDirection  == 1) {
-                        c.lineTo(this.Points[i][0] + this.X + this.ArrowEndLineSize, this.Points[i][1] + this.Y);
-                    } else if (this.ArrowEndDirection == 2) {
-                        c.lineTo(this.Points[i][0] + this.X, this.Points[i][1] + this.Y + this.ArrowEndLineSize);
-                    } else if (this.ArrowEndDirection == 3) {
-                        c.lineTo(this.Points[i][0] + this.X + -this.ArrowEndLineSize, this.Points[i][1] + this.Y);
-                    }                                
-
-                    c.lineTo(this.Points[i][0] + this.X, this.Points[i][1] + this.Y);
-
-                    // TODO draw arrow
-                }                
-            } */
-
-            /*
-            if (this.Heights && this.Heights.length >= this.Points.length) {
-                for (var i = this.Points.length - 1; i >= 0; i--) {
-                    c.lineTo(this.Points[i][0] + this.X, this.Points[i][1] + (this.Heights[i]) + this.Y);
-                }
-                c.lineTo(this.Points[0][0] + this.X, this.Points[0][1] + this.Y);
-            } */           
         }
 
         this.DrawFS(c);
@@ -802,17 +857,39 @@ TK.Draw.Circle = {
             c.arc(centerPosX, centerPosY, outerRadius, th2, th1, true);
         } else {
             // Simple (faster) method for simple circles
-            
             c.ellipse(this.X + this.W * 0.5, this.Y + this.H * 0.5, this.W * 0.5, this.H * 0.5, 0, 0, (2 * Math.PI));
-            
-            
         }
-        //c.arc(100, 100, 100, this.Angle, this.Size, false); // outer (filled)
-        //c.arc(100, 100, 80, this.Size, this.Size * 2, true); // outer (unfills it)
-
-        //c.ellipse(this.X + this.W * 0.5, this.Y + this.H * 0.5, this.W * 0.5, this.H * 0.5, 0, this.Angle, (2 * Math.PI) * this.Size);
         this.DrawFS(c);
         c.closePath();
+    },
+    CheckMouseOver: function (x, y) {
+        var cx = (this.Anchor & TK.Draw.AnchorLeft) ? this.X + (this.W / 2) : (this.Anchor & TK.Draw.AnchorRight) ? this.X - (this.W / 2) : this.X;
+        var cy = (this.Anchor & TK.Draw.AnchorTop) ? this.Y + (this.H / 2) : (this.Anchor & TK.Draw.AnchorBottom) ? this.Y - (this.H / 2) : this.Y;
+        if (this.Extrude) {
+            var extrudeAngle = (this.Angle + (this.Size * 0.5)) * Math.PI / 180;
+            cx += Math.cos(extrudeAngle) * this.Extrude;
+            cy += Math.sin(extrudeAngle) * this.Extrude;
+        }
+        if (this.Size && this.Size < 360) {
+            var deg = Math.atan2(y - cy, x - cx) * 180.0 / Math.PI;
+            if (deg < 0)
+                deg = 360 + deg; // Turn into a value between 0 and 360
+
+            var checkFrom = this.Angle % 360;
+            if (checkFrom < 0)
+                checkFrom = 360 + checkFrom; // Start is also in a value between 0 and 360
+            var checkTo = (checkFrom + this.Size) % 360;
+
+            if (deg < checkFrom && (checkTo > checkFrom || deg > checkTo))
+                return false;
+            if (deg > checkTo && (checkFrom < checkTo || deg < checkTo))
+                return false;
+
+        }
+        var dist = Math.sqrt(Math.pow(x - cx, 2) + Math.pow(y - cy, 2));
+        if (this.DonutSize && dist <= (this.W / 2) * this.DonutSize)
+            return false;
+        return (dist <= this.W / 2);
     }
 };
 TK.Draw.Text = {

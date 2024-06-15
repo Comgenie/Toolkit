@@ -59,6 +59,59 @@
     }
 }</pre>
 
+    <h2>Draw smooth lines</h2>
+    <pre>{
+    _: TK.Draw,
+    Width: 650,
+    Height: 400,
+    Zoom: 2,
+    Elements: {
+        LineNone: {
+            _: TK.Draw.LineThroughPoints,
+            Stroke: "#F00", // Red
+            Smoothing: TK.Draw.SmoothNone,
+            Points: [
+                [100, 100], [150, 150], [200, 125], [250, 100]
+            ]
+        },
+        LineQuadratic: {
+            _: TK.Draw.LineThroughPoints,
+            Stroke: "#090", // Green
+            Smoothing: TK.Draw.SmoothQuadratic,
+            Points: [
+                [100, 100], [150, 150], [200, 125], [250, 100]
+            ]
+        },
+        LineCornersVertical: {
+            _: TK.Draw.LineThroughPoints,
+            Stroke: "#00F", // Blue
+            Smoothing: TK.Draw.SmoothCorners,
+            DefaultDirection: TK.Draw.DirectionBottom,
+            Points: [
+                [100, 100], [150, 150], [200, 125], [250, 100]
+            ]
+        },
+        LineCornersHorizontal: {
+            _: TK.Draw.LineThroughPoints,
+            Stroke: "#F0F", // Purple
+            Smoothing: TK.Draw.SmoothCorners,
+            DefaultDirection: TK.Draw.DirectionRight,
+            Points: [
+                [100, 100], [150, 150], [200, 125], [250, 100]
+            ]
+        },
+        LineVariableWidth: { 
+            _: TK.Draw.LineThroughPoints,
+            Stroke: "#666", // Green
+            Smoothing: TK.Draw.SmoothQuadratic,
+            Points: [
+                [10, 10], [100, 20], [200, 10], [300, 30]
+            ],
+            Heights: [10, 20, 20, 40]
+        }
+    }
+}
+</pre>
 
 </body>
 </html>

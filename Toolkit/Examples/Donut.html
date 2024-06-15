@@ -32,7 +32,7 @@
 }
 </pre>
 
-    <h2>Donut with legend</h2>
+    <h2>Donut with legend and click events</h2>
 
     <pre>
 {
@@ -45,7 +45,10 @@
         { Name: "Value C", Color: "#09F", Value: 2 }
     ],    
     EnableLegend: true,
-    LabelStyle: 1
+    LabelStyle: 1,
+    Click: function(value) {
+        alert('Clicked on ' + value.Name);
+    }
 }
 </pre>
 

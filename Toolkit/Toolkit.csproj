@@ -71,6 +71,7 @@
     <Content Include="Builder\Builder.Main.js" />
     <Content Include="Builder\Index.html" />
     <Content Include="Examples\ArrayExtensions.html" />
+    <Content Include="Examples\Sankey.html" />
     <Content Include="Examples\ImageEditor.html" />
     <Content Include="Examples\HtmlEditor.html" />
     <Content Include="Examples\Draw.html" />
@@ -112,6 +113,7 @@
     <Content Include="Framework\TK.HtmlEditor.js" />
     <Content Include="Framework\TK.ServerStorage.js" />
     <Content Include="Framework\TK.ServerChannel.js" />
+    <Content Include="Framework\TK.Sankey.js" />
     <Content Include="Framework\TK.Toast.js" />
     <Content Include="Framework\TK.Gauge.js" />
     <Content Include="Framework\TK.Draw.js" />

@@ -7,6 +7,8 @@ window.TK.Dropdown = {
     Options: [], // Array of { Value: ..., Text: ... }
     Multiple: false, // Allow multiple selections
     Placeholder: "Select...",
+    SelectedText: "{0} selected",
+    PaddingCheckSelectedFit: 10,
     MaxDisplayItems: 10, // Maximum items to show before scrolling
     SelectedClass: "toolkitDropdownSelected", // Class for selected items
     OpenClass: "toolkitDropdownOpen", // Class when dropdown is open
@@ -67,6 +69,7 @@ window.TK.Dropdown = {
         }, "Options");
 
         this.RefreshOptions();
+        this.UpdateDisplay();
     },
 
     RefreshOptions: function () {
@@ -137,11 +140,11 @@ window.TK.Dropdown = {
                     });
                     var bboxItem = item.getBoundingClientRect();
 
-                    if (bboxItem.right > bboxDisplay.right) {
+                    if (bboxItem.right > bboxDisplay.right - this.PaddingCheckSelectedFit) {
                         this.Elements.Display.Elements.SelectedItems.Clear();
                         this.Elements.Display.Elements.SelectedItems.Add({
                             _: "li",
-                            innerText: this.Data.length + " selected",
+                            innerText: this.SelectedText.replace(/\{0\}/g, this.Data.length),
                         });
                         break;
                     }

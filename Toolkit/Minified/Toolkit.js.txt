@@ -5479,12 +5479,37 @@ window.TK.Dropdown = {
     Options: [], // Array of { Value: ..., Text: ... }
     Multiple: false, // Allow multiple selections
     Placeholder: "Select...",
+    SelectedText: "{0} selected",
+    PaddingCheckSelectedFit: 10,
     MaxDisplayItems: 10, // Maximum items to show before scrolling
     SelectedClass: "toolkitDropdownSelected", // Class for selected items
     OpenClass: "toolkitDropdownOpen", // Class when dropdown is open
-
+    ListItemTemplate: {
+        _: "li",
+        Dropdown: null,
+        Data: null,
+        Init: function () {
+            this.innerText = this.Data.Text;
+            this.Value = this.Data.Value;
+            this.className = this.Dropdown.IsSelected(this.Data.Value) ? this.Dropdown.SelectedClass : "";  
+        },
+        onclick: function (a) {
+            this.Dropdown.SelectItem(this.Value);
+            if (!this.Dropdown.Multiple) {
+                this.Dropdown.ToggleDropdown();
+            }
+        }
+    },
     Init: function () {
         var obj = this;
+        if (this.DataSettings) {
+            var fields = ["Placeholder", "MaxDisplayItems", "Multiple", "Options", "SelectedClass", "OpenClass"];
+            for (var i = 0; i < fields.length; i++) {
+                if (this.DataSettings[fields[i]] !== undefined)
+                    this[fields[i]] = this.DataSettings[fields[i]];
+            }
+        }
+
         this.Clear();
         this.Add({
             _: "div",
@@ -5516,6 +5541,7 @@ window.TK.Dropdown = {
         }, "Options");
 
         this.RefreshOptions();
+        this.UpdateDisplay();
     },
 
     RefreshOptions: function () {
@@ -5531,16 +5557,9 @@ window.TK.Dropdown = {
             if (option.Text === undefined || option.Text === null)
                 continue;
             this.Elements.Options.Elements.OptionsList.Add({
-                _: "li",
-                innerText: option.Text,
-                Value: option.Value,
-                className: this.IsSelected(option.Value) ? this.SelectedClass : "",
-                onclick: function (a) {
-                    obj.SelectItem(this.Value);
-                    if (!obj.Multiple) {
-                        obj.ToggleDropdown();
-                    }
-                },
+                _: this.ListItemTemplate,
+                Dropdown: this,
+                Data: option
             });
         }
     },
@@ -5593,11 +5612,11 @@ window.TK.Dropdown = {
                     });
                     var bboxItem = item.getBoundingClientRect();
 
-                    if (bboxItem.right > bboxDisplay.right) {
+                    if (bboxItem.right > bboxDisplay.right - this.PaddingCheckSelectedFit) {
                         this.Elements.Display.Elements.SelectedItems.Clear();
                         this.Elements.Display.Elements.SelectedItems.Add({
                             _: "li",
-                            innerText: this.Data.length + " selected",
+                            innerText: this.SelectedText.replace(/\{0\}/g, this.Data.length),
                         });
                         break;
                     }
@@ -5638,7 +5657,8 @@ window.TK.Dropdown = {
 
 if (window.TK.Form) {
     window.TK.Form.DefaultTemplates.dropdown = {
-        _: TK.Dropdown
+        _: TK.Dropdown,
+        
     };
 }
 "use strict";
