@@ -767,42 +767,36 @@ window.ajax = function () {
         if (this.ajaxObject.responseType !== this.undefined && this.getSetting("responseType"))
             this.ajaxObject.responseType = this.getSetting("responseType");
 
-        if (post && post.name) {
-            // This is the classic file upload. send it raw, the filereader method is not supported by most browsers
-            this.ajaxObject.setRequestHeader("File-Name", post.name);
-            this.ajaxObject.send(post);
-        } else {
-            // Normal request
-            this.timeoutChecker = setTimeout(function () {
-                obj.timeoutChecker = null;
-                try { // try to cancel
-                    obj.ajaxObject.abort();
-                } catch (errie) { }
-                obj.retryLast();
-            }, this.getSetting("timeout"));
+        this.timeoutChecker = setTimeout(function () {
+            obj.timeoutChecker = null;
+            try { // try to cancel
+                obj.ajaxObject.abort();
+            } catch (errie) { }
+            obj.retryLast();
+        }, this.getSetting("timeout"));
 
-            if (post == null) {
-                this.ajaxObject.send(); // get
-            } else {
-                if (post instanceof FormData) { // Post form data (including file uploads)
-                    this.ajaxObject.send(post);
-                    return;
-                } else if (!(typeof post === "string" || post instanceof String)) {
-                    // We can only put text in our post data
-                    post = JSON.stringify(post);
-                    if (!this.currentRequestInfo.extraSettings)
-                        this.currentRequestInfo.extraSettings = {};
-                    if (this.currentRequestInfo.extraSettings.parseJSONResponse == undefined)
-                        this.currentRequestInfo.extraSettings.parseJSONResponse = true;
-                }
-                this.ajaxObject.setRequestHeader("Content-Type", post.length > 0 && post.substr(0, 1) == "{" ? "application/json" : "application/x-www-form-urlencoded");
-                this.ajaxObject.setRequestHeader("Content-Size", post.length);
-                if (post.length > 0 && post.substr(0, 1) == "{") {
-                    post = post.replace(/"\/Date\((\d*)\)\/"/g, "\"\\/Date($1)\\/\"");
-                }
+        if (post == null) {
+            this.ajaxObject.send(); // get
+        } else {
+            if (post instanceof FormData) { // Post form data (including file uploads)
                 this.ajaxObject.send(post);
+                return;
+            } else if (!(typeof post === "string" || post instanceof String)) {
+                // We can only put text in our post data
+                post = JSON.stringify(post);
+                if (!this.currentRequestInfo.extraSettings)
+                    this.currentRequestInfo.extraSettings = {};
+                if (this.currentRequestInfo.extraSettings.parseJSONResponse == undefined)
+                    this.currentRequestInfo.extraSettings.parseJSONResponse = true;
             }
+            this.ajaxObject.setRequestHeader("Content-Type", post.length > 0 && post.substr(0, 1) == "{" ? "application/json" : "application/x-www-form-urlencoded");
+            this.ajaxObject.setRequestHeader("Content-Size", post.length);
+            if (post.length > 0 && post.substr(0, 1) == "{") {
+                post = post.replace(/"\/Date\((\d*)\)\/"/g, "\"\\/Date($1)\\/\"");
+            }
+            this.ajaxObject.send(post);
         }
+
     };
 
     /* Extra handy functions */

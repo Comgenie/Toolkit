@@ -68,8 +68,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Builder\Builder.Main.js" />
-    <Content Include="Builder\Index.html" />
     <Content Include="Examples\ArrayExtensions.html" />
     <Content Include="Examples\Sankey.html" />
     <Content Include="Examples\ImageEditor.html" />
@@ -106,6 +104,11 @@
     <Content Include="Framework\TK.AjaxList.js" />
     <Content Include="Framework\TK.ButtonSwitcher.js" />
     <Content Include="Framework\TK.ClientStorage.js" />
+    <Content Include="Framework\TK.Draw.Image.js" />
+    <Content Include="Framework\TK.Draw.LineThroughPoints.js" />
+    <Content Include="Framework\TK.Draw.Rect.js" />
+    <Content Include="Framework\TK.Draw.Line.js" />
+    <Content Include="Framework\TK.Draw.Text.js" />
     <Content Include="Framework\TK.Slider.js" />
     <Content Include="Framework\TK.Dropdown.js" />
     <Content Include="Framework\TK.Switch.js" />
@@ -155,6 +158,7 @@
     <Content Include="Examples\ExamplePage.txt" />
     <Content Include="Framework\TK.Interface.js" />
     <Content Include="Framework\TK.Donut.js" />
+    <Content Include="Framework\TK.Draw.Circle.js" />
     <None Include="packages.config" />
     <None Include="Properties\PublishProfiles\Toolkit - Web Deploy.pubxml" />
     <None Include="Properties\PublishProfiles\Toolkit - Web Deploy1.pubxml" />
