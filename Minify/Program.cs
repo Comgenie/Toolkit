@@ -115,6 +115,8 @@ namespace Minify
                 // Check if there is a /* Minify Order(123) */ header, so we know what order to use
                 if (sourceFile.Source.Contains("/* Minify Skip") && !includeAll)
                     continue;
+                if (sourceFile.Source.Contains("/* Minify WIP")) // Work in progress is always skipped
+                    continue;
 
                 var order = sourceFile.Source.IndexOf("/* Minify Order(");
                 if (order >= 0)
