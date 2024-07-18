@@ -116,16 +116,17 @@ window.TK.Table = {
                 innerHTML: "Remove",
                 onclick: function (event) {
                     // Find with button clicked and delete it from Rows variable in the table
+                    var table = this.Parent.Table;
                     var thisRow = this.Parent.Parent.Row;
-                    for (var i = 0; i < this.Parent.Table.Rows.length; i++) {
-                        if (this.Parent.Table.Rows[i] == thisRow) {
-                            this.Parent.Table.Rows.splice(i, 1);
-                            break;
-                        }
-                    }
-
                     // When the row was succesfully deleted in the save function remove current row
-                    if (this.Parent.Table.Save(thisRow, true) !== false) {
+                    if (table.Save(thisRow, true) !== false) {
+                        for (var i = 0; i < table.Rows.length; i++) {
+                            if (table.Rows[i] == thisRow) {
+                                table.Rows.splice(i, 1);
+                                break;
+                            }
+                        }
+
                         var thisRowNode = this.Parent.Parent;
                         // When the user was editing the row a form is showing on the next row. When this is the case remove that form as well.
                         if (thisRowNode.subTr)
