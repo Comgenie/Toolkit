@@ -364,8 +364,8 @@ if(this.Parent.Table.CheckboxCheck){if(!this.Parent.Table.LastCheckBoxRange){thi
 this.Parent.Table.LastCheckBoxRange.push(this.Parent.Row);this.Parent.Table.CheckboxCheck(this.Parent.Table.LastCheckBoxRange,this.checked);}}
 this.Parent.Table.LastCheckBoxRange=null;},UpdateData:function(){this.Parent.Row["CheckBoxes"]=this.checked;},Init:function(){this.checked=this.Parent.Data===true;}}}},RemoveButtonTemplate:{_:"td",Data:null,onclick:function(event){if(event)
 event.stopPropagation();if(window.event)
-window.event.cancelBubble=true;return true;},Elements:{RemoveButton:{_:"button",innerHTML:"Remove",onclick:function(event){var thisRow=this.Parent.Parent.Row;for(var i=0;i<this.Parent.Table.Rows.length;i++){if(this.Parent.Table.Rows[i]==thisRow){this.Parent.Table.Rows.splice(i,1);break;}}
-if(this.Parent.Table.Save(thisRow,true)!==false){var thisRowNode=this.Parent.Parent;if(thisRowNode.subTr)
+window.event.cancelBubble=true;return true;},Elements:{RemoveButton:{_:"button",innerHTML:"Remove",onclick:function(event){var table=this.Parent.Table;var thisRow=this.Parent.Parent.Row;if(table.Save(thisRow,true)!==false){for(var i=0;i<table.Rows.length;i++){if(table.Rows[i]==thisRow){table.Rows.splice(i,1);break;}}
+var thisRowNode=this.Parent.Parent;if(thisRowNode.subTr)
 thisRowNode.subTr.Remove();thisRowNode.Remove();}}}}},PreviousCheckBox:null,Rows:[],Form:null,FormAlwaysLoaded:false,Init:function(){if(this.SortedBy&&this.Rows&&this.Rows.OrderBy){var sortedBy=this.SortedBy;this.Rows=this.SortedDesc?this.Rows.OrderByDesc(function(a){return a[sortedBy];}):this.Rows.OrderBy(function(a){return a[sortedBy];});}
 this.Refresh();},RowClick:function(rowObj,trElement){var obj=this;if(this.Form){if(!trElement){if(!this.Elements.tbody)
 return;for(var rowId in this.Elements.tbody.Elements){var row=this.Elements.tbody.Elements[rowId];if(row.Row==rowObj){trElement=row;break;}}
