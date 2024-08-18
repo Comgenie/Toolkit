@@ -294,7 +294,8 @@ window.TK.DateTime = {
         this.NotFirst = true;
 
         this.Data = dateISO;
-        element.DateISO = dateISO;        
+        element.DateISO = dateISO;
+        
         if (!dateISO)
             dateISO = new Date().toISOString();        
 
@@ -393,8 +394,6 @@ window.TK.DateTime = {
                 element.style.display = "none";
             };
             element.appendChild(applyButton);
-
-
 
             obj.Elements.DateInputContainer.Elements.DateInput.focus();
             return;

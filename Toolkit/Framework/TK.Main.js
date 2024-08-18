@@ -121,23 +121,24 @@ window.TK.Initialize = function (obj, parentObj, nameChildObj, selfObj, taggedOb
     
     if (defaultInnerHTML && (!copyObj.innerHTML || copyObj.innerHTML == "")) {
         copyObj.innerHTML = defaultInnerHTML;
-    }    
+    }
+    
+    if (copyObj._Position && copyObj.style) {
+        var isSet = function (a) {
+            return !(a === null || a === undefined);
+        };
+        var p = TK.ParsePosition(copyObj._Position); // top,right,bottom,left,width,height[,relative]
+        copyObj.style.top = isSet(p[0]) ? p[0] : "";
+        copyObj.style.right = isSet(p[1]) ? p[1] : "";
+        copyObj.style.bottom = isSet(p[2]) ? p[2] : "";
+        copyObj.style.left = isSet(p[3]) ? p[3] : "";        
 
-    if (copyObj._Position && copyObj.style && copyObj._Position.split) {
-        var p = copyObj._Position.split(','); // top,right,bottom,left,width,height[,relative]
-        
-        copyObj.style.top = p[0];
-        copyObj.style.right = p.length > 1 ? p[1] : "";
-        copyObj.style.bottom = p.length > 2 ? p[2] : "";
-        copyObj.style.left = p.length > 3 ? p[3] : "";        
-
-        if (p.length > 4)
+        if (isSet(p[4]))
             copyObj.style.width = p[4];
-        if (p.length > 5)
+        if (isSet(p[5]))
             copyObj.style.height = p[5];
 
-        copyObj.style.position = p.length > 6 ? p[6] : "absolute";     
-        
+        copyObj.style.position = isSet(p[6]) ? p[6] : "absolute";
     }
 
     for (var name in taggedObjects) {
@@ -473,6 +474,59 @@ window.TK.RecursiveCopy = function (objSource, objTarget, singleProperty) {
             window.TK.RecursiveCopy(objSource[n], objTarget[n]);
         }
     }
+};
+window.TK.ParsePosition = function (p) {
+    if (!p)
+        return [];
+    // Parse a _Position property and returns an array with all values
+    // Supported:
+    // - [top,right,bottom,left,width,height,tags]
+    // - L10 T20 W200 H400
+    // - L10 T20 R10 B10
+    // - X10 Y20 W200 H400 relative
+    // - [100, 200, "50px","10%", null, null, "relative"]
+
+    if (p.substr) {
+        if (p.indexOf(",") >= 0) { // 'old' style
+            p = p.split(/,/g);
+        } else {
+            var newP = [];
+            var matches = p.match(/[XYLTRBWH]\d+(%|px|pt|vw|vh)?/g);
+            for (var i = 0; i < matches.length; i++) {
+                p = p.replace(matches[i], "");
+                var c = matches[i].substr(0, 1);
+                var v = matches[i].substr(1);
+                if (c == "X" || c == "L")
+                    newP[3] = v;
+                else if (c == "Y" || c == "T")
+                    newP[0] = v;
+                else if (c == "R")
+                    newP[1] = v;
+                else if (c == "B")
+                    newP[2] = v;
+                else if (c == "W")
+                    newP[4] = v;
+                else if (c == "H")
+                    newP[5] = v;
+            }
+
+            // Rest are tags, we'll put them all in the [6] position
+            if (p.trim)
+                p = p.trim();
+            if (p)
+                newP[6] = p;
+            p = newP;
+        }
+    } else {
+        p = p.slice(); // Don't edit the existing array object as it might be observed
+    }
+
+    for (var i = 0; i < p.length; i++) {
+        if (p[i] !== null && p[i] !== undefined && !p[i].substr) {
+            p[i] = p[i].toString() + "px"; // Convert numbers to px
+        }
+    }
+    return p;
 };
 
 /// Helper functions
