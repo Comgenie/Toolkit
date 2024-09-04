@@ -367,13 +367,19 @@ TK.Draw.ColorToDifferentColor = function (s, s2, ratio) {
     }
     return "rgba(" + s.join(",") + ")";
 };
-TK.Draw.ValueToPx = function (v, total) {
+TK.Draw.ValueToPx = function (v, curIsWidth, totalWidth, totalHeight) {
     if (!v.substr)
         return v;
+    var total = curIsWidth ? totalWidth : totalHeight;
+
     if (v.indexOf("px") >= 0)
         return parseFloat(v.replace("px", ""));
     if (v.indexOf("%") >= 0)
         return total * (parseFloat(v.replace("%", "")) / 100);
+    if (v.indexOf("vw") >= 0)
+        return totalWidth * (parseFloat(v.replace("%", "")) / 100);
+    if (v.indexOf("vh") >= 0)
+        return totalHeight * (parseFloat(v.replace("%", "")) / 100);
     return parseFloat(v);
 };
 TK.Draw.SetPositionsUsingPositionProperty = function (drawableObject) {
@@ -397,33 +403,33 @@ TK.Draw.SetPositionsUsingPositionProperty = function (drawableObject) {
     };
 
     if (isSet(p[0]) && isSet(p[2])) {
-        t.Y = TK.Draw.ValueToPx(p[0], totalHeight); // 50% -> 150px
-        t.H = (totalHeight - TK.Draw.ValueToPx(p[2], totalHeight)) - t.Y; // 25% ->   (300 - 75) = 225 - 150 = 75
+        t.Y = TK.Draw.ValueToPx(p[0], false, totalWidth, totalHeight); // 50% -> 150px
+        t.H = (totalHeight - TK.Draw.ValueToPx(p[2], false, totalWidth, totalHeight)) - t.Y; // 25% ->   (300 - 75) = 225 - 150 = 75
         t.Anchor = (t.Anchor & anchorH) | TK.Draw.AnchorTop;
     } else if (isSet(p[0])) {
-        t.Y = TK.Draw.ValueToPx(p[0], totalHeight);
+        t.Y = TK.Draw.ValueToPx(p[0], false, totalWidth, totalHeight);
         t.Anchor = (t.Anchor & anchorH) | TK.Draw.AnchorTop;
     } else if (isSet(p[2])) {
-        t.Y = totalHeight - TK.Draw.ValueToPx(p[2], totalHeight);
+        t.Y = totalHeight - TK.Draw.ValueToPx(p[2], false, totalWidth, totalHeight);
         t.Anchor = (t.Anchor & anchorH) | TK.Draw.AnchorBottom;
     }
 
     if (isSet(p[1]) && isSet(p[3])) {
-        t.X = TK.Draw.ValueToPx(p[3], totalWidth);
-        t.W = (totalWidth - TK.Draw.ValueToPx(p[1], totalWidth)) - t.X;
+        t.X = TK.Draw.ValueToPx(p[3], true, totalWidth, totalHeight);
+        t.W = (totalWidth - TK.Draw.ValueToPx(p[1], true, totalWidth, totalHeight)) - t.X;
         t.Anchor = (t.Anchor & anchorV) | TK.Draw.AnchorLeft;
     } else if (isSet(p[1])) {
-        t.X = totalWidth - TK.Draw.ValueToPx(p[1], totalWidth);
+        t.X = totalWidth - TK.Draw.ValueToPx(p[1], true, totalWidth, totalHeight);
         t.Anchor = (t.Anchor & anchorV) | TK.Draw.AnchorRight;
     } else if (isSet(p[3])) {
-        t.X = TK.Draw.ValueToPx(p[3], totalWidth);
+        t.X = TK.Draw.ValueToPx(p[3], true, totalWidth, totalHeight);
         t.Anchor = (t.Anchor & anchorV) | TK.Draw.AnchorLeft;
     }
 
     if (isSet(p[4]))
-        t.W = TK.Draw.ValueToPx(p[4], totalWidth);
+        t.W = TK.Draw.ValueToPx(p[4], true, totalWidth, totalHeight);
     if (isSet(p[5]))
-        t.H = TK.Draw.ValueToPx(p[5], totalHeight);
+        t.H = TK.Draw.ValueToPx(p[5], false, totalWidth, totalHeight);
 
     if (isSet(p[6])) {
         if (p[6].indexOf("middle") >= 0)
@@ -571,26 +577,24 @@ TK.Draw.DrawableObject = {
                     var parts = this.Fill.split(/ /g);
                     var g = null;
                     var stopOffset = 5;
-                    var totalWidth = c.CanvasObj.Width;
-                    var totalHeight = c.CanvasObj.Height;
 
                     // TODO: Make sure positions and percentages are relative from the current drawableObject
 
                     if (parts[0] == "radial") {
                         g = c.createRadialGradient(
-                            (this.X + TK.Draw.ValueToPx(parts[1], this.W)) /*- c.OffsetX*/, // inner circle X
-                            (this.Y + TK.Draw.ValueToPx(parts[2], this.H)) /*- c.OffsetY*/, // inner circle Y
-                            TK.Draw.ValueToPx(parts[3], this.W), // inner circle Radius
-                            (this.X + TK.Draw.ValueToPx(parts[4], this.W)) /*- c.OffsetX*/, // outer circle X
-                            (this.Y + TK.Draw.ValueToPx(parts[5], this.H)) /*- c.OffsetY*/, // outer circle Y
-                            TK.Draw.ValueToPx(parts[6], this.W)); // outer circle Radius
+                            (this.X + TK.Draw.ValueToPx(parts[1], true, this.W, this.H)) /*- c.OffsetX*/, // inner circle X
+                            (this.Y + TK.Draw.ValueToPx(parts[2], false, this.W, this.H)) /*- c.OffsetY*/, // inner circle Y
+                            TK.Draw.ValueToPx(parts[3], true, this.W, this.H), // inner circle Radius
+                            (this.X + TK.Draw.ValueToPx(parts[4], true, this.W, this.H)) /*- c.OffsetX*/, // outer circle X
+                            (this.Y + TK.Draw.ValueToPx(parts[5], false, this.W, this.H)) /*- c.OffsetY*/, // outer circle Y
+                            TK.Draw.ValueToPx(parts[6], true, this.W, this.H)); // outer circle Radius
                         stopOffset = 7;
                     } else {
                         g = c.createLinearGradient(
-                            (this.X + TK.Draw.ValueToPx(parts[1], this.W)) /*- c.OffsetX*/, // Start gradient X
-                            (this.Y + TK.Draw.ValueToPx(parts[2], this.H)) /*- c.OffsetY*/, // Start gradient Y
-                            (this.X + TK.Draw.ValueToPx(parts[3], this.W)) /*- c.OffsetX*/, // End gradient X
-                            (this.Y + TK.Draw.ValueToPx(parts[4], this.H)) /*- c.OffsetY*/); // End gradient Y
+                            (this.X + TK.Draw.ValueToPx(parts[1], true, this.W, this.H)) /*- c.OffsetX*/, // Start gradient X
+                            (this.Y + TK.Draw.ValueToPx(parts[2], false, this.W, this.H)) /*- c.OffsetY*/, // Start gradient Y
+                            (this.X + TK.Draw.ValueToPx(parts[3], true, this.W, this.H)) /*- c.OffsetX*/, // End gradient X
+                            (this.Y + TK.Draw.ValueToPx(parts[4], false, this.W, this.H)) /*- c.OffsetY*/); // End gradient Y
                     }
                     for (var i = stopOffset; i + 1 < parts.length; i += 2) {
                         g.addColorStop(parseFloat(parts[i]), parts[i + 1]);

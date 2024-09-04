@@ -59,7 +59,7 @@
             X: 250, Y: 150,
             Fill: "#FFF",
             Text: "Hello World",
-            Font: "12px",
+            Font: "12pt Arial",
             Anchor: window.TK.Draw.AnchorMiddle | window.TK.Draw.AnchorCenter
         }
     }
@@ -119,5 +119,168 @@
 }
 </pre>
 
+    <h2>Image drawing</h2>
+    <p>Behaviour of the scaling can be changed with the .Scaling and .ImageAlign properties.</p>
+    <pre>{
+    _: TK.Draw,
+    Width: 600,
+    Height: 300,
+    Elements: {
+        BoxA: {
+            _: TK.Draw.Rect,
+            X: 110, Y: 60, W: 200, H: 100,       
+            Stroke: "#000",
+            LineWidth: 2,            
+            Anchor: window.TK.Draw.AnchorMiddle | window.TK.Draw.AnchorCenter
+        },
+        ImageA: {
+            _: TK.Draw.Image,
+            Src: "example.jpg",
+            X: 110, Y: 60, W: 198, H: 98,       
+            Scaling: 0, // Fill
+            Anchor: window.TK.Draw.AnchorMiddle | window.TK.Draw.AnchorCenter,
+        },
+        BoxB: {
+            _: TK.Draw.Rect,
+            X: 110, Y: 170, W: 200, H: 100,       
+            Stroke: "#000",
+            LineWidth: 2,            
+            Anchor: window.TK.Draw.AnchorMiddle | window.TK.Draw.AnchorCenter
+        },
+        ImageB: {
+            _: TK.Draw.Image,
+            Src: "example.jpg",
+            X: 110, Y: 170, W: 198, H: 98,       
+            Scaling: 1, // Contain
+            Anchor: window.TK.Draw.AnchorMiddle | window.TK.Draw.AnchorCenter,
+        },
+        BoxC: {
+            _: TK.Draw.Rect,
+            X: 320, Y: 60, W: 200, H: 100,       
+            Stroke: "#000",
+            LineWidth: 2,            
+            Anchor: window.TK.Draw.AnchorMiddle | window.TK.Draw.AnchorCenter
+        },
+        ImageC: {
+            _: TK.Draw.Image,
+            Src: "example.jpg",
+            X: 320, Y: 60, W: 198, H: 98,       
+            Scaling: 1, // Contain
+            Anchor: window.TK.Draw.AnchorMiddle | window.TK.Draw.AnchorCenter,
+            ImageAlign: window.TK.Draw.AnchorMiddle | window.TK.Draw.AnchorLeft,
+        },
+        BoxD: {
+            _: TK.Draw.Rect,
+            X: 320, Y: 170, W: 200, H: 100,       
+            Stroke: "#000",
+            LineWidth: 2,            
+            Anchor: window.TK.Draw.AnchorMiddle | window.TK.Draw.AnchorCenter
+        },
+        ImageD: {
+            _: TK.Draw.Image,
+            Src: "example.jpg",
+            X: 320, Y: 170, W: 198, H: 98,       
+            Scaling: 1, // Contain
+            Anchor: window.TK.Draw.AnchorMiddle | window.TK.Draw.AnchorCenter,
+            ImageAlign: window.TK.Draw.AnchorMiddle | window.TK.Draw.AnchorRight,
+        },
+        BoxE: {
+            _: TK.Draw.Rect,
+            X: 480, Y: 115, W: 100, H: 210,       
+            Stroke: "#000",
+            LineWidth: 2,            
+            Anchor: window.TK.Draw.AnchorMiddle | window.TK.Draw.AnchorCenter
+        },
+        ImageE: {
+            _: TK.Draw.Image,
+            Src: "example.jpg",
+            X: 480, Y: 115, W: 98, H: 208,       
+            Scaling: 1, // Contain
+            Anchor: window.TK.Draw.AnchorMiddle | window.TK.Draw.AnchorCenter,
+            ImageAlign: window.TK.Draw.AnchorTop | window.TK.Draw.AnchorCenter,
+        }
+    }
+}</pre>
+    <p>Image with scaling Contain</p>
+    <pre>{
+    _: TK.Draw,
+    Width: 600,
+    Height: 300,
+    Elements: {
+        BoxA: {
+            _: TK.Draw.Rect,
+            X: 110, Y: 60, W: 200, H: 100,       
+            Stroke: "#000",
+            LineWidth: 2,            
+            Anchor: window.TK.Draw.AnchorMiddle | window.TK.Draw.AnchorCenter
+        },
+        ImageA: {
+            _: TK.Draw.Image,
+            Src: "example.jpg",
+            X: 110, Y: 60, W: 198, H: 98,       
+            Scaling: 0, // Fill
+            Anchor: window.TK.Draw.AnchorMiddle | window.TK.Draw.AnchorCenter,
+        },
+        BoxB: {
+            _: TK.Draw.Rect,
+            X: 110, Y: 170, W: 200, H: 100,       
+            Stroke: "#000",
+            LineWidth: 2,            
+            Anchor: window.TK.Draw.AnchorMiddle | window.TK.Draw.AnchorCenter
+        },
+        ImageB: {
+            _: TK.Draw.Image,
+            Src: "example.jpg",
+            X: 110, Y: 170, W: 198, H: 98,       
+            Scaling: 2, // Cover
+            Anchor: window.TK.Draw.AnchorMiddle | window.TK.Draw.AnchorCenter,
+        },
+        BoxC: {
+            _: TK.Draw.Rect,
+            X: 320, Y: 60, W: 200, H: 100,       
+            Stroke: "#000",
+            LineWidth: 2,            
+            Anchor: window.TK.Draw.AnchorMiddle | window.TK.Draw.AnchorCenter
+        },
+        ImageC: {
+            _: TK.Draw.Image,
+            Src: "example.jpg",
+            X: 320, Y: 60, W: 198, H: 98,       
+            Scaling: 2, // Cover
+            Anchor: window.TK.Draw.AnchorMiddle | window.TK.Draw.AnchorCenter,
+            ImageAlign: window.TK.Draw.AnchorTop | window.TK.Draw.AnchorCenter,
+        },
+        BoxD: {
+            _: TK.Draw.Rect,
+            X: 320, Y: 170, W: 200, H: 100,       
+            Stroke: "#000",
+            LineWidth: 2,            
+            Anchor: window.TK.Draw.AnchorMiddle | window.TK.Draw.AnchorCenter
+        },
+        ImageD: {
+            _: TK.Draw.Image,
+            Src: "example.jpg",
+            X: 320, Y: 170, W: 198, H: 98,       
+            Scaling: 2, // Cover
+            Anchor: window.TK.Draw.AnchorMiddle | window.TK.Draw.AnchorCenter,
+            ImageAlign: window.TK.Draw.AnchorBottom | window.TK.Draw.AnchorCenter,
+        },
+        BoxE: {
+            _: TK.Draw.Rect,
+            X: 480, Y: 115, W: 100, H: 210,       
+            Stroke: "#000",
+            LineWidth: 2,            
+            Anchor: window.TK.Draw.AnchorMiddle | window.TK.Draw.AnchorCenter
+        },
+        ImageE: {
+            _: TK.Draw.Image,
+            Src: "example.jpg",
+            X: 480, Y: 115, W: 98, H: 208,       
+            Scaling: 2, // Cover
+            Anchor: window.TK.Draw.AnchorMiddle | window.TK.Draw.AnchorCenter,
+            ImageAlign: window.TK.Draw.AnchorMiddle | window.TK.Draw.AnchorRight,
+        }
+    }
+}</pre>
 </body>
 </html>
