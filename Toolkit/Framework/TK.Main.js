@@ -491,7 +491,7 @@ window.TK.ParsePosition = function (p) {
             p = p.split(/,/g);
         } else {
             var newP = [];
-            var matches = p.match(/[XYLTRBWH]\d+(%|px|pt|vw|vh)?/g);
+            var matches = p.match(/[XYLTRBWH][\d\-\.]+(%|px|pt|vw|vh)?/g);
             for (var i = 0; i < matches.length; i++) {
                 p = p.replace(matches[i], "");
                 var c = matches[i].substr(0, 1);
