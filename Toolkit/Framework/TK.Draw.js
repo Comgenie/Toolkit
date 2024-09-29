@@ -670,14 +670,39 @@ TK.Draw.DrawableObject = {
             var s = new Date().getTime();
             if (p.Animations.length > 100) // Clear all deleted animations from the array
                 p.Animations = p.Animations.Where(function (a) { return a; });
-            
+
+            var animObj = null;
+            for (var i = 0; i < p.Animations.length; i++) {
+                if (p.Animations[i] && p.Animations[i].I == this && p.Animations[i].P == propName) {
+                    animObj = p.Animations[i];
+                    break;
+                }
+            }
+            if (animObj == null) {
+                animObj = {
+                    I: this,
+                    P: propName,
+                };
+                p.Animations.push(animObj);
+            }
+            animObj.L = ms; // Total animation length
+            animObj.E = easing; 
+            animObj.S = s; // Start time
+
             if (typeof this[propName] === 'string' && typeof targetValue === 'string') {
                 // Colors                      
-                p.Animations.push({ I: this, P: propName, O: TK.Draw.GetColor(this[propName]), T: TK.Draw.GetColor(targetValue), L: ms, E: easing, S: s });
+                animObj.O = TK.Draw.GetColor(this[propName]);
+                animObj.T = TK.Draw.GetColor(targetValue);
+
+                //p.Animations.push({ I: this, P: propName, O: TK.Draw.GetColor(this[propName]), T: TK.Draw.GetColor(targetValue), L: ms, E: easing, S: s });
             } else if (Array.isArray(this[propName])) {
-                p.Animations.push({ I: this, P: propName, O: JSON.parse(JSON.stringify(this[propName])), T: targetValue, L: ms, E: easing, S: s });                
+                animObj.O = JSON.parse(JSON.stringify(this[propName]));
+                animObj.T = targetValue;
+                //p.Animations.push({ I: this, P: propName, O: JSON.parse(JSON.stringify(this[propName])), T: targetValue, L: ms, E: easing, S: s });                
             } else {
-                p.Animations.push({ I: this, P: propName, O: parseFloat(this[propName]), T: targetValue, L: ms, E: easing, S: s });                
+                animObj.O = parseFloat(this[propName]);
+                animObj.T = targetValue;
+                //p.Animations.push({ I: this, P: propName, O: parseFloat(this[propName]), T: targetValue, L: ms, E: easing, S: s });                
             }
             p.Refresh();
         }
