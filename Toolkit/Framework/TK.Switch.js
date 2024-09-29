@@ -28,7 +28,10 @@ window.TK.Switch = {
                 this.TextAfter = this.DataSettings.TextAfter;
         }
 
-        this.className = this.className.replace(/toolkitSwitchActive/g, "").replace(/toolkitSwitchInactive/g, "") + " " + (this.Data ? "toolkitSwitchActive" : "toolkitSwitchInactive");
+        this.className = this.className.replace(/toolkitSwitchActive/g, "").replace(/toolkitSwitchInactive/g, "").replace(/toolkitSwitchDisabled/g, "").replace(/toolkitSwitchReadOnly/g, "") + " "
+            + (this.disabled ? "toolkitSwitchDisabled" : "")
+            + " " + (this.readOnly ? "toolkitSwitchReadOnly" : "")
+            + " " + (this.Data ? "toolkitSwitchActive" : "toolkitSwitchInactive");
         this.Elements.TextBefore.innerText = this.TextBefore;
         this.Elements.TextBefore.style.display = this.TextBefore ? "" : "none";
         this.Elements.TextAfter.innerText = this.TextAfter;
