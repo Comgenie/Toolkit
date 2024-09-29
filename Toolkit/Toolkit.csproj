@@ -69,6 +69,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Examples\ArrayExtensions.html" />
+    <Content Include="Examples\example.jpg" />
     <Content Include="Examples\Sankey.html" />
     <Content Include="Examples\ImageEditor.html" />
     <Content Include="Examples\HtmlEditor.html" />

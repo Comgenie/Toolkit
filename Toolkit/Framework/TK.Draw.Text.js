@@ -67,10 +67,10 @@ TK.Draw.Text = {
                     var sentenceLength = 0;
                     for (var i = 0; i < parts.length; i++) {
                         var curText = parts[i] + (i + 1 == parts.length ? "" : " ");
-                        var curWidth = Math.ceil(this.MeasureWidth(curText + ".", this.Font)); // The dot gives us some breathing space to deal with measureText inaccuracies
+                        var curWidth = Math.ceil(this.MeasureWidth(curText, this.Font)); 
                         if (sentenceLength > 0 && sentenceLength + curWidth >= this.W) {
                             newText += "\n";
-                            sentenceLength = 0;
+                            sentenceLength = curWidth;
                         } else {
                             sentenceLength += curWidth;
                         }

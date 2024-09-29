@@ -82,7 +82,7 @@ return copyObj;};window.TK.P=function(name,observe){return{ToolkitPropertyRefere
 continue;if(!(objSource[n]instanceof Object)||typeof objSource[n]=="function"){objTarget[n]=objSource[n];}else if(Array.isArray(objSource[n])){if(!objTarget[n])
 objTarget[n]=[];for(var i=0;i<objSource[n].length;i++){objTarget[n].push(objSource[n][i]);}}else{if(!objTarget[n])
 objTarget[n]={};window.TK.RecursiveCopy(objSource[n],objTarget[n]);}}};window.TK.ParsePosition=function(p){if(!p)
-return[];if(p.substr){if(p.indexOf(",")>=0){p=p.split(/,/g);}else{var newP=[];var matches=p.match(/[XYLTRBWH]\d+(%|px|pt|vw|vh)?/g);for(var i=0;i<matches.length;i++){p=p.replace(matches[i],"");var c=matches[i].substr(0,1);var v=matches[i].substr(1);if(c=="X"||c=="L")
+return[];if(p.substr){if(p.indexOf(",")>=0){p=p.split(/,/g);}else{var newP=[];var matches=p.match(/[XYLTRBWH][\d\-\.]+(%|px|pt|vw|vh)?/g);for(var i=0;i<matches.length;i++){p=p.replace(matches[i],"");var c=matches[i].substr(0,1);var v=matches[i].substr(1);if(c=="X"||c=="L")
 newP[3]=v;else if(c=="Y"||c=="T")
 newP[0]=v;else if(c=="R")
 newP[1]=v;else if(c=="B")
@@ -680,4 +680,7 @@ return;this.Data=!this.Data;if(this.onchange)
 this.onchange();this.Init();},Init:function(){if(this.DataSettings){if(this.DataSettings.TextBefore!==undefined)
 this.TextBefore=this.DataSettings.TextBefore;if(this.DataSettings.TextAfter!==undefined)
 this.TextAfter=this.DataSettings.TextAfter;}
-this.className=this.className.replace(/toolkitSwitchActive/g,"").replace(/toolkitSwitchInactive/g,"")+" "+(this.Data?"toolkitSwitchActive":"toolkitSwitchInactive");this.Elements.TextBefore.innerText=this.TextBefore;this.Elements.TextBefore.style.display=this.TextBefore?"":"none";this.Elements.TextAfter.innerText=this.TextAfter;this.Elements.TextAfter.style.display=this.TextAfter?"":"none";},GetValue:function(){return this.Data;},Elements:{TextBefore:{},SwitchContainer:{Elements:{Indicator:{_:"div"}}},TextAfter:{},}};if(window.TK.Form){window.TK.Form.DefaultTemplates.switch={_:TK.Switch};}
+this.className=this.className.replace(/toolkitSwitchActive/g,"").replace(/toolkitSwitchInactive/g,"").replace(/toolkitSwitchDisabled/g,"").replace(/toolkitSwitchReadOnly/g,"")+" "
++(this.disabled?"toolkitSwitchDisabled":"")
++" "+(this.readOnly?"toolkitSwitchReadOnly":"")
++" "+(this.Data?"toolkitSwitchActive":"toolkitSwitchInactive");this.Elements.TextBefore.innerText=this.TextBefore;this.Elements.TextBefore.style.display=this.TextBefore?"":"none";this.Elements.TextAfter.innerText=this.TextAfter;this.Elements.TextAfter.style.display=this.TextAfter?"":"none";},GetValue:function(){return this.Data;},Elements:{TextBefore:{},SwitchContainer:{Elements:{Indicator:{_:"div"}}},TextAfter:{},}};if(window.TK.Form){window.TK.Form.DefaultTemplates.switch={_:TK.Switch};}

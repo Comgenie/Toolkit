@@ -119,6 +119,33 @@
 }
 </pre>
 
+    <h3>Text scaling</h3>
+    <p>Text can be scaled using a few different options using the .Scaling property.</p>
+    <p>this.Scaling == TK.Draw.TextScalingResize || this.Scaling == TK.Draw.TextScalingResizeIfNeeded</p>
+    <pre>{
+    _: TK.Draw,
+    Width: 500,
+    Height: 300,
+    Elements: {
+        SomeRect: {
+            _: TK.Draw.Rect,
+            X: 250, Y: 150, W: 100, H: 100,            
+            Fill: "#00F",
+            Anchor: window.TK.Draw.AnchorMiddle | window.TK.Draw.AnchorCenter
+        },
+        SomeText: {
+            _: TK.Draw.Text,
+            X: 250, Y: 150, W: 100, H: 100,
+            Fill: "#FFF",
+            Text: "This is a long text which should be broken up in multiple lines.",
+            Font: "12pt Arial",
+            Scaling: TK.Draw.TextScalingWhiteSpaceBreak,
+            Anchor: TK.Draw.AnchorMiddle | TK.Draw.AnchorCenter,
+            TextAlign: TK.Draw.AnchorMiddle | TK.Draw.AnchorLeft
+        }
+    }
+}</pre>
+
     <h2>Image drawing</h2>
     <p>Behaviour of the scaling can be changed with the .Scaling and .ImageAlign properties.</p>
     <pre>{

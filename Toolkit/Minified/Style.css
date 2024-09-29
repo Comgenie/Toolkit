@@ -799,7 +799,19 @@ th.toolkitHasFilter > .toolkitFilterButton {
     background-color: var(--toolkit-main-color);
     margin-left: 30px;
 }
-
+.toolkitSwitch.toolkitSwitchDisabled .Element-SwitchContainer {
+    border-color: #666;
+    background-color: #eee;
+}
+.toolkitSwitch.toolkitSwitchDisabled .Element-Indicator{
+    background-color: #666;
+}
+.toolkitSwitch.toolkitSwitchActive.toolkitSwitchDisabled .Element-SwitchContainer:hover .Element-Indicator {
+    margin-left: 30px;
+}
+.toolkitSwitch.toolkitSwitchInactive.toolkitSwitchDisabled .Element-SwitchContainer:hover .Element-Indicator {
+    margin-left: 0px;
+}
 .toolkitSlider {
     display: inline-block;
 }
