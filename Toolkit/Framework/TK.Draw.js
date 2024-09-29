@@ -16,13 +16,26 @@ TK.Draw = {
     MaxZoom: 10,
     Animations: [],
     Init: function () {
-        this.width = this.Width * this.Scale;
-        this.height = this.Height * this.Scale;
-        this.style.width = this.Width + "px";
-        this.style.height = this.Height + "px";
         this.Context = this.GetContext();
         this.Context.CanvasObj = this;
-        this.Refresh();        
+        this.SetSize(this.Width, this.Height);      
+    },
+    SetSize: function (width, height, parsePositionTags) {
+        this.Width = width;
+        this.Height = height;
+        this.width = width * this.Scale;
+        this.height = height * this.Scale;
+        this.style.width = width + "px";
+        this.style.height = height + "px";
+        if (parsePositionTags && this.SortedElements) {
+            for (var i = 0; i < this.SortedElements.length; i++) {
+                if (this.SortedElements[i]._NormalizePositions !== false)
+                    TK.Draw.SetPositionsUsingPositionProperty(this.SortedElements[i]);
+                if (this.SortedElements[i].Resize)
+                    this.SortedElements[i].Resize();
+            }
+        }
+        this.Refresh();
     },
     GetContext: function () {
         return this.getContext("2d");
@@ -79,6 +92,8 @@ TK.Draw = {
                 this.Animations[i] = null;
                 if (a.I.AnimationEnded)
                     a.I.AnimationEnded(a.P);
+                if (a.AnimationEnded)
+                    a.AnimationEnded(a.P);
                 
             }
             if (Array.isArray(a.O)) {
@@ -231,8 +246,15 @@ TK.Draw = {
                     break;
                 }
             }
-            if (match || (r[0] < x && r[0] + r[2] > x && r[1] < y && r[1] + r[3] > y && (!el.CheckMouseOver || el.CheckMouseOver(x, y))) && !stoppedPropagation) {                                                                    
-                if (func != "MouseOut" && (func != "MouseOver" || !el.CurrentlyMouseOver) ) {                    
+            if (match || (r[0] < x && r[0] + r[2] > x && r[1] < y && r[1] + r[3] > y && (!el.CheckMouseOver || el.CheckMouseOver(x, y))) && !stoppedPropagation) {          
+
+                if (func == "MouseDown" && this.CurrentMouseDownElements && this.CurrentMouseDownElements.indexOf(el) >= 0) {
+                    el.CurrentlyMouseOver = true;
+                    eventHandled = true;
+                    continue;
+                }
+
+                if (func != "MouseOut" && (func != "MouseOver" || !el.CurrentlyMouseOver)) {            
                     if (el[func](x, y) === true) {
                         stoppedPropagation = true;
                         el.StoppedPropagation = true;
