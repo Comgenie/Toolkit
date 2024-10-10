@@ -768,6 +768,7 @@ window.TK.Table = {
             }
             tr.Elements[name] = {
                 _: templateToUse,
+                DataColumnName: name,
                 Data: rowObj[name],
                 Row: rowObj,
                 Table: this
