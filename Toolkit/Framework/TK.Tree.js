@@ -1,6 +1,6 @@
 ﻿"use strict";
 window.TK.Tree = {
-    _: "ul",    
+    _: "ul",
     IdField: "Id",
     ParentIdField: "ParentId",
     CurrentFilter: null,
@@ -9,6 +9,7 @@ window.TK.Tree = {
     className: "tree toolkitTree",
     EnableFullRowExpand: false,
     AutoExpandChildNodesDuringFilter: true, // When applying filter with showAllChildNodes=true and this setting is set to false, the child rows will be visible but not expanded
+    inAddRowsFunction: false, // used by functions inside object do not override
     Template: {
         _: "li",
         Data: null,
@@ -24,12 +25,12 @@ window.TK.Tree = {
     },
     Collapsed: function (row, byUserClick, rowElement) {
 
-    },    
+    },
     Init: function () {
         if (this.Rows.length == 0)
             return;
         this.Refresh();
-    },    
+    },
     AddExpandButtonToRowElement: function (rowElement) {
         var obj = this;
         if (rowElement.SubList)
@@ -70,56 +71,82 @@ window.TK.Tree = {
     },
     AddRows: function (rows) {
         var obj = this;
+        obj.inAddRowsFunction = true;
         if (!this.CurRows)
             this.CurRows = {};
 
         // First add all the rows
-        var ignoredRows = [];
         var addedRows = [];
-
         for (var i = 0; i < rows.length; i++) {
-            var rowId = rows[i][this.IdField];
+            // Order at the end for performance
+            var rowElement = obj.AddRow(rows[i], false);
 
-            if (this.CurRows["id" + rowId]) { // Won't insert duplicated id's
-                ignoredRows.push(rows[i]);
-                continue;
-            }
-            var rowElement = this.Add({
-                _: this.Template,
-                Data: rows[i],
-                onclick: function (e) {
-                    if (e && e.target && (e.target.tagName == "INPUT" || e.target.tagName == "SELECT" || e.target.tagName == "TEXTAREA" || e.target.PreventRowClick))
-                        return;
-                    obj.RowClick(this.Data, e, this);
-                    if (obj.EnableFullRowExpand && this.ExpandCollapseButton) {
-                        this.ExpandCollapseButton.click();
-                    }
-                    e.stopPropagation();
-                    return false;
-                }
-            });
-
-            if (rows[i].AlwaysShowExpandButton) {
-                this.AddExpandButtonToRowElement(rowElement);
-            }
-
-            if (this.CurrentFilter && rowElement.innerText.toLowerCase().indexOf(this.CurrentFilter) < 0) {
-                rowElement.style.display = "none";
-            }
-            this.CurRows["id" + rowId] = rowElement;            
             addedRows.push(rows[i]);
-            this.Rows.push(rows[i]);
         }
 
-        // Then move them to the right items
-        for (var i = 0; i < rows.length; i++) {            
-            if (ignoredRows.indexOf(rows[i]) >= 0)
-                continue;
+        obj.OrderRows(addedRows);
+        obj.inAddRowsFunction = false;
+        return addedRows;
+    },
+    AddRow: function (data) {
+        let obj = this;
+
+        if (!this.CurRows)
+            this.CurRows = {};
+
+        let rowId = data[this.IdField];
+
+        if (this.CurRows["id" + rowId]) {
+            console.warn(rowId + ' row id is already added and must be unique. Row not added.');
+            return;
+        }
+
+        let row = obj.Add({
+            _: obj.Template,
+            TreeRoot: obj,
+            Data: data,
+            Row: {},
+            onclick: function (e) {
+                let rowObj = this;
+                if (e && e.target && (e.target.tagName == "INPUT" || e.target.tagName == "SELECT" || e.target.tagName == "TEXTAREA" || e.target.PreventRowClick))
+                    return;
+                obj.RowClick(rowObj.Data, e, rowObj);
+                if (rowObj.EnableFullRowExpand && rowObj.ExpandCollapseButton) {
+                    rowObj.ExpandCollapseButton.click();
+                }
+                e.stopPropagation();
+                return false;
+            }
+        });
+        row.Row = row;
+
+        if (data.AlwaysShowExpandButton) {
+            obj.AddExpandButtonToRowElement(row);
+        }
+
+        if (obj.CurrentFilter && row.innerText.toLowerCase().indexOf(this.CurrentFilter) < 0) {
+            row.style.display = "none";
+        }
+
+        obj.CurRows["id" + rowId] = row;
+        obj.Rows.push(data);
+        if (!obj.inAddRowsFunction) {
+            obj.OrderRows(obj.Rows);
+        }
+        return row;
+    },
+    OrderRows: function (rows) {
+        const obj = this;
+        // Move rows to right place
+        for (var i = 0; i < rows.length; i++) {
+            // if (this.IgnoredRows.indexOf(rows[i]) >= 0)
+            //     continue;
             var rowId = rows[i][this.IdField];
             var parentId = rows[i][this.ParentIdField];
 
             if (!parentId || !this.CurRows["id" + parentId])
                 continue;
+
 
             // Add expand button to the parent item
             var parent = this.CurRows["id" + parentId];
@@ -127,9 +154,20 @@ window.TK.Tree = {
 
             // Move this item to the right parent element
             parent.SubList.appendChild(this.CurRows["id" + rowId]);
+            this.CurRows["id" + rowId].Parent = parent;
         }
-
-        return addedRows;
+        // After ordering set tree depth for each row
+        for (const row of obj.children) {
+            if (!row || !row.Row)
+                continue;
+            row.TreeDepth = 0;
+            obj.RecursiveSublist(row, function (childRow) {
+                if (!childRow.Parent.TreeDepth)
+                    childRow.TreeDepth = 1;
+                else
+                    childRow.TreeDepth = childRow.Parent.TreeDepth + 1;
+            });
+        }
     },
     RemoveRows: function (rows) {
         for (var i = 0; i < rows.length; i++) {
@@ -151,6 +189,30 @@ window.TK.Tree = {
         this.CurRows = {};
         this.AddRows(rows);
     },
+    RecursiveSublist: function (row, subItemFunction) {
+        const obj = this;
+        if (!row.SubList)
+            return;
+
+        for (const rowDescendant of row.SubList.childNodes) {
+            // if descendant does not have the Row property it is not a generated row.
+            if (!rowDescendant.Row)
+                continue;
+
+            subItemFunction(rowDescendant);
+            obj.RecursiveSublist(rowDescendant, subItemFunction);
+        }
+    },
+    RecursiveParent: function (row, parentFunction) {
+        const obj = this;
+        // Check if parent is a generated row
+        if (!row.Parent || !row.Parent.Row)
+            return;
+
+        parentFunction(row.Parent);
+        obj.RecursiveParent(row.Parent, parentFunction);
+    },
+
     ApplyFilter: function (filter, showAllChildNodes, callBackFoundRows) {
         filter = filter.toLowerCase();
         if (filter == "") {
@@ -192,8 +254,8 @@ window.TK.Tree = {
                         if (row.ExpandCollapseButton)
                             row.ExpandCollapseButton.Update();
                     }
-                    
-                    if (showAllChildNodes && row.SubList) {                        
+
+                    if (showAllChildNodes && row.SubList) {
                         var subLists = [row.SubList];
                         for (var j = 0; j < subLists.length; j++) {
                             var curList = subLists[j];
@@ -239,7 +301,7 @@ window.TK.Tree = {
                                 row.ExpandCollapseButton.Update();
                         }
                         row.style.display = "";
-                    }                    
+                    }
                 }
             }
         }
@@ -264,7 +326,7 @@ window.TK.Tree = {
         row.style.display = "";
         if (row.SubList) {
             this.Expanded(row.Data, false, row);
-            row.className = row.className.replace(/collapsed/g, "") + " expanded";            
+            row.className = row.className.replace(/collapsed/g, "") + " expanded";
             row.SubList.style.display = "";
         }
         while (row.parentNode.Rows == undefined) {
@@ -281,14 +343,15 @@ window.TK.Tree = {
     },
     RowClick: function (rowObj, jsEvent) { }
 };
+
 window.TK.AjaxTree = {
     _: window.TK.Tree,
     Url: null,
-    Post: "",
+    Post: null,
     AjaxSettings: {},
-    Init: function () {
-        this.Clear();
+    Init: function (callback) {
         var obj = this;
+        obj.Clear();
         if (this.Url) {
             Ajax.do(this.Url, this.Post, function (response) {
                 if (response && response.substr)
@@ -296,8 +359,189 @@ window.TK.AjaxTree = {
                 obj.Rows = response;
                 obj.Refresh();
                 obj.Update();
+                if (callback) {
+                    callback.apply(obj);
+                }
             }, undefined, this.AjaxSettings);
         }
+    },
+    Update: function () { }
+};
+
+// Control and shift keys are supported. 
+// For switching a parent and keep the rest of the selection use the control key.
+// For selecting multiple checkboxes next to each other use the shift key.
+window.TK.FormTree = {
+    _: window.TK.Tree,
+    ReturnDataObject: false,
+    inAddCheckboxesFunction: false, // used by functions inside object do not override
+    Init: function () {
+        if (this.Rows.length == 0)
+            return;
+        let obj = this;
+        const originalAddRows = obj.AddRows;
+        obj.AddRows = function (rows) {
+            if (!rows) return;
+            originalAddRows.apply(obj, [rows]);
+            obj.AddCheckBoxes();
+        };
+        const originalAddRow = obj.AddRow;
+        obj.AddRow = function (row, orderRows) {
+            const rowNode = originalAddRow.apply(obj, [row, orderRows]);
+            obj.AddCheckBox(rowNode);
+        }
+        obj.Refresh();
+    },
+    CheckBoxChange: function (changedRow, checkedRows) { },
+    CheckBoxClick: function (event, row) {
+        // Set all decendants to the same value
+        let sublistCheck = function (row) {
+            obj.RecursiveSublist(row, function (rowDescendant) {
+                let box = rowDescendant.CheckBox;
+                if (box) {
+                    box.checked = checkboxObj.checked;
+                    box.indeterminate = false;
+                }
+            });
+        };
+
+        // Check parent nodes and their childeren to set checkbox value
+        let parentCheck = function (row) {
+            obj.RecursiveParent(row, function (parentRow) {
+                let checked = true;
+                let indeterminate = false;
+                obj.RecursiveSublist(parentRow, function (childRow) {
+                    let box = childRow.CheckBox;
+                    if (box) {
+                        checked = checked && box.checked;
+                        indeterminate = indeterminate || box.checked;
+                    }
+                });
+                // If checked is true here, all items are checked so indeterminate is false
+                indeterminate = !checked && indeterminate;
+
+                parentRow.CheckBox.checked = checked;
+                parentRow.CheckBox.indeterminate = indeterminate;
+
+            });
+        };
+
+        let obj = this;
+        let checkboxObj = row.CheckBox;
+
+        // Control only selects that single specific row
+        if (event.ctrlKey) {
+            obj.lastBoxClick = checkboxObj;
+            // Call change function
+            obj.CheckBoxChange(row, obj.Checkboxes.filter(b => b.checked).map(b => b.Parent));
+            return;
+        }
+
+        // Shift key functionality
+        if (event.shiftKey && obj.lastBoxClick) {
+            // Dont remember last click when shift is pressed
+
+            // When shift clicked on same box deselect all children and check parent
+            if (obj.lastBoxClick === checkboxObj) {
+                obj.RecursiveSublist(checkboxObj.Parent, function (row) { row.CheckBox.checked = false; });
+                checkboxObj.indeterminate = false;
+                checkboxObj.checked = true;
+
+                // Call change function
+                obj.CheckBoxChange(row, obj.Checkboxes.filter(b => b.checked).map(b => b.Parent));
+                return;
+            }
+            // Filter and set right checkboxes based on checkbox Id
+            let goUp = checkboxObj.TreeId < obj.lastBoxClick.TreeId;
+            let cboxes = obj.Checkboxes.filter(box => {
+                if (goUp)
+                    return box.TreeId < obj.lastBoxClick.TreeId && box.TreeId >= checkboxObj.TreeId;
+                return box.TreeId > obj.lastBoxClick.TreeId && box.TreeId <= checkboxObj.TreeId;
+            });
+            cboxes.forEach(b => b.checked = obj.lastBoxClick.checked);
+
+            sublistCheck(row.TreeDepth <= obj.lastBoxClick.Parent.Row.TreeDepth ? row : obj.lastBoxClick.Parent.Row);
+            parentCheck(row.TreeDepth >= obj.lastBoxClick.Parent.Row.TreeDepth ? row : obj.lastBoxClick.Parent.Row);
+
+            // Call change function
+            obj.CheckBoxChange(row, obj.Checkboxes.filter(b => b.checked).map(b => b.Parent));
+            return;
+        }
+
+        obj.lastBoxClick = row.CheckBox;
+
+        sublistCheck(row);
+        parentCheck(row);
+
+        // Call change function
+        obj.CheckBoxChange(row, obj.Checkboxes.filter(b => b.checked).map(b => b.Parent));
+    },
+    AddCheckBoxes: function () {
+        const obj = this;
+        obj.inAddCheckboxesFunction = true;
+        for (const rowId in obj.CurRows) {
+            const row = obj.CurRows[rowId];
+            obj.AddCheckBox(row);
+        }
+        // Give each checkbox a tree Id
+        obj.IndexCheckboxes();
+        obj.inAddCheckboxesFunction = false;
+    },
+    AddCheckBox: function (row) {
+        const obj = this;
+        if (!row || row.CheckBox || !row.firstChild)
+            return;
+
+        let checkbox = TK.Initialize({
+            _: "input",
+            type: "checkbox",
+            className: "TKtreeCheckbox"
+        });
+        checkbox.onclick = function (e) { obj.CheckBoxClick(e, row); };
+        row.CheckBox = checkbox;
+        checkbox.Parent = row;
+
+        if (row.firstChild.classList.contains('expandCollapseButton') && row.childNodes.length > 1)
+            row.insertBefore(checkbox, row.childNodes[1]);
+        else
+            row.insertBefore(checkbox, row.firstChild);
+        if (!obj.inAddCheckboxesFunction)
+            obj.IndexCheckboxes();
+    },
+    IndexCheckboxes: function () {
+        const obj = this;
+        // Give each checkbox a tree Id
+        if (obj.parentNode) {
+            obj.Checkboxes = [];
+            var lis = obj.parentNode.querySelectorAll(':scope ul>li>input.TKtreeCheckbox');
+            if (lis)
+                lis.forEach((a, i) => { a.TreeId = i + 1; obj.Checkboxes.push(a); });
+        }
+    },
+    GetValue: function () {
+        let obj = this;
+        let result = [];
+        for (const rowId in obj.CurRows) {
+            const row = obj.CurRows[rowId];
+            if (row.CheckBox.checked) {
+
+                result.push(row.Data[obj.IdField]);
+            }
+        }
+
+        return result;
+    },
+    Checkboxes: []
+}
+
+window.TK.AjaxFormTree = {
+    _: window.TK.FormTree,
+    Url: null,
+    Post: null,
+    AjaxSettings: {},
+    Init: function () {
+        let obj = this;
+        window.TK.AjaxTree.Init.apply(obj, [window.TK.FormTree.Init]);
     },
     Update: function () { }
 };
