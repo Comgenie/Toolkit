@@ -209,6 +209,7 @@ window.TK.Form = {
                     optionEle.ValueObj = this.Values[i];
                     this.appendChild(optionEle);
                 }
+
                 if (this.Data !== undefined && this.Data !== null) {
                     this.value = this.Data.toString(); // Always set a string for compatibility reasons
                     // Set Data to null so GetValue will return value from here on
