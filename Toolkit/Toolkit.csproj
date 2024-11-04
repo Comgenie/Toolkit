@@ -100,6 +100,7 @@
     <Content Include="Examples\Page.html" />
     <Content Include="Examples\GettingStarted.html" />
     <Content Include="Examples\Table.html" />
+    <Content Include="Examples\TreeExample.txt" />
     <Content Include="Framework\Ajax.js" />
     <Content Include="Framework\ArrayExtensions.js" />
     <Content Include="Framework\TK.AjaxList.js" />
