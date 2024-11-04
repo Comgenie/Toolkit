@@ -1,0 +1,36 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>TK.Dropdown</title>
+    <link href="../Style.css" rel="stylesheet" />
+    <script src="/Framework/TK.Main.js"></script>
+    <script src="/Framework/TK.Draw.js"></script>
+    <script src="/Framework/TK.Draw.Line.js"></script>
+    <script src="/Framework/TK.Draw.LineThroughPoints.js"></script>
+    <script src="/Framework/TK.Draw.Rect.js"></script>
+    <script src="/Framework/TK.Draw.Text.js"></script>
+    <script src="/Framework/TK.Draw.Circle.js"></script>
+    <script src="/Framework/TK.Draw.Image.js"></script>
+    <script src="/Framework/TK.Sankey.js"></script>
+    <script src="/Framework/ArrayExtensions.js"></script>
+    <script src="Example.js"></script>
+    <link href="/Minified/Style.css" rel="stylesheet" />
+</head>
+<body>
+    <a href="/" class="home">Toolkit</a>
+
+    <h1>TK.Sankey</h1>
+    <h2>Sankey component</h2>
+    <pre>
+{
+    _: TK.Sankey,
+    Width: 800, 
+    Height: 600,
+    Nodes: [{ NodeId: "Node1", Name: "Node 1", Color: "#0081D5" }, { NodeId: "Node2", Name: "Node 2", Color: "#0081D5" }, { NodeId: "Node3", Name: "Node 3", Color: "#0081D5" } ],
+    Links: [{ Source: "Node1", Target: "Node2", Value: 100, Color: "#FF9947" }, { Source: "Node1", Target: "Node3", Value: 200, Color: "#339947" }]
+}
+</pre>
+
+</body>
+</html>

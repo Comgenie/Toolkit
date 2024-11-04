@@ -69,6 +69,8 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Examples\ArrayExtensions.html" />
+    <Content Include="Examples\example.jpg" />
+    <Content Include="Examples\Sankey.html" />
     <Content Include="Examples\ImageEditor.html" />
     <Content Include="Examples\HtmlEditor.html" />
     <Content Include="Examples\Draw.html" />
@@ -87,6 +89,7 @@
     <Content Include="Examples\Event.html" />
     <Content Include="Examples\ClientStorage.html" />
     <Content Include="Examples\ButtonSwitcher.html" />
+    <Content Include="Examples\Dropdown.html" />
     <Content Include="Examples\Switch.html" />
     <Content Include="Examples\Slider.html" />
     <Content Include="Examples\ServerStorage.html" />
@@ -102,12 +105,19 @@
     <Content Include="Framework\TK.AjaxList.js" />
     <Content Include="Framework\TK.ButtonSwitcher.js" />
     <Content Include="Framework\TK.ClientStorage.js" />
+    <Content Include="Framework\TK.Draw.Image.js" />
+    <Content Include="Framework\TK.Draw.LineThroughPoints.js" />
+    <Content Include="Framework\TK.Draw.Rect.js" />
+    <Content Include="Framework\TK.Draw.Line.js" />
+    <Content Include="Framework\TK.Draw.Text.js" />
     <Content Include="Framework\TK.Slider.js" />
+    <Content Include="Framework\TK.Dropdown.js" />
     <Content Include="Framework\TK.Switch.js" />
     <Content Include="Framework\TK.ImageEditor.js" />
     <Content Include="Framework\TK.HtmlEditor.js" />
     <Content Include="Framework\TK.ServerStorage.js" />
     <Content Include="Framework\TK.ServerChannel.js" />
+    <Content Include="Framework\TK.Sankey.js" />
     <Content Include="Framework\TK.Toast.js" />
     <Content Include="Framework\TK.Gauge.js" />
     <Content Include="Framework\TK.Draw.js" />
@@ -132,7 +142,9 @@
     <Content Include="Minified\Style.css" />
     <Content Include="Minified\Svg.js" />
     <Content Include="Minified\Toolkit.js" />
+    <Content Include="Minified\Toolkit.js.txt" />
     <Content Include="Minified\ToolkitFull.js" />
+    <Content Include="Minified\ToolkitFull.js.txt" />
     <Content Include="Style.css" />
     <Content Include="Web.config">
       <SubType>Designer</SubType>
@@ -147,6 +159,7 @@
     <Content Include="Examples\ExamplePage.txt" />
     <Content Include="Framework\TK.Interface.js" />
     <Content Include="Framework\TK.Donut.js" />
+    <Content Include="Framework\TK.Draw.Circle.js" />
     <None Include="packages.config" />
     <None Include="Properties\PublishProfiles\Toolkit - Web Deploy.pubxml" />
     <None Include="Properties\PublishProfiles\Toolkit - Web Deploy1.pubxml" />

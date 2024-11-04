@@ -2,7 +2,6 @@
 /* Minify Order(200) */
 
 TK.Interface = {
-    _Position: ["0px", "0px", "0px", "0px"],
     CurrentUserTemplate: null,
     CurrentLogoTemplate: null,
     DefaultContent: "Index",
@@ -13,7 +12,6 @@ TK.Interface = {
     ResponsiveFullThreshold: 700,
     EnableMenu: true,
     Content: {},
-    
 
     HamburgerIcon: null, // <svg> </svg> data
 
