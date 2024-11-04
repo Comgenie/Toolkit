@@ -19,6 +19,22 @@
         }
     </style>
 </head>
+<script>
+    var dTemplates = window.TK.Form.DefaultTemplates;
+    for(const [key, value] of Object.entries(dTemplates)){
+        const originalInit = dTemplates[key].Init;
+        if(originalInit){
+            dTemplates[key].Init = function(){
+                originalInit.apply(this);
+                var text = this?.DataSettings?.Appendum;
+                if(text && this?.Parent){
+                    console.log(text);
+                this.Parent.Add({_: "span", innerText: text});
+                }
+            }
+        }
+    }
+</script>
 <body>
     <a href="/" class="home">Toolkit</a>
 
@@ -32,7 +48,7 @@
     Model: {
         Name: "Duck",
         Active: true,
-        Age: 5
+        Age: 5,
     },
     Save: function(newModel) {
         alert(JSON.stringify(newModel));
@@ -57,7 +73,7 @@
         From: { Type: "date", DisplayName: "Active From" },
 
         // Marking a field as required
-        Name: { Required: true, PlaceHolder: "Name here" },
+        Name: { Required: true, PlaceHolder: "Name here", Appendum: "test" },
 
         // Hide the ID field (Original result will still be available in the saved model)
         Id: { Type: "ignore"},
