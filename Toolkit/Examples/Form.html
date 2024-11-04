@@ -19,22 +19,6 @@
         }
     </style>
 </head>
-<script>
-    var dTemplates = window.TK.Form.DefaultTemplates;
-    for(const [key, value] of Object.entries(dTemplates)){
-        const originalInit = dTemplates[key].Init;
-        if(originalInit){
-            dTemplates[key].Init = function(){
-                originalInit.apply(this);
-                var text = this?.DataSettings?.Appendum;
-                if(text && this?.Parent){
-                    console.log(text);
-                this.Parent.Add({_: "span", innerText: text});
-                }
-            }
-        }
-    }
-</script>
 <body>
     <a href="/" class="home">Toolkit</a>
 
