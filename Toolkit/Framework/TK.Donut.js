@@ -35,6 +35,7 @@ TK.Donut = {
     LegendStyle: 0, // 0 = Name only, 1 = Value only, 2 = Both
     LegendSize: 0, // 0 = Auto
     LegendLineHeight: 25,
+    Click: null, // function (valuePart) { },
 
     Init: function () {
         if (!this.Size)
@@ -50,6 +51,7 @@ TK.Donut = {
     },
     Refresh: function () {
         this.Canvas.Clear();
+        var obj = this;
 
         var total = 0;
         var countLegend = 0;
@@ -128,7 +130,26 @@ TK.Donut = {
                 DonutSize: this.DonutSize,
                 X: middlePointX, Y: middlePointY, W: this.Size, H: this.Size, Size: size, Angle: curAngle, Extrude: 10,
                 Fill: this.Values[i].Color,
+                Value: this.Values[i],
                 Anchor: window.TK.Draw.AnchorCenter | window.TK.Draw.AnchorMiddle,
+                MouseOver: function () {
+                    if (obj.EnableLegend || obj.Click) {
+                        if (this.Value.LegendElement)
+                            this.Value.LegendElement.Elements.Text.Animate("X", 20, 150);
+                        this.Animate("Extrude", 10, 150);
+                    }
+                },
+                MouseOut: function () {
+                    if (obj.EnableLegend || obj.Click) {
+                        if (this.Value.LegendElement)
+                            this.Value.LegendElement.Elements.Text.Animate("X", 15, 150);
+                        this.Animate("Extrude", this.Value.Extrude ? this.Value.Extrude : 0, 150);
+                    }
+                },
+                Click: function () {
+                    if (obj.Click)
+                        obj.Click(this.Value);
+                }
             });            
             donutPart.Animate("W", this.Size * this.FinalSizeRatio, this.AnimationLength, window.TK.Draw.EaseBounce);
 
@@ -152,8 +173,7 @@ TK.Donut = {
                 var maxSizeFromMiddle = this.Size * this.FinalSizeRatio * 0.5;
                 if (this.Values[i].Extrude) {
                     maxSizeFromMiddle += this.Values[i].Extrude;
-                }                
-                
+                }
 
                 var middleRad = (curAngle + (size * 0.5)) * Math.PI / 180;
                 var x = Math.cos(middleRad) * maxSizeFromMiddle * (this.DonutSize * 1.5);
@@ -270,9 +290,11 @@ TK.Donut = {
                         return [this.X, this.Y, obj.LegendSize, obj.LegendLineHeight];
                     },
                     MouseOver: function () {                        
+                        this.Elements.Text.Animate("X", 20, 150);
                         this.DonutPart.Animate("Extrude", 10, 150);
                     },
                     MouseOut: function () {
+                        this.Elements.Text.Animate("X", 15, 150);
                         this.DonutPart.Animate("Extrude", this.ValuesObj.Extrude ? this.ValuesObj.Extrude : 0, 150);
                     }
                 };
@@ -290,8 +312,7 @@ TK.Donut = {
                 } else if (this.LocationLegend == 3) {
                     legend.Y = ((this.Height / 2) - ((this.LegendLineHeight * countLegend) / 2)) + (i * this.LegendLineHeight);
                 }
-
-                this.Canvas.Add(legend);
+                this.Values[i].LegendElement = this.Canvas.Add(legend);
             }
 
             curAngle += size;

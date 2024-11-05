@@ -136,7 +136,7 @@ window.TK.Tree = {
         return row;
     },
     OrderRows: function (rows) {
-        const obj = this;
+        var obj = this;
         // Move rows to right place
         for (var i = 0; i < rows.length; i++) {
             // if (this.IgnoredRows.indexOf(rows[i]) >= 0)
@@ -157,7 +157,8 @@ window.TK.Tree = {
             this.CurRows["id" + rowId].Parent = parent;
         }
         // After ordering set tree depth for each row
-        for (const row of obj.children) {
+        for (var rowKey in obj.children) {
+            var row = obj.children[rowKey];
             if (!row || !row.Row)
                 continue;
             row.TreeDepth = 0;
@@ -190,11 +191,12 @@ window.TK.Tree = {
         this.AddRows(rows);
     },
     RecursiveSublist: function (row, subItemFunction) {
-        const obj = this;
+        var obj = this;
         if (!row.SubList)
             return;
 
-        for (const rowDescendant of row.SubList.childNodes) {
+        for (var rowDescendantKey in row.SubList.childNodes) {
+            var rowDescendant = row.SubList.childNodes[rowDescendantKey];
             // if descendant does not have the Row property it is not a generated row.
             if (!rowDescendant.Row)
                 continue;
@@ -204,7 +206,7 @@ window.TK.Tree = {
         }
     },
     RecursiveParent: function (row, parentFunction) {
-        const obj = this;
+        var obj = this;
         // Check if parent is a generated row
         if (!row.Parent || !row.Parent.Row)
             return;
@@ -373,22 +375,27 @@ window.TK.AjaxTree = {
 // For selecting multiple checkboxes next to each other use the shift key.
 window.TK.FormTree = {
     _: window.TK.Tree,
-    ReturnDataObject: false,
     inAddCheckboxesFunction: false, // used by functions inside object do not override
+    Data: [],
     Init: function () {
         if (this.Rows.length == 0)
             return;
         let obj = this;
-        const originalAddRows = obj.AddRows;
+        var originalAddRows = obj.AddRows;
         obj.AddRows = function (rows) {
             if (!rows) return;
             originalAddRows.apply(obj, [rows]);
             obj.AddCheckBoxes();
         };
-        const originalAddRow = obj.AddRow;
+        var originalAddRow = obj.AddRow;
         obj.AddRow = function (row, orderRows) {
-            const rowNode = originalAddRow.apply(obj, [row, orderRows]);
-            obj.AddCheckBox(rowNode);
+            var rowNode = originalAddRow.apply(obj, [row, orderRows]);
+            var checked = false;
+            if (obj.Data && rowNode.Data && rowNode.Data[obj.IdField] !== undefined && rowNode.Data[obj.IdField] !== null) {
+                checked = obj.Data.indexOf(rowNode.Data[obj.IdField]) >= 0;
+            }
+            obj.AddCheckBox(rowNode, checked);
+
         }
         obj.Refresh();
     },
@@ -433,7 +440,7 @@ window.TK.FormTree = {
         if (event.ctrlKey) {
             obj.lastBoxClick = checkboxObj;
             // Call change function
-            obj.CheckBoxChange(row, obj.Checkboxes.filter(b => b.checked).map(b => b.Parent));
+            obj.CheckBoxChange(row, obj.Checkboxes.filter(function (b) { return b.checked; }).map(function (b) { return b.Parent; }));
             return;
         }
 
@@ -448,23 +455,25 @@ window.TK.FormTree = {
                 checkboxObj.checked = true;
 
                 // Call change function
-                obj.CheckBoxChange(row, obj.Checkboxes.filter(b => b.checked).map(b => b.Parent));
+                obj.CheckBoxChange(row, obj.Checkboxes.filter(function (b) { return b.checked; }).map(function (b) { return b.Parent; }));
                 return;
             }
             // Filter and set right checkboxes based on checkbox Id
             let goUp = checkboxObj.TreeId < obj.lastBoxClick.TreeId;
-            let cboxes = obj.Checkboxes.filter(box => {
+            let cboxes = obj.Checkboxes.filter(function (box) {
                 if (goUp)
                     return box.TreeId < obj.lastBoxClick.TreeId && box.TreeId >= checkboxObj.TreeId;
                 return box.TreeId > obj.lastBoxClick.TreeId && box.TreeId <= checkboxObj.TreeId;
             });
-            cboxes.forEach(b => b.checked = obj.lastBoxClick.checked);
+            cboxes.forEach(function (b) {
+                b.checked = obj.lastBoxClick.checked
+            });
 
             sublistCheck(row.TreeDepth <= obj.lastBoxClick.Parent.Row.TreeDepth ? row : obj.lastBoxClick.Parent.Row);
             parentCheck(row.TreeDepth >= obj.lastBoxClick.Parent.Row.TreeDepth ? row : obj.lastBoxClick.Parent.Row);
 
             // Call change function
-            obj.CheckBoxChange(row, obj.Checkboxes.filter(b => b.checked).map(b => b.Parent));
+            obj.CheckBoxChange(row, obj.Checkboxes.filter(function (b) { return b.checked; }).map(function (b) { return b.Parent; }));
             return;
         }
 
@@ -474,28 +483,29 @@ window.TK.FormTree = {
         parentCheck(row);
 
         // Call change function
-        obj.CheckBoxChange(row, obj.Checkboxes.filter(b => b.checked).map(b => b.Parent));
+        obj.CheckBoxChange(row, obj.Checkboxes.filter(function (b) { return b.checked; }).map(function (b) { return b.Parent; }));
     },
     AddCheckBoxes: function () {
-        const obj = this;
+        var obj = this;
         obj.inAddCheckboxesFunction = true;
-        for (const rowId in obj.CurRows) {
-            const row = obj.CurRows[rowId];
+        for (var rowId in obj.CurRows) {
+            var row = obj.CurRows[rowId];
             obj.AddCheckBox(row);
         }
         // Give each checkbox a tree Id
         obj.IndexCheckboxes();
         obj.inAddCheckboxesFunction = false;
     },
-    AddCheckBox: function (row) {
-        const obj = this;
+    AddCheckBox: function (row, checked) {
+        var obj = this;
         if (!row || row.CheckBox || !row.firstChild)
             return;
 
         let checkbox = TK.Initialize({
             _: "input",
             type: "checkbox",
-            className: "TKtreeCheckbox"
+            checked: checked ? true : false,
+            className: "toolkitTreeCheckbox"
         });
         checkbox.onclick = function (e) { obj.CheckBoxClick(e, row); };
         row.CheckBox = checkbox;
@@ -509,26 +519,28 @@ window.TK.FormTree = {
             obj.IndexCheckboxes();
     },
     IndexCheckboxes: function () {
-        const obj = this;
+        var obj = this;
         // Give each checkbox a tree Id
         if (obj.parentNode) {
             obj.Checkboxes = [];
-            var lis = obj.parentNode.querySelectorAll(':scope ul>li>input.TKtreeCheckbox');
-            if (lis)
-                lis.forEach((a, i) => { a.TreeId = i + 1; obj.Checkboxes.push(a); });
+            var lis = obj.parentNode.querySelectorAll(':scope ul>li>input.toolkitTreeCheckbox');
+            if (lis) {
+                lis.forEach(function (a, i) {
+                    a.TreeId = i + 1;
+                    obj.Checkboxes.push(a);
+                });
+            }
         }
     },
     GetValue: function () {
         let obj = this;
         let result = [];
-        for (const rowId in obj.CurRows) {
-            const row = obj.CurRows[rowId];
+        for (var rowId in obj.CurRows) {
+            var row = obj.CurRows[rowId];
             if (row.CheckBox.checked) {
-
                 result.push(row.Data[obj.IdField]);
             }
         }
-
         return result;
     },
     Checkboxes: []

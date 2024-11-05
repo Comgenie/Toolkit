@@ -16,12 +16,25 @@ TK.Draw = {
     MaxZoom: 10,
     Animations: [],
     Init: function () {
-        this.width = this.Width * this.Scale;
-        this.height = this.Height * this.Scale;
-        this.style.width = this.Width + "px";
-        this.style.height = this.Height + "px";
         this.Context = this.GetContext();
         this.Context.CanvasObj = this;
+        this.SetSize(this.Width, this.Height);      
+    },
+    SetSize: function (width, height, parsePositionTags) {
+        this.Width = width;
+        this.Height = height;
+        this.width = width * this.Scale;
+        this.height = height * this.Scale;
+        this.style.width = width + "px";
+        this.style.height = height + "px";
+        if (parsePositionTags && this.SortedElements) {
+            for (var i = 0; i < this.SortedElements.length; i++) {
+                if (this.SortedElements[i]._NormalizePositions !== false)
+                    TK.Draw.SetPositionsUsingPositionProperty(this.SortedElements[i]);
+                if (this.SortedElements[i].Resize)
+                    this.SortedElements[i].Resize();
+            }
+        }
         this.Refresh();
     },
     GetContext: function () {
@@ -40,6 +53,9 @@ TK.Draw = {
         var obj = this;
         
         var hasAnimation = this.ProcessAnimations();
+
+        // TODO: If EnableNavigation is true, Draw on an offscreen canvas
+        // TODO: Find a way to only redraw whats needed
 
         this.Context.setTransform(this.Scale, 0, 0, this.Scale , 0, 0);
         this.Context.clearRect(0, 0, this.Width, this.Height);        
@@ -63,19 +79,22 @@ TK.Draw = {
     },
     ProcessAnimations: function () {
         // Process animations
-        var ms = new Date().getTime();
+        var cur = new Date().getTime();
         var hasAnimation = false;
         for (var i = 0; i < this.Animations.length; i++) {
             if (!this.Animations[i])
                 continue;
             var a = this.Animations[i];
-            var r = (ms - a.S) / a.L;
+            var r = (cur - a.S) / a.L; // 500 - 400 = 100 / 400 = 0.25
 
             if (r >= 1) {
                 r = 1;
+                this.Animations[i] = null;
                 if (a.I.AnimationEnded)
                     a.I.AnimationEnded(a.P);
-                delete this.Animations[i];
+                if (a.AnimationEnded)
+                    a.AnimationEnded(a.P);
+                
             }
             if (Array.isArray(a.O)) {
                 var rgba = [0, 0, 0, 0];
@@ -99,6 +118,9 @@ TK.Draw = {
             }
             //a.I[a.P] = a.O + ((a.T - a.O) * r);            
             hasAnimation = true;
+            if (a.I.Invalidate) {
+                a.I.Invalidate();
+            }
         }
         return hasAnimation;
     },
@@ -126,6 +148,7 @@ TK.Draw = {
         this.HandleMouseEvent(e, "MouseOver");
         this.HandleMouseEvent(e, "MouseMove");
         this.HandleMouseEvent(e, "MouseOut");
+        e.preventDefault();
     },
     onmouseout: function (e) {
         this.HandleMouseEvent(e, "MouseOut");
@@ -135,13 +158,26 @@ TK.Draw = {
     },
     ontouchstart: function (e) {
         this.HandleMouseEvent(e, "MouseDown");
+        e.preventDefault();
     },
     onmouseup: function (e) {
         this.HandleMouseEvent(e, "MouseUp");
     },
     ontouchend: function (e) {
         this.HandleMouseEvent(e, "MouseUp");
+        e.preventDefault();
     },
+    /*onpointerdown: function (e) {
+        this.HandleMouseEvent(e, "MouseDown");
+    },
+    onpointermove: function (e) {
+        this.HandleMouseEvent(e, "MouseOver");
+        this.HandleMouseEvent(e, "MouseMove");
+        this.HandleMouseEvent(e, "MouseOut");
+    },
+    onpointerup: function (e) {
+        this.HandleMouseEvent(e, "MouseUp");
+    },*/
     onwheel: function (event) {
         if (this.EnableZoom) {
             if (!event)
@@ -178,6 +214,11 @@ TK.Draw = {
         var eventHandled = false;
         var x, y;
         try { x = e.clientX; y = e.clientY; } catch (errie) { var e2 = window.event; x = e2.clientX; y = e2.clientY; }
+
+        if (e && e.changedTouches && e.changedTouches.length > 0) {
+            x = e.changedTouches[0].clientX;
+            y = e.changedTouches[0].clientY;
+        }
         
         var rect = this.getBoundingClientRect();        
         // Make sure top/left is always 0,0, then Compensate for the zoom level, then Add the offset from the viewport
@@ -194,6 +235,8 @@ TK.Draw = {
             if (!el[func] || !el.GetRect)
                 continue;
             var r = el.GetRect();
+            if (r === null)
+                continue;
             //r[0] -= this.ViewPortX;
             //r[1] -= this.ViewPortY;
             var match = false;
@@ -203,8 +246,15 @@ TK.Draw = {
                     break;
                 }
             }
-            if (match || (r[0] < x && r[0] + r[2] > x && r[1] < y && r[1] + r[3] > y) && !stoppedPropagation) {                                                                    
-                if (func != "MouseOut" && (func != "MouseOver" || !el.CurrentlyMouseOver) ) {                    
+            if (match || (r[0] < x && r[0] + r[2] > x && r[1] < y && r[1] + r[3] > y && (!el.CheckMouseOver || el.CheckMouseOver(x, y))) && !stoppedPropagation) {          
+
+                if (func == "MouseDown" && this.CurrentMouseDownElements && this.CurrentMouseDownElements.indexOf(el) >= 0) {
+                    el.CurrentlyMouseOver = true;
+                    eventHandled = true;
+                    continue;
+                }
+
+                if (func != "MouseOut" && (func != "MouseOver" || !el.CurrentlyMouseOver)) {            
                     if (el[func](x, y) === true) {
                         stoppedPropagation = true;
                         el.StoppedPropagation = true;
@@ -257,6 +307,15 @@ TK.Draw.AnchorRight = 4;
 TK.Draw.AnchorTop = 8;
 TK.Draw.AnchorMiddle = 16;
 TK.Draw.AnchorBottom = 32;
+
+TK.Draw.SmoothNone = 0;
+TK.Draw.SmoothQuadratic = 1; // Quadratic curvers with the center in between the two points
+TK.Draw.SmoothCorners = 2; // Only use horizontal and vertical lines, or small 90 degree corners
+
+TK.Draw.DirectionTop = 0;
+TK.Draw.DirectionRight = 1;
+TK.Draw.DirectionBottom = 2;
+TK.Draw.DirectionLeft = 3;
 
 TK.Draw.EaseLinear = function (a, b, r) { return a + ((b - a) * r); };
 TK.Draw.EaseExponential = function (a, b, r) {
@@ -330,22 +389,139 @@ TK.Draw.ColorToDifferentColor = function (s, s2, ratio) {
     }
     return "rgba(" + s.join(",") + ")";
 };
+TK.Draw.ValueToPx = function (v, curIsWidth, totalWidth, totalHeight) {
+    if (!v.substr)
+        return v;
+    var total = curIsWidth ? totalWidth : totalHeight;
+
+    if (v.indexOf("px") >= 0)
+        return parseFloat(v.replace("px", ""));
+    if (v.indexOf("%") >= 0)
+        return total * (parseFloat(v.replace("%", "")) / 100);
+    if (v.indexOf("vw") >= 0)
+        return totalWidth * (parseFloat(v.replace("%", "")) / 100);
+    if (v.indexOf("vh") >= 0)
+        return totalHeight * (parseFloat(v.replace("%", "")) / 100);
+    return parseFloat(v);
+};
+TK.Draw.SetPositionsUsingPositionProperty = function (drawableObject) {
+    var t = drawableObject;
+    if (!t._Position)
+        return;
+    var p = t.Parent;
+    while (p !== undefined && p.ProcessAnimations === undefined) // find the TK.Draw component
+        p = p.Parent;
+    if (!p)
+        return;
+
+    var anchorV = TK.Draw.AnchorTop | TK.Draw.AnchorMiddle | TK.Draw.AnchorBottom;
+    var anchorH = TK.Draw.AnchorLeft | TK.Draw.AnchorCenter | TK.Draw.AnchorRight;
+
+    var p = window.TK.ParsePosition(t._Position);
+    var totalWidth = t.Parent.Width;
+    var totalHeight = t.Parent.Height;
+    var isSet = function (v) {
+        return !(v === undefined || v === null);
+    };
+
+    if (isSet(p[0]) && isSet(p[2])) {
+        t.Y = TK.Draw.ValueToPx(p[0], false, totalWidth, totalHeight); // 50% -> 150px
+        t.H = (totalHeight - TK.Draw.ValueToPx(p[2], false, totalWidth, totalHeight)) - t.Y; // 25% ->   (300 - 75) = 225 - 150 = 75
+        t.Anchor = (t.Anchor & anchorH) | TK.Draw.AnchorTop;
+    } else if (isSet(p[0])) {
+        t.Y = TK.Draw.ValueToPx(p[0], false, totalWidth, totalHeight);
+        t.Anchor = (t.Anchor & anchorH) | TK.Draw.AnchorTop;
+    } else if (isSet(p[2])) {
+        t.Y = totalHeight - TK.Draw.ValueToPx(p[2], false, totalWidth, totalHeight);
+        t.Anchor = (t.Anchor & anchorH) | TK.Draw.AnchorBottom;
+    }
+
+    if (isSet(p[1]) && isSet(p[3])) {
+        t.X = TK.Draw.ValueToPx(p[3], true, totalWidth, totalHeight);
+        t.W = (totalWidth - TK.Draw.ValueToPx(p[1], true, totalWidth, totalHeight)) - t.X;
+        t.Anchor = (t.Anchor & anchorV) | TK.Draw.AnchorLeft;
+    } else if (isSet(p[1])) {
+        t.X = totalWidth - TK.Draw.ValueToPx(p[1], true, totalWidth, totalHeight);
+        t.Anchor = (t.Anchor & anchorV) | TK.Draw.AnchorRight;
+    } else if (isSet(p[3])) {
+        t.X = TK.Draw.ValueToPx(p[3], true, totalWidth, totalHeight);
+        t.Anchor = (t.Anchor & anchorV) | TK.Draw.AnchorLeft;
+    }
+
+    if (isSet(p[4]))
+        t.W = TK.Draw.ValueToPx(p[4], true, totalWidth, totalHeight);
+    if (isSet(p[5]))
+        t.H = TK.Draw.ValueToPx(p[5], false, totalWidth, totalHeight);
+
+    if (isSet(p[6])) {
+        if (p[6].indexOf("middle") >= 0)
+            t.Anchor = (t.Anchor & anchorH) | TK.Draw.AnchorMiddle;
+        if (p[6].indexOf("top") >= 0)
+            t.Anchor = (t.Anchor & anchorH) | TK.Draw.AnchorTop;
+        if (p[6].indexOf("bottom") >= 0)
+            t.Anchor = (t.Anchor & anchorH) | TK.Draw.AnchorBottom;
+        if (p[6].indexOf("left") >= 0)
+            t.Anchor = (t.Anchor & anchorV) | TK.Draw.AnchorLeft;
+        if (p[6].indexOf("center") >= 0)
+            t.Anchor = (t.Anchor & anchorV) | TK.Draw.AnchorCenter;
+        if (p[6].indexOf("right") >= 0)
+            t.Anchor = (t.Anchor & anchorV) | TK.Draw.AnchorRight;
+    }
+};
 // Draws all child elements
 TK.Draw.Group = {
+    DrawType: "Group",
     X: 0,
     Y: 0,
+
+    // Optional, set these so all child elements can use anchor top/left, while the full group respects it's own anchor setting
+    // This is useful to make self-contained drawable components, and required when wanting to use the _Positions tag
+    _NormalizePositions: false,
+    Anchor: null,
+    W: null, H: null,
+    Init: function () {
+        if (this._NormalizePositions)
+            TK.Draw.SetPositionsUsingPositionProperty(this);
+    },
     Draw: function (c) {
-        c.OffsetX += this.X;
-        c.OffsetY += this.Y;
+        var x = 0;
+        var y = 0;
+
+        if (this._NormalizePositions && this.Anchor !== null && this.W && this.H) {
+            if ((this.Anchor & TK.Draw.AnchorCenter) > 0) {
+                x = -(this.W * 0.5);
+            } else if ((this.Anchor & TK.Draw.AnchorRight) > 0) {
+                x = -this.W;
+            }
+
+            if ((this.Anchor & TK.Draw.AnchorMiddle) > 0) {
+                y = -(this.H * 0.5);
+            } else if ((this.Anchor & TK.Draw.AnchorBottom) > 0) {
+                y = -this.H;
+            }        
+        }
+
+        c.OffsetX += this.X + x;
+        c.OffsetY += this.Y + y;
         for (var i in this.Elements) {
             if (this.Elements[i].Draw)
                 this.Elements[i].Draw(c);
         }
-        c.OffsetX -= this.X;
-        c.OffsetY -= this.Y;
+        c.OffsetX -= this.X + x;
+        c.OffsetY -= this.Y + y;
+    },
+    GetRect: function () {
+        return this._NormalizePositions ? TK.Draw.DrawableObject.GetRect.apply(this) : null;
+    },
+    Overlaps: function (otherDrawableObject) {
+        return this._NormalizePositions ? TK.Draw.DrawableObject.Overlaps.apply(this, [otherDrawableObject]) : null;
+    },
+    Animate: function (propName, targetValue, ms, easing) {
+        return TK.Draw.DrawableObject.Animate.apply(this, [propName, targetValue, ms, easing]);
     }
 };
 TK.Draw.DrawableObject = {
+    DrawType: "DrawableObject",
     Fill: null, // Color
     Stroke: null, // Color
     BlendMode: null, // Any value of globalCompositeOperation
@@ -357,7 +533,12 @@ TK.Draw.DrawableObject = {
     Anchor: TK.Draw.AnchorLeft | TK.Draw.AnchorTop,
     ZIndex: 1,
     X: 0, Y: 0, W: 0, H: 0,
+    _Position: null, // Alternative way of setting positions, similar to the normal toolkit method, but with added anchor support
     Opacity: 1,
+    Init: function () {
+        TK.Draw.SetPositionsUsingPositionProperty(this);
+    },
+    
     Transform: function (c) {
         if (this.DrawAndTransformDisabled) {
             c.setTransform(c.Scale, 0, 0, c.Scale, c.OffsetX * c.Scale, c.OffsetY * c.Scale);
@@ -377,6 +558,9 @@ TK.Draw.DrawableObject = {
         } else if ((this.Anchor & TK.Draw.AnchorBottom) > 0) {
             y = -this.H;
         }        
+
+        c.SetOffsetX = (c.OffsetX + x);
+        c.SetOffsetY = (c.OffsetY + y);
 
         c.setTransform(c.Scale, 0, 0, c.Scale, (c.OffsetX + x) * c.Scale, (c.OffsetY + y) * c.Scale);        
 
@@ -408,7 +592,41 @@ TK.Draw.DrawableObject = {
         c.globalAlpha = this.Opacity;
 
         if (this.Fill) {
-            c.fillStyle = this.Fill;
+            if (this.Fill.length > 7 && (this.Fill.substr(0, 7) == "radial " || this.Fill.substr(0, 7) == "linear ")) {
+                // Support for gradients
+                if (this._CachedFillStyleKey != this.Fill) {
+                    this._CachedFillStyleKey = this.Fill;
+                    var parts = this.Fill.split(/ /g);
+                    var g = null;
+                    var stopOffset = 5;
+
+                    // TODO: Make sure positions and percentages are relative from the current drawableObject
+
+                    if (parts[0] == "radial") {
+                        g = c.createRadialGradient(
+                            (this.X + TK.Draw.ValueToPx(parts[1], true, this.W, this.H)) /*- c.OffsetX*/, // inner circle X
+                            (this.Y + TK.Draw.ValueToPx(parts[2], false, this.W, this.H)) /*- c.OffsetY*/, // inner circle Y
+                            TK.Draw.ValueToPx(parts[3], true, this.W, this.H), // inner circle Radius
+                            (this.X + TK.Draw.ValueToPx(parts[4], true, this.W, this.H)) /*- c.OffsetX*/, // outer circle X
+                            (this.Y + TK.Draw.ValueToPx(parts[5], false, this.W, this.H)) /*- c.OffsetY*/, // outer circle Y
+                            TK.Draw.ValueToPx(parts[6], true, this.W, this.H)); // outer circle Radius
+                        stopOffset = 7;
+                    } else {
+                        g = c.createLinearGradient(
+                            (this.X + TK.Draw.ValueToPx(parts[1], true, this.W, this.H)) /*- c.OffsetX*/, // Start gradient X
+                            (this.Y + TK.Draw.ValueToPx(parts[2], false, this.W, this.H)) /*- c.OffsetY*/, // Start gradient Y
+                            (this.X + TK.Draw.ValueToPx(parts[3], true, this.W, this.H)) /*- c.OffsetX*/, // End gradient X
+                            (this.Y + TK.Draw.ValueToPx(parts[4], false, this.W, this.H)) /*- c.OffsetY*/); // End gradient Y
+                    }
+                    for (var i = stopOffset; i + 1 < parts.length; i += 2) {
+                        g.addColorStop(parseFloat(parts[i]), parts[i + 1]);
+                    }
+                    this._CachedFillStyle = g;
+                }
+                c.fillStyle = this._CachedFillStyle;
+            } else {
+                c.fillStyle = this.Fill;
+            }
             if (!this.DrawAndTransformDisabled)
                 c.fill();
         }
@@ -433,10 +651,12 @@ TK.Draw.DrawableObject = {
             c.globalCompositeOperation = "source-over"; // default
         }
     },
-    Animate: function (propName, targetValue, ms, easing) {        
+    Animate: function (propName, targetValue, ms, easing) {
         if (!easing)
             easing = TK.Draw.EaseLinear;
         var p = this.Parent;
+        while (p !== undefined && p.ProcessAnimations === undefined) // find the TK.Draw component
+            p = p.Parent;
         if (!TK.Draw.AnimationsEnabled) {
             this[propName] = targetValue;
             if (this.AnimationEnded)
@@ -446,19 +666,45 @@ TK.Draw.DrawableObject = {
             return this;
         }
 
-        if (this.Parent) {
-            if (this.Parent.Animations.length > 100) // Clear all deleted animations from the array
-                this.Parent.Animations = this.Parent.Animations.Where(function (a) { return a; });
-            
+        if (p) {
+            var s = new Date().getTime();
+            if (p.Animations.length > 100) // Clear all deleted animations from the array
+                p.Animations = p.Animations.Where(function (a) { return a; });
+
+            var animObj = null;
+            for (var i = 0; i < p.Animations.length; i++) {
+                if (p.Animations[i] && p.Animations[i].I == this && p.Animations[i].P == propName) {
+                    animObj = p.Animations[i];
+                    break;
+                }
+            }
+            if (animObj == null) {
+                animObj = {
+                    I: this,
+                    P: propName,
+                };
+                p.Animations.push(animObj);
+            }
+            animObj.L = ms; // Total animation length
+            animObj.E = easing; 
+            animObj.S = s; // Start time
+
             if (typeof this[propName] === 'string' && typeof targetValue === 'string') {
                 // Colors                      
-                this.Parent.Animations.push({ I: this, P: propName, O: TK.Draw.GetColor(this[propName]), T: TK.Draw.GetColor(targetValue), L: ms, E: easing, S: new Date().getTime() });
+                animObj.O = TK.Draw.GetColor(this[propName]);
+                animObj.T = TK.Draw.GetColor(targetValue);
+
+                //p.Animations.push({ I: this, P: propName, O: TK.Draw.GetColor(this[propName]), T: TK.Draw.GetColor(targetValue), L: ms, E: easing, S: s });
             } else if (Array.isArray(this[propName])) {
-                this.Parent.Animations.push({ I: this, P: propName, O: JSON.parse(JSON.stringify(this[propName])), T: targetValue, L: ms, E: easing, S: new Date().getTime() });                
+                animObj.O = JSON.parse(JSON.stringify(this[propName]));
+                animObj.T = targetValue;
+                //p.Animations.push({ I: this, P: propName, O: JSON.parse(JSON.stringify(this[propName])), T: targetValue, L: ms, E: easing, S: s });                
             } else {
-                this.Parent.Animations.push({ I: this, P: propName, O: parseFloat(this[propName]), T: targetValue, L: ms, E: easing, S: new Date().getTime() });                
+                animObj.O = parseFloat(this[propName]);
+                animObj.T = targetValue;
+                //p.Animations.push({ I: this, P: propName, O: parseFloat(this[propName]), T: targetValue, L: ms, E: easing, S: s });                
             }
-            this.Parent.Refresh();
+            p.Refresh();
         }
         return this;
     },
@@ -485,445 +731,8 @@ TK.Draw.DrawableObject = {
         var rectB = otherDrawableObject.GetRect();
         
         return (rectA[0] < (rectB[0] + rectB[2]) && (rectA[0] + rectA[2]) > rectB[0] && rectA[1] < (rectB[1] + rectB[3]) && (rectA[1] + rectA[3]) > rectB[1]);
-    }
-};
-TK.Draw.Line = {
-    _: TK.Draw.DrawableObject,
-    Draw: function (c) {        
-        c.beginPath();
-        this.Transform(c);
-        c.moveTo(this.X, this.Y);
-        if (this.X2 != undefined) {
-            c.lineTo(this.X2, this.Y2);
-        } else {
-            c.lineTo(this.X + this.W, this.Y + this.H);
-        }
-        
-        this.DrawFS(c);
-        c.closePath();
-    }
-};
-TK.Draw.LineThroughPoints = {
-    _: TK.Draw.DrawableObject,
-    Points: [], // [ [x,y], [x, y] ]
-    Heights: [], // Array with heights, for creating an area
-    Smoothing: 0, // 0 None, 1 quadratic, 2 arrow and straight lines
-    ArrowStartDirection: 1, // 0 = from the top (arrow down), 1= from the right (arrow left), 2 = from the bottom (arrow up), 3= from the left (arrow right)
-    ArrowEndDirection: 3, 
-    ArrowStartSize: 20,
-    ArrowEndSize: 20,
-    ArrowStartLineSize: 50,
-    ArrowEndLineSize: 50,
-
-    Draw: function (c) {
-        c.beginPath();
-        if (!this.W) {
-            this.W = 0;
-            for (var i = 0; i < this.Points.length; i++) {
-                if (this.Points[i][0] > this.W)
-                    this.W = this.Points[i][0];
-                if (this.Points[i][1] > this.H)
-                    this.H = this.Points[i][1];
-            }
-        }
-        this.Transform(c);
-        
-        if (!this.Smoothing) {
-            for (var i = 0; i < this.Points.length; i++) {
-                if (i == 0) {
-                    c.moveTo(this.Points[i][0] + this.X, this.Points[i][1] + this.Y);
-                    continue;
-                }
-                c.lineTo(this.Points[i][0] + this.X, this.Points[i][1] + this.Y);
-            }
-
-            if (this.Heights && this.Heights.length >= this.Points.length) {
-                for (var i = this.Points.length - 1; i >= 0; i--) {
-                    c.lineTo(this.Points[i][0] + this.X, this.Points[i][1] + (this.Heights[i]) + this.Y);
-                }
-                c.lineTo(this.Points[0][0] + this.X, this.Points[0][1] + this.Y);
-            }
-        } else if (this.Smoothing == 1 || this.Smoothing == 2 || this.Smoothing == 3) {
-            for (var i = 0; i < this.Points.length - 1; i++) {
-                if (i == 0)
-                    c.moveTo(this.Points[i][0] + this.X, this.Points[i][1] + this.Y);
-
-                var x_mid = (this.Points[i][0] + this.Points[i + 1][0]) / 2;
-                var y_mid = (this.Points[i][1] + this.Points[i + 1][1]) / 2;
-                
-                if (this.Smoothing == 1) { // Horizontal smoothing                                
-                    var cp_x1 = (x_mid + this.Points[i][0]) / 2;
-                    var cp_x2 = (x_mid + this.Points[i + 1][0]) / 2;                        
-                    c.quadraticCurveTo(cp_x1 + this.X, this.Points[i][1] + this.Y, x_mid + this.X, y_mid + this.Y);
-                    c.quadraticCurveTo(cp_x2 + this.X, this.Points[i + 1][1] + this.Y, this.Points[i + 1][0] + this.X, this.Points[i + 1][1] + this.Y);
-                } else if (this.Smoothing == 2) { // Vertical smoothing                    
-                    var cp_y1 = (y_mid + this.Points[i][1]) / 2;
-                    var cp_y2 = (y_mid + this.Points[i + 1][1]) / 2;
-                    c.quadraticCurveTo(this.Points[i][0] + this.X, cp_y1 + this.Y, x_mid + this.X, y_mid + this.Y);
-                    c.quadraticCurveTo(this.Points[i + 1][0] + this.X, cp_y2 +  this.Y, this.Points[i + 1][0] + this.X, this.Points[i + 1][1] + this.Y);
-                } else if (this.Smoothing == 3) { // Horizontal start, vertical in between
-                    if (i == 0) {
-                        c.quadraticCurveTo(this.Points[i + 1][0] + this.X, this.Points[i][1] + this.Y, this.Points[i + 1][0] + this.X, this.Points[i + 1][1] + this.Y);
-                    } else if (i + 2 == this.Points.length) {
-                        c.quadraticCurveTo(this.Points[i][0] + this.X, this.Points[i + 1][1] + this.Y, this.Points[i + 1][0] + this.X, this.Points[i + 1][1] + this.Y);
-                    } else {
-                        var cp_y1 = (y_mid + this.Points[i][1]) / 2;
-                        var cp_y2 = (y_mid + this.Points[i + 1][1]) / 2;
-                        c.quadraticCurveTo(this.Points[i][0] + this.X, cp_y1 + this.Y, x_mid + this.X, y_mid + this.Y);
-                        c.quadraticCurveTo(this.Points[i + 1][0] + this.X, cp_y2 + this.Y, this.Points[i + 1][0] + this.X, this.Points[i + 1][1] + this.Y);
-                    }
-                }                              
-            }
-
-            if (this.Heights && this.Heights.length >= this.Points.length) {
-                for (var i = this.Points.length - 1; i > 0; i--) {
-                    if (i == this.Points.length - 1) {
-                        c.lineTo(this.Points[i][0] + this.X, this.Points[i][1] + this.Heights[i] + this.Y);
-                    }
-                    var x_mid = (this.Points[i][0] + this.Points[i - 1][0]) / 2;
-                    var y_mid = (this.Points[i][1] + this.Heights[i] + this.Points[i - 1][1] + this.Heights[i - 1]) / 2;
-                    var cp_x1 = (x_mid + this.Points[i][0]) / 2;
-                    //var cp_y1 = (y_mid + this.Points[i][1]) / 2;
-                    var cp_x2 = (x_mid + this.Points[i - 1][0]) / 2;
-                    //var cp_y2 = (y_mid + this.Points[i + 1][1]) / 2;
-                    c.quadraticCurveTo(cp_x1 + this.X, this.Points[i][1] + this.Heights[i] + this.Y, x_mid + this.X, y_mid + this.Y);
-                    c.quadraticCurveTo(cp_x2 + this.X, this.Points[i - 1][1] + this.Y + this.Heights[i - 1], this.Points[i - 1][0] + this.X, this.Points[i - 1][1] + this.Y + this.Heights[i - 1]);
-                }
-                c.lineTo(this.Points[0][0] + this.X, this.Points[0][1] + this.Heights[0] + this.Y);
-            }
-        } else if (this.Smoothing == 4) { // Only horizontal and vertical lines with max 2 corners between 2 points
-            /*for (var i = 0; i < this.Points.length; i++) {
-                if (i == 0) {
-                    c.moveTo(this.Points[i][0] + this.X, this.Points[i][1] + this.Y);                    
-
-                    if (ArrowStartDirection == 0) {
-                        c.lineTo(this.Points[i][0] + this.X, this.Points[i][1] + this.Y + -this.ArrowStartLineSize);
-                    } else if (ArrowStartDirection == 1) {
-                        c.lineTo(this.Points[i][0] + this.X + this.ArrowStartLineSize, this.Points[i][1] + this.Y);
-                    } else if (ArrowStartDirection == 2) {
-                        c.lineTo(this.Points[i][0] + this.X, this.Points[i][1] + this.Y + this.ArrowStartLineSize);
-                    } else if (ArrowStartDirection == 3) {
-                        c.lineTo(this.Points[i][0] + this.X + -this.ArrowStartLineSize, this.Points[i][1] + this.Y);
-                    }                    
-
-                    // TODO draw arrow
-
-                    continue;
-                }
-                // line from this.Points[i-1][0], this.Points[i-1][1]  to this.Points[i][0], this.Points[i][1]  to                 
-                
-                if (i < this.Points.length) {
-                    c.lineTo(this.Points[i][0] + this.X, this.Points[i][1] + this.Y);
-                } else {
-                    // Last line and arrow
-                    if (this.ArrowEndDirection == 0) {
-                        c.lineTo(this.Points[i][0] + this.X, this.Points[i][1] + this.Y + -this.ArrowEndLineSize);
-                    } else if (this.ArrowEndDirection  == 1) {
-                        c.lineTo(this.Points[i][0] + this.X + this.ArrowEndLineSize, this.Points[i][1] + this.Y);
-                    } else if (this.ArrowEndDirection == 2) {
-                        c.lineTo(this.Points[i][0] + this.X, this.Points[i][1] + this.Y + this.ArrowEndLineSize);
-                    } else if (this.ArrowEndDirection == 3) {
-                        c.lineTo(this.Points[i][0] + this.X + -this.ArrowEndLineSize, this.Points[i][1] + this.Y);
-                    }                                
-
-                    c.lineTo(this.Points[i][0] + this.X, this.Points[i][1] + this.Y);
-
-                    // TODO draw arrow
-                }                
-            } */
-
-            /*
-            if (this.Heights && this.Heights.length >= this.Points.length) {
-                for (var i = this.Points.length - 1; i >= 0; i--) {
-                    c.lineTo(this.Points[i][0] + this.X, this.Points[i][1] + (this.Heights[i]) + this.Y);
-                }
-                c.lineTo(this.Points[0][0] + this.X, this.Points[0][1] + this.Y);
-            } */           
-        }
-
-        this.DrawFS(c);
-        c.closePath();
-    }
-};
-
-TK.Draw.Rect = {
-    _: TK.Draw.DrawableObject,
-    //RoundCorners: [15,15,15,15],
-    ShadeSize: 0,    
-    ShadePosition: 1,
-    Extrude: 0, // Does not work with RoundCorners yet
-    DrawRoundedRect: function (c, x, y, w, h, corners) {
-        if (!corners || (corners[0] == 0 && corners[1] == 0 && corners[2] == 0 && corners[3] == 0)) {
-            c.rect(x, y, w, h);
-            return;
-        }        
-
-        c.moveTo(x + corners[0], y);
-        c.lineTo(x + w - corners[1], y);
-        c.quadraticCurveTo(x + w, y, x + w, y + corners[1]);
-        c.lineTo(x + w, y + h - corners[2]);
-        c.quadraticCurveTo(x + w, y + h, x + w - corners[2], y + h);
-        c.lineTo(x + corners[3], y + h);
-        c.quadraticCurveTo(x, y + h, x, y + h - corners[3]);
-        c.lineTo(x, y + corners[0]);
-        c.quadraticCurveTo(x, y, x + corners[0], y);
     },
-    Draw: function (c) {
-        c.beginPath();
-        this.Transform(c);
-
-        
-        var corners = null;
-        if (this.RoundCorners && this.RoundCorners.length == 4) {
-            corners = this.RoundCorners.slice();
-            var w = this.W;
-            var h = this.H;
-            var f = 2;
-            if (corners[0] * f > w || corners[1] * f > w || corners[2] * f > w || corners[3] * f > w || corners[0] * f > h || corners[1] * f > h || corners[2] * f > h || corners[3] * f > h)
-                corners = null;
-        }
-
-        this.DrawRoundedRect(c, this.X, this.Y, this.W, this.H, corners);
-
-        this.DrawFS(c);
-        c.closePath();
-
-        if (this.Extrude) {
-            if (this.Extrude > 0) {
-                // Outside, Draw lighter color above, darker color on the right
-                c.beginPath();
-                c.fillStyle = this.FillExtrudeLightColor ? this.FillExtrudeLightColor : TK.Draw.ColorToDifferentColor(this.Fill, "#FFF", 0.4);
-                c.moveTo(this.X, this.Y);
-                c.lineTo(this.X + this.Extrude, this.Y - this.Extrude);
-                c.lineTo(this.X + this.W + this.Extrude, this.Y - this.Extrude);
-                c.lineTo(this.X + this.W, this.Y);
-                c.lineTo(this.X, this.Y);
-                c.fill();
-                c.closePath();
-
-                c.beginPath();
-                c.fillStyle = this.FillExtrudeDarkColor ? this.FillExtrudeDarkColor : TK.Draw.ColorToDifferentColor(this.Fill, "#000", 0.4);
-                c.moveTo(this.X + this.W, this.Y);
-                c.lineTo(this.X + this.W + this.Extrude, this.Y - this.Extrude);
-                c.lineTo(this.X + this.W + this.Extrude, this.Y + this.H - this.Extrude);
-                c.lineTo(this.X + this.W, this.Y + this.H);
-                c.lineTo(this.X + this.W, this.Y);
-                c.fill();
-                c.closePath();
-            } else if (this.Extrude < 0) {
-                // Inside
-                c.beginPath();
-                //c.fillStyle = colorToDifferentColor(this.Fill, "#FFF", 0.4);
-                c.fillStyle = this.FillExtrudeDarkColor ? this.FillExtrudeDarkColor : TK.Draw.ColorToDifferentColor(this.Fill, "#000", 0.4);                
-                c.moveTo(this.X, this.Y);
-                c.lineTo(this.X + -this.Extrude, this.Y);
-                c.lineTo(this.X + -this.Extrude, this.Y + this.H - -this.Extrude);
-                c.lineTo(this.X, this.Y + this.H);
-                c.lineTo(this.X, this.Y);
-                c.fill();
-                c.closePath();
-
-                c.beginPath();
-                c.fillStyle = this.FillExtrudeLightColor ? this.FillExtrudeLightColor : TK.Draw.ColorToDifferentColor(this.Fill, "#000", 0.1);
-                c.moveTo(this.X, this.Y + this.H);
-                c.lineTo(this.X + -this.Extrude, this.Y + this.H - -this.Extrude);
-                c.lineTo(this.X + this.W, this.Y + this.H - -this.Extrude);
-                c.lineTo(this.X + this.W, this.Y + this.H);
-                c.lineTo(this.X, this.Y + this.H);
-                c.fill();
-                c.closePath();                
-            }
-        }
-
-        if (this.ShadeSize) {
-            c.beginPath();
-            this.Transform(c);
-            var origFill = this.Fill;
-            var origStroke = this.Stroke;
-            this.Fill = "rgba(0,0,0,0.2)";
-            this.Stroke = null;
-
-            if (!corners)
-                corners = [0, 0, 0, 0];
-
-            if (this.ShadePosition == 0)
-                this.DrawRoundedRect(c, this.X, this.Y, this.W, this.ShadeSize, [corners[0], corners[1], 0, 0]);                
-            else if (this.ShadePosition == 1)
-                this.DrawRoundedRect(c, (this.X + this.W) - this.ShadeSize, this.Y, this.ShadeSize, this.H, [0, corners[1], corners[2], 0]);
-            else if (this.ShadePosition == 2)
-                this.DrawRoundedRect(c, this.X, (this.Y + this.H) - this.ShadeSize, this.W, this.ShadeSize, [0, 0, corners[2], corners[3]]);
-            else if(this.ShadePosition == 3)
-                this.DrawRoundedRect(c, this.X, this.Y, this.ShadeSize, this.H, [corners[1], 0, 0, 0]);
-
-            this.DrawFS(c);
-            c.closePath();
-            this.Fill = origFill;
-            this.Stroke = origStroke;
-        }
-    }
-};
-TK.Draw.Circle = {
-    _: TK.Draw.DrawableObject,
-    Angle: 0, Size: null, DonutSize: null, Extrude: 0,
-    Draw: function (c) {
-        c.beginPath();
-        this.Transform(c);
-
-        if (this.Size || this.DonutSize) {
-            
-            // Complicated (slower) method for partial circles
-            var outerRadius = this.W * 0.5;
-            var innerRadius = outerRadius * this.DonutSize;
-
-            var centerPosX = this.X + this.W * 0.5;
-            var centerPosY = this.Y + this.H * 0.5;
-
-
-            if (this.Extrude) {
-                var extrudeAngle = (this.Angle + (this.Size * 0.5)) * Math.PI / 180;
-                centerPosX += Math.cos(extrudeAngle) * this.Extrude;
-                centerPosY += Math.sin(extrudeAngle) * this.Extrude;
-            }
-
-            var th1 = this.Angle * Math.PI / 180; // 0 = begin angle
-            var th2 = (this.Size + this.Angle) * Math.PI / 180; // 45 = end angle
-            var startOfOuterArcX = outerRadius * Math.cos(th2) + centerPosX;
-            var startOfOuterArcY = outerRadius * Math.sin(th2) + centerPosY;
-
-
-            c.arc(centerPosX, centerPosY, innerRadius, th1, th2, false);
-            c.lineTo(startOfOuterArcX, startOfOuterArcY);
-            c.arc(centerPosX, centerPosY, outerRadius, th2, th1, true);
-        } else {
-            // Simple (faster) method for simple circles
-            
-            c.ellipse(this.X + this.W * 0.5, this.Y + this.H * 0.5, this.W * 0.5, this.H * 0.5, 0, 0, (2 * Math.PI));
-            
-            
-        }
-        //c.arc(100, 100, 100, this.Angle, this.Size, false); // outer (filled)
-        //c.arc(100, 100, 80, this.Size, this.Size * 2, true); // outer (unfills it)
-
-        //c.ellipse(this.X + this.W * 0.5, this.Y + this.H * 0.5, this.W * 0.5, this.H * 0.5, 0, this.Angle, (2 * Math.PI) * this.Size);
-        this.DrawFS(c);
-        c.closePath();
-    }
-};
-TK.Draw.Text = {
-    _: TK.Draw.DrawableObject,
-    DrawAndTransformDisabled: true,
-    Text: "Blabla", Font: "30pt Arial", 
-    Draw: function (c) {
-        c.beginPath();
-        this.Transform(c);
-
-        c.font = this.Font;
-
-        if ((this.Anchor & TK.Draw.AnchorCenter) > 0) {
-            c.textAlign = "center";
-        } else if ((this.Anchor & TK.Draw.AnchorLeft) > 0) {
-            c.textAlign = "left";
-        } else if ((this.Anchor & TK.Draw.AnchorRight) > 0) {
-            c.textAlign = "right";
-        }
-
-        if ((this.Anchor & TK.Draw.AnchorMiddle) > 0) {
-            c.textBaseline = "middle";
-        } else if ((this.Anchor & TK.Draw.AnchorTop) > 0) {
-            c.textBaseline = "top";
-        } else if ((this.Anchor & TK.Draw.AnchorBottom) > 0) {
-            c.textBaseline = "bottom";
-        }
-
-        this.DrawFS(c);
-
-
-
-        if (!this.W) {
-            var rect = c.measureText(this.Text);
-            this.W = rect.width;         
-        }
-        if (!this.H) {
-            this.H = this.MeasureHeight(this.Text, this.Font);
-        }
-
-        if (this.Rotate) {
-            var translateX = this.X;
-            var translateY = this.Y;
-
-            c.translate(translateX, translateY);
-            //c.ellipse(0, 0, 35, 35, 0, 0, (2 * Math.PI));
-
-            c.rotate(this.Rotate * Math.PI / 180);
-            c.translate(-translateX, -translateY);
-        }
-
-        if (this.Fill)
-            c.fillText(this.Text, this.X, this.Y);
-        if (this.Stroke)
-            c.strokeText(this.Text, this.X, this.Y);
-        c.closePath();
-    },
-    FillWidthHeight: function () {
-        this.W = this.MeasureWidth(this.Text, this.Font);
-        this.H = this.MeasureHeight(this.Text, this.Font);
-    },
-    MeasureHeight: function (txt, font) {
-        var height = 16;
-        var f = font.split(' ');
-        if (f.length > 1) {
-            height = parseInt(f[0]);
-            if (f[0].indexOf("pt") > 0) {
-                height *= 1.34; // TODO: Fix for different user settings
-            } else if (f[0].indexOf("em") > 0) {
-                height *= 16;
-            }
-        }    
-        return height;
-    },
-    MeasureWidth: function (txt, font) {
-        if (txt == undefined)
-            txt = this.Text;
-        if (font == undefined)
-            font = this.Font;
-        var c = document.createElement("CANVAS");
-        c = c.getContext("2d");
-        c.textAlign = "left";
-        c.textBaseline = "top";
-        c.font = font;        
-        return c.measureText(txt).width;
-    }
-};
-
-
-TK.Draw.Image = {
-    _: TK.Draw.DrawableObject,
-    //RoundCorners: [15,15,15,15],
-    Img: null,
-    Src: null,
-    
-    Draw: function (c) {
-        var obj = this;
-        if (!this.Img && this.Src) {
-            this.Img = new Image();
-            this.Img.onload = function () {
-                // Refresh draw
-                c.CanvasObj.Refresh();                
-            };
-            this.Img.src = this.Src;
-            return;
-        }
-        if (!this.Img)
-            return;
-        
-        c.beginPath();
-        this.Transform(c);
-        this.DrawFS(c);
-        try {
-            c.globalAlpha = this.Opacity;
-            c.drawImage(this.Img, this.X, this.Y, this.W, this.H);
-            c.globalAlpha = 1;
-        } catch (errie) { }
-        c.closePath();        
+    Invalidate: function () {
+        // Called whenever a property is changed
     }
 };

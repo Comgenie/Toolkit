@@ -16,6 +16,7 @@ window.TK.Form = {
     ApplyToModelDirectly: false,
     RemoveValueOfNotVisibleFields: true, // If false, a field hidden by IsVisible will still keep its value when saving
     CustomValidation: function (model, callBackResult) { callBackResult([]); }, // Callback with an array of errors. If the array is empty or undefined, the validation is seen as passed.
+    SubmitResult: function (isSaved, errors) { }, // Callback after .onsubmit and .Save or .RenderErrors is called
     DefaultTemplates: {
         text: {
             _: "input",
@@ -208,13 +209,14 @@ window.TK.Form = {
                     optionEle.ValueObj = this.Values[i];
                     this.appendChild(optionEle);
                 }
-                if (this.Data) {
+
+                if (this.Data !== undefined && this.Data !== null) {
                     this.value = this.Data.toString(); // Always set a string for compatibility reasons
                     // Set Data to null so GetValue will return value from here on
                     this.Data = null;
                 }
                 else
-                    this.value = this.DataSettings.ValueIsText ? "" : 0;
+                    this.value = this.DataSettings.ValueIsText ? "" : "0";
             },
             GetValue: function () {
                 // When Data is set and options are being retrieved we can return the Data.
@@ -574,19 +576,27 @@ window.TK.Form = {
                 this.CustomValidation(newObj, function (customErrors) {
                     obj.IsCurrentlySubmitting = false;
                     if (!customErrors || customErrors.length == 0) {                        
-                        obj.Save(newObj);                        
+                        obj.Save(newObj);           
                     } else {
                         obj.RenderErrors(customErrors, "");
                     }
+
+                    if (obj.SubmitResult)
+                        obj.SubmitResult(!customErrors || customErrors.length == 0, customErrors);
                 });
             } else {
                 this.IsCurrentlySubmitting = false;
                 this.Save(newObj);
+                if (this.SubmitResult)
+                    this.SubmitResult(true, errors);
             }            
         } else {
             this.RenderErrors(errors, this.RequiredText);
             this.IsCurrentlySubmitting = false;
+            if (this.SubmitResult)
+                this.SubmitResult(false, errors);
         }        
+        this.LastErrors = errors;
         return false;
     }
 };

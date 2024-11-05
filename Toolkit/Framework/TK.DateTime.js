@@ -164,11 +164,13 @@ window.TK.DateTime = {
 
                         this.TimeOut = setTimeout(function () {
                             obj.TimeOut = 0;
-                            obj.Parent.Parent.Elements.Selection.style.display = "none";
-                            obj.Parent.Parent.Elements.Selection.style.position = "absolute";
-                            obj.Parent.Parent.Elements.Selection.style.top = "";
-                            obj.Parent.Parent.Elements.Selection.style.left = "";
-                            obj.Parent.Parent.appendChild(obj.Parent.Parent.Elements.Selection); // Move element back (so the next time the position will be correct as well)
+                            if (obj.Parent.Parent.Elements.Selection) {
+                                obj.Parent.Parent.Elements.Selection.style.display = "none";
+                                obj.Parent.Parent.Elements.Selection.style.position = "absolute";
+                                obj.Parent.Parent.Elements.Selection.style.top = "";
+                                obj.Parent.Parent.Elements.Selection.style.left = "";
+                                obj.Parent.Parent.appendChild(obj.Parent.Parent.Elements.Selection); // Move element back (so the next time the position will be correct as well)
+                            }
                         }, 250);
                     },
                     onfocus: function () {
@@ -294,7 +296,8 @@ window.TK.DateTime = {
         this.NotFirst = true;
 
         this.Data = dateISO;
-        element.DateISO = dateISO;        
+        element.DateISO = dateISO;
+        
         if (!dateISO)
             dateISO = new Date().toISOString();        
 
@@ -393,8 +396,6 @@ window.TK.DateTime = {
                 element.style.display = "none";
             };
             element.appendChild(applyButton);
-
-
 
             obj.Elements.DateInputContainer.Elements.DateInput.focus();
             return;
@@ -583,6 +584,10 @@ window.TK.DateTime = {
 
         //element.appendChild(document.createTextNode(dateObj.toString()));
     },
+    Destroy: function () {
+        if (this.Elements.Selection)
+            this.Elements.Selection.Remove();
+    }
     
 };
 

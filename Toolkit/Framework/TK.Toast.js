@@ -33,8 +33,13 @@ window.TK.Toast = {
     Width: 250,
     Height: 100,
     CurrentToasts: [],
-    Create: function (title, message, action) {
-        var toast = TK.Initialize({ _: this.Template, Title: title, Message: message, Action: action });
+    Create: function (title, message, action, customTemplate) {
+
+        if (customTemplate && !customTemplate._) {
+            customTemplate._ = this.Template;
+        }
+        
+        var toast = TK.Initialize({ _: customTemplate ? customTemplate : this.Template, Title: title, Message: message, Action: action });
         toast.style.position = "fixed";
         toast.style.width = this.Width + "px";
         
