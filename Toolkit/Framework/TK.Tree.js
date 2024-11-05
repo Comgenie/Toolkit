@@ -202,7 +202,7 @@ window.TK.Tree = {
                 continue;
 
             let breakLoop = subItemFunction.apply(obj, [rowDescendant]);
-            if(breakLoop)
+            if (breakLoop)
                 break;
             obj.RecursiveSublist(rowDescendant, subItemFunction);
         }
@@ -214,7 +214,7 @@ window.TK.Tree = {
             return;
 
         let breakRecursion = parentFunction.apply(obj, [row.Parent]);
-        if(breakRecursion)
+        if (breakRecursion)
             return;
         obj.RecursiveParent(row.Parent, parentFunction);
     },
@@ -403,7 +403,10 @@ window.TK.FormTree = {
         }
         obj.Refresh();
         if (obj.Data) {
-            for (let boxChecked of obj.Checkboxes.filter((c) => { return c.checked })) {
+            let checkedCheckboxes = obj.Checkboxes.filter(function (c) { return c ? c.checked : false });
+            
+            for (let i = 0; i < checkedCheckboxes.length; i++) {
+                let boxChecked = obj.Checkboxes[i];
                 obj.RecursiveParent(boxChecked.Parent.Row, function (parentRow) {
                     if (parentRow.CheckBox.checked)
                         return;
@@ -412,6 +415,7 @@ window.TK.FormTree = {
                 });
             }
         }
+
     },
     CheckBoxChange: function (changedRow, checkedRows) { },
     CheckBoxClick: function (event, row) {
