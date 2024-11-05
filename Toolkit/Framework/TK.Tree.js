@@ -201,7 +201,9 @@ window.TK.Tree = {
             if (!rowDescendant.Row)
                 continue;
 
-            subItemFunction(rowDescendant);
+            let breakLoop = subItemFunction.apply(obj, [rowDescendant]);
+            if (breakLoop)
+                break;
             obj.RecursiveSublist(rowDescendant, subItemFunction);
         }
     },
@@ -211,7 +213,9 @@ window.TK.Tree = {
         if (!row.Parent || !row.Parent.Row)
             return;
 
-        parentFunction(row.Parent);
+        let breakRecursion = parentFunction.apply(obj, [row.Parent]);
+        if (breakRecursion)
+            return;
         obj.RecursiveParent(row.Parent, parentFunction);
     },
 
@@ -398,6 +402,20 @@ window.TK.FormTree = {
 
         }
         obj.Refresh();
+        if (obj.Data) {
+            let checkedCheckboxes = obj.Checkboxes.filter(function (c) { return c ? c.checked : false });
+            
+            for (let i = 0; i < checkedCheckboxes.length; i++) {
+                let boxChecked = obj.Checkboxes[i];
+                obj.RecursiveParent(boxChecked.Parent.Row, function (parentRow) {
+                    if (parentRow.CheckBox.checked)
+                        return;
+
+                    obj.SetParentCheckbox(parentRow);
+                });
+            }
+        }
+
     },
     CheckBoxChange: function (changedRow, checkedRows) { },
     CheckBoxClick: function (event, row) {
@@ -414,23 +432,7 @@ window.TK.FormTree = {
 
         // Check parent nodes and their childeren to set checkbox value
         let parentCheck = function (row) {
-            obj.RecursiveParent(row, function (parentRow) {
-                let checked = true;
-                let indeterminate = false;
-                obj.RecursiveSublist(parentRow, function (childRow) {
-                    let box = childRow.CheckBox;
-                    if (box) {
-                        checked = checked && box.checked;
-                        indeterminate = indeterminate || box.checked;
-                    }
-                });
-                // If checked is true here, all items are checked so indeterminate is false
-                indeterminate = !checked && indeterminate;
-
-                parentRow.CheckBox.checked = checked;
-                parentRow.CheckBox.indeterminate = indeterminate;
-
-            });
+            obj.RecursiveParent(row, obj.SetParentCheckbox);
         };
 
         let obj = this;
@@ -542,6 +544,27 @@ window.TK.FormTree = {
             }
         }
         return result;
+    },
+    SetParentCheckbox: function (parentRow) {
+        let obj = this;
+
+        let checked = true;
+        let indeterminate = false;
+        obj.RecursiveSublist(parentRow, function (childRow) {
+            // When at least one is checked and one is unchecked we don't need to check the rest
+            if (!checked && indeterminate)
+                return true; // will break out of recursion
+            let box = childRow.CheckBox;
+            if (box) {
+                checked = checked && box.checked;
+                indeterminate = indeterminate || box.checked;
+            }
+        });
+        // If checked is true here, all items are checked so indeterminate is false
+        indeterminate = !checked && indeterminate;
+
+        parentRow.CheckBox.checked = checked;
+        parentRow.CheckBox.indeterminate = indeterminate;
     },
     Checkboxes: []
 }
