@@ -54,6 +54,9 @@ window.TK.DateTime = {
         this.RefreshDateInput(true);
         this.Elements.DateInputContainer.Elements.TimeZoneInfo.style.display = (this.EnableTimeZone ? "" : "none");
     },
+    GetTimeZoneText: function () {
+
+    },
     GetValue: function () {
         var isoDate = this.Data;
         if (this.EnableRelative && isoDate && isoDate.indexOf && isoDate.indexOf("|") >= 0) {
@@ -217,6 +220,7 @@ window.TK.DateTime = {
                     //this.Elements.DateInputContainer.Elements.TimeZoneInfo.style.display = "none";
                 }
 
+
                 try {
                     var timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
                     this.Elements.DateInputContainer.Elements.TimeZoneInfo.title = timeZone;
@@ -228,9 +232,13 @@ window.TK.DateTime = {
                 } catch (errie) {
                     this.Elements.DateInputContainer.Elements.TimeZoneInfo.title = "Local timezone";
                 }
-
             } else {
                 // TODO
+            }
+
+            var customTimeZoneText = this.GetTimeZoneText();
+            if (customTimeZoneText) {
+                this.Elements.DateInputContainer.Elements.TimeZoneInfo.innerHTML = customTimeZoneText;
             }
         }
         
