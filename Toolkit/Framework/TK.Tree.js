@@ -447,10 +447,10 @@ window.TK.FormTree = {
             // At the end of the add rows function the rest of the functionality will be executed
             if (obj.inAddRowsFunction)
                 return;
-            var checked = false;
-            if (obj.Data && rowNode.Data && rowNode.Data[obj.IdField] !== undefined && rowNode.Data[obj.IdField] !== null) {
-                checked = obj.Data.some(function (d) { return d == rowNode.Data[obj.IdField] });
-            }
+            var checked = obj.Data && rowNode.Data &&
+                (rowNode.Data[obj.IdField] !== undefined && rowNode.Data[obj.IdField] !== null && obj.Data.some(function (d) { return d === rowNode.Data[obj.IdField] }))
+                || (obj.ValueProperty && rowNode.Data[obj.ValueProperty] !== undefined && rowNode.Data[obj.ValueProperty] !== null && obj.Data.some(function (d) { return d === rowNode.Data[obj.ValueProperty] }));
+
             obj.AddCheckBox(rowNode, checked);
 
         }
@@ -552,12 +552,12 @@ window.TK.FormTree = {
                 continue;
             }
 
-            let checked = obj.Data && rowNode.Data && 
-            (rowNode.Data[obj.IdField] !== undefined && rowNode.Data[obj.IdField] !== null && obj.Data.some(function (d) { return d == rowNode.Data[obj.IdField] }))
-                ||(obj.ValueProperty && rowNode.Data[obj.ValueProperty] !== undefined && rowNode.Data[obj.ValueProperty] !== null && obj.Data.some(function (d) { return d == rowNode.Data[obj.ValueProperty] }));
+            let checked = obj.Data && rowNode.Data &&
+                (rowNode.Data[obj.IdField] !== undefined && rowNode.Data[obj.IdField] !== null && obj.Data.some(function (d) { return d === rowNode.Data[obj.IdField] }))
+                || (obj.ValueProperty && rowNode.Data[obj.ValueProperty] !== undefined && rowNode.Data[obj.ValueProperty] !== null && obj.Data.some(function (d) { return d === rowNode.Data[obj.ValueProperty] }));
 
             obj.AddCheckBox(row, checked);
-            if (obj.ValueProperty ) {
+            if (obj.ValueProperty) {
                 obj.RecursiveParent(row, function (parentRow) { if (!parentRow.CheckBox) obj.AddCheckBox(parentRow) });
             }
         }
