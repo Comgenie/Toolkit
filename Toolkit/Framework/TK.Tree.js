@@ -220,8 +220,9 @@ window.TK.Tree = {
     },
 
     ApplyFilter: function (filter, showAllChildNodes, callBackFoundRows) {
-        filter = filter.toLowerCase();
-        if (filter == "") {
+        let obj = this;
+        const isFunction = typeof filter === "function";
+        if (!filter) {
             this.Refresh(); // Collapse everything
             return;
         }
@@ -237,25 +238,32 @@ window.TK.Tree = {
         var foundRows = [];
 
         // Then make everything matching visible, including all parents and optionally all child nodes
-        var filterParts = filter.split(/;/g);
-        for (var i = 0; i < filterParts.length; i++) {
-            for (var item in this.CurRows) {
-                var row = this.CurRows[item];
-                var txt = "";
-                if (row.SubList) { // Only look at the text of this element
-                    for (var j = 0; j < row.childNodes.length; j++) {
-                        if (row.childNodes[j] != row.SubList)
-                            txt += row.childNodes[j].innerText;
-                    }
+        function processRow(filterString) {
+            for (var item in obj.CurRows) {
+                var row = obj.CurRows[item];
+                let matchesFilter = false;
+
+                if (isFunction) {
+                    matchesFilter = filter(row);
                 } else {
-                    txt = row.innerText;
+                    var txt = "";
+                    if (row.SubList) { // Only look at the text of this element
+                        for (var j = 0; j < row.childNodes.length; j++) {
+                            if (row.childNodes[j] != row.SubList)
+                                txt += row.childNodes[j].innerText;
+                        }
+                    } else {
+                        txt = row.innerText;
+                    }
+
+                    matchesFilter = txt.toLowerCase().indexOf(filterString) >= 0;
                 }
 
-                if (txt.toLowerCase().indexOf(filterParts[i]) >= 0) {
+                if (matchesFilter) {
                     row.style.display = "";
                     foundRows.push(row);
 
-                    if (!this.AutoExpandChildNodesDuringFilter && row.className.indexOf("collapsed") < 0) {
+                    if (!obj.AutoExpandChildNodesDuringFilter && row.className.indexOf("collapsed") < 0) {
                         row.className = row.className.replace(/expanded/g, "") + " collapsed";
                         if (row.ExpandCollapseButton)
                             row.ExpandCollapseButton.Update();
@@ -269,7 +277,7 @@ window.TK.Tree = {
                             var removeClass = "collapsed";
                             var setStyle = "";
 
-                            if (!this.AutoExpandChildNodesDuringFilter) {
+                            if (!obj.AutoExpandChildNodesDuringFilter) {
                                 addClass = "collapsed";
                                 removeClass = "expanded";
                                 setStyle = "none";
@@ -282,9 +290,9 @@ window.TK.Tree = {
                                 if (li.className.indexOf(addClass) < 0) {
                                     li.className = li.className.replace(removeClass, "") + " " + addClass;
                                     if (addClass == "expanded")
-                                        this.Expanded(li.Data, false, curList);
+                                        obj.Expanded(li.Data, false, curList);
                                     else
-                                        this.Collapsed(li.Data, false, curList);
+                                        obj.Collapsed(li.Data, false, curList);
 
                                     if (li.ExpandCollapseButton)
                                         li.ExpandCollapseButton.Update();
@@ -302,13 +310,24 @@ window.TK.Tree = {
                         row = row.parentNode;
                         if (row.SubList && row.className.indexOf("expanded") < 0) {
                             row.className = row.className.replace(/collapsed/g, "") + " expanded";
-                            this.Expanded(row.Data, false, row);
+                            obj.Expanded(row.Data, false, row);
                             if (row.ExpandCollapseButton)
                                 row.ExpandCollapseButton.Update();
                         }
                         row.style.display = "";
                     }
                 }
+            }
+        }
+
+        if (isFunction) {
+            processRow()
+        }
+        else {
+            var filterString = (filter || "").toLowerCase();
+            var filterParts = filterString.split(/;/g);
+            for (var i = 0; i < filterParts.length; i++) {
+                processRow(filterParts[i]);
             }
         }
         this.style.display = "";
