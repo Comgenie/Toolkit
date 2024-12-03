@@ -240,7 +240,7 @@ window.TK.Tree = {
                 let matchesFilter = false;
 
                 if (isFunction) {
-                    matchesFilter = filter(row);
+                    matchesFilter = filter(row.Data, row);
                 } else {
                     var txt = "";
                     if (row.SubList) { // Only look at the text of this element
