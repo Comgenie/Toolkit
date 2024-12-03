@@ -107,20 +107,20 @@
     <p>Retrieve tree rows with ajax.</p>
     <pre>
     {
-        Elements: {
-            AjaxTree:{
-                _: TK.AjaxTree,
-                Url: 'TreeExample.txt'
-            },
-            AjaxFormTree: {
-                _: TK.AjaxFormTree,
-                ShowJsonAsTree: true,
-                ArrayChildNames: ["Name"],
-                Url: 'TreeExample.txt'
-            }
-        }
+        _: TK.AjaxTree,
+        Url: 'TreeExample.txt'
     }
     </pre>
+    
+    <p>By setting the ShowJsonAsTree property to true, a json object can be shown within a tree similar to the array preview in your browsers development console.</p>
+    <pre>
+    {
+        _: TK.AjaxFormTree,
+        ShowJsonAsTree: true,
+        ArrayChildNames: ["Name"],
+        Url: 'TreeExample.txt'
+    }
+    </pre>    
 
     <h2>Tree forms</h2>
     <p>In forms or as a GUI element you want to select nodes in a tree. This can be done in groups or individual level.
@@ -148,7 +148,15 @@
                 onclick: function(){
                     alert(JSON.stringify(this.Parent.Elements.Tree.GetValue()));
                 }
-            },
+            }
+        }
+    }
+    </pre>
+    
+    <p>By setting the ValueProperty, only rows with that property will have a value. It is also the value which .Data expects and the .GetValue method returns.</p>
+    <pre>
+    {
+        Elements: {
             ValueTree:{
                 _: TK.FormTree,
                 EnableFullRowExpand: true,
@@ -173,7 +181,7 @@
             },
         }
     }
-    </pre>
+    </pre>    
 
 </body>
 
