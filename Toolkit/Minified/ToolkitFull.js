@@ -490,44 +490,62 @@ return;for(var rowDescendantKey in row.SubList.childNodes){var rowDescendant=row
 continue;let breakLoop=subItemFunction.apply(obj,[rowDescendant]);if(breakLoop)
 break;obj.RecursiveSublist(rowDescendant,subItemFunction);}},RecursiveParent:function(row,parentFunction){var obj=this;if(!row.Parent||!row.Parent.Row)
 return;let breakRecursion=parentFunction.apply(obj,[row.Parent]);if(breakRecursion)
-return;obj.RecursiveParent(row.Parent,parentFunction);},ApplyFilter:function(filter,showAllChildNodes,callBackFoundRows){filter=filter.toLowerCase();if(filter==""){this.Refresh();return;}
+return;obj.RecursiveParent(row.Parent,parentFunction);},ApplyFilter:function(filter,showAllChildNodes,callBackFoundRows){let obj=this;const isFunction=typeof filter==="function";if(!filter){this.Refresh();return;}
 this.style.display="none";for(var item in this.CurRows){var row=this.CurRows[item];row.style.display="none";}
-var foundRows=[];var filterParts=filter.split(/;/g);for(var i=0;i<filterParts.length;i++){for(var item in this.CurRows){var row=this.CurRows[item];var txt="";if(row.SubList){for(var j=0;j<row.childNodes.length;j++){if(row.childNodes[j]!=row.SubList)
+var foundRows=[];function processRow(filterString){for(var item in obj.CurRows){var row=obj.CurRows[item];let matchesFilter=false;if(isFunction){matchesFilter=filter(row.Data,row);}else{var txt="";if(row.SubList){for(var j=0;j<row.childNodes.length;j++){if(row.childNodes[j]!=row.SubList)
 txt+=row.childNodes[j].innerText;}}else{txt=row.innerText;}
-if(txt.toLowerCase().indexOf(filterParts[i])>=0){row.style.display="";foundRows.push(row);if(!this.AutoExpandChildNodesDuringFilter&&row.className.indexOf("collapsed")<0){row.className=row.className.replace(/expanded/g,"")+" collapsed";if(row.ExpandCollapseButton)
+matchesFilter=txt.toLowerCase().indexOf(filterString)>=0;}
+if(matchesFilter){row.style.display="";foundRows.push(row);if(!obj.AutoExpandChildNodesDuringFilter&&row.className.indexOf("collapsed")<0){row.className=row.className.replace(/expanded/g,"")+" collapsed";if(row.ExpandCollapseButton)
 row.ExpandCollapseButton.Update();}
-if(showAllChildNodes&&row.SubList){var subLists=[row.SubList];for(var j=0;j<subLists.length;j++){var curList=subLists[j];var addClass="expanded";var removeClass="collapsed";var setStyle="";if(!this.AutoExpandChildNodesDuringFilter){addClass="collapsed";removeClass="expanded";setStyle="none";}
+if(showAllChildNodes&&row.SubList){var subLists=[row.SubList];for(var j=0;j<subLists.length;j++){var curList=subLists[j];var addClass="expanded";var removeClass="collapsed";var setStyle="";if(!obj.AutoExpandChildNodesDuringFilter){addClass="collapsed";removeClass="expanded";setStyle="none";}
 curList.style.display=setStyle;for(var n=0;n<curList.childNodes.length;n++){var li=curList.childNodes[n];if(li.className.indexOf(addClass)<0){li.className=li.className.replace(removeClass,"")+" "+addClass;if(addClass=="expanded")
-this.Expanded(li.Data,false,curList);else
-this.Collapsed(li.Data,false,curList);if(li.ExpandCollapseButton)
+obj.Expanded(li.Data,false,curList);else
+obj.Collapsed(li.Data,false,curList);if(li.ExpandCollapseButton)
 li.ExpandCollapseButton.Update();}
 if(li.style)
 li.style.display="";if(li.SubList)
 subLists.push(li.SubList);}}}
-while(row.parentNode.Rows==undefined){row=row.parentNode;if(row.SubList&&row.className.indexOf("expanded")<0){row.className=row.className.replace(/collapsed/g,"")+" expanded";this.Expanded(row.Data,false,row);if(row.ExpandCollapseButton)
+while(row.parentNode.Rows==undefined){row=row.parentNode;if(row.SubList&&row.className.indexOf("expanded")<0){row.className=row.className.replace(/collapsed/g,"")+" expanded";obj.Expanded(row.Data,false,row);if(row.ExpandCollapseButton)
 row.ExpandCollapseButton.Update();}
 row.style.display="";}}}}
+if(isFunction){processRow()}
+else{var filterString=(filter||"").toLowerCase();var filterParts=filterString.split(/;/g);for(var i=0;i<filterParts.length;i++){processRow(filterParts[i]);}}
 this.style.display="";if(callBackFoundRows){callBackFoundRows(foundRows);}},SelectRow:function(id){var curSelectedItem=this.querySelector(".selectedItem");if(curSelectedItem)
 curSelectedItem.className=curSelectedItem.className.replace(/selectedItem/g,"");var currentRow=this.CurRows["id"+id];if(!currentRow)
 return;currentRow.className+=" selectedItem";var row=currentRow;row.style.display="";if(row.SubList){this.Expanded(row.Data,false,row);row.className=row.className.replace(/collapsed/g,"")+" expanded";row.SubList.style.display="";}
 while(row.parentNode.Rows==undefined){row=row.parentNode;if(row.SubList){this.Expanded(row.Data,false,row);row.className=row.className.replace(/collapsed/g,"")+" expanded";}
 row.style.display="";}
-currentRow.scrollIntoView();return currentRow;},RowClick:function(rowObj,jsEvent){}};window.TK.AjaxTree={_:window.TK.Tree,Url:null,Post:null,AjaxSettings:{},Init:function(callback){var obj=this;obj.Clear();if(this.Url){Ajax.do(this.Url,this.Post,function(response){if(response&&response.substr)
-response=JSON.parse(response);obj.Rows=response;obj.Refresh();obj.Update();if(callback){callback.apply(obj);}},undefined,this.AjaxSettings);}},Update:function(){}};window.TK.FormTree={_:window.TK.Tree,inAddCheckboxesFunction:false,Data:[],Init:function(){if(this.Rows.length==0)
-return;let obj=this;var originalAddRows=obj.AddRows;obj.AddRows=function(rows){if(!rows)return;originalAddRows.apply(obj,[rows]);obj.AddCheckBoxes();};var originalAddRow=obj.AddRow;obj.AddRow=function(row,orderRows){var rowNode=originalAddRow.apply(obj,[row,orderRows]);var checked=false;if(obj.Data&&rowNode.Data&&rowNode.Data[obj.IdField]!==undefined&&rowNode.Data[obj.IdField]!==null){checked=obj.Data.indexOf(rowNode.Data[obj.IdField])>=0;}
-obj.AddCheckBox(rowNode,checked);}
-obj.Refresh();if(obj.Data){let checkedCheckboxes=obj.Checkboxes.filter(function(c){return c?c.checked:false});for(let i=0;i<checkedCheckboxes.length;i++){let boxChecked=obj.Checkboxes[i];obj.RecursiveParent(boxChecked.Parent.Row,function(parentRow){if(parentRow.CheckBox.checked)
-return;obj.SetParentCheckbox(parentRow);});}}},CheckBoxChange:function(changedRow,checkedRows){},CheckBoxClick:function(event,row){let sublistCheck=function(row){obj.RecursiveSublist(row,function(rowDescendant){let box=rowDescendant.CheckBox;if(box){box.checked=checkboxObj.checked;box.indeterminate=false;}});};let parentCheck=function(row){obj.RecursiveParent(row,obj.SetParentCheckbox);};let obj=this;let checkboxObj=row.CheckBox;if(event.ctrlKey){obj.lastBoxClick=checkboxObj;obj.CheckBoxChange(row,obj.Checkboxes.filter(function(b){return b.checked;}).map(function(b){return b.Parent;}));return;}
+currentRow.scrollIntoView();return currentRow;},ConvertJsonToRows:function(json,arrayChildNames){let obj=this;let rowId=0;let resultRows=[];if(!arrayChildNames)
+arrayChildNames=[];let recursiveJsonProperties=function(top,skip){let parentId=rowId;for(const propIndex in top){let prop=top[propIndex];if(!prop||(skip&&skip===propIndex)){continue;}
+let proptype=typeof prop;rowId++;let rowObj={Id:rowId,ParentId:parentId,Text:propIndex+": "+prop};if(proptype==='boolean'||proptype==='number'||proptype==='string'||proptype==='date'){if(obj.ValueProperty&&propIndex==obj.ValueProperty)
+rowObj[obj.ValueProperty]=prop;if(Array.isArray(top))
+rowObj.Text=prop+"";resultRows.push(rowObj);}
+else if(proptype==='object'){let childArrayProp=null;rowObj.Text=propIndex+"";if(!Array.isArray(prop)){childArrayProp=Object.keys(prop).find(k=>arrayChildNames.includes(k));if(childArrayProp)
+rowObj.Text=prop[childArrayProp]+"";}
+resultRows.push(rowObj);recursiveJsonProperties(prop,childArrayProp);}}}
+recursiveJsonProperties(json);return resultRows;},RowClick:function(rowObj,jsEvent){}};window.TK.AjaxTree={_:window.TK.Tree,Url:null,Post:null,AjaxSettings:{},ShowJsonAsTree:false,ArrayChildNames:[],Init:function(callback){var obj=this;obj.Clear();if(this.Url){Ajax.do(this.Url,this.Post,function(response){if(response&&response.substr)
+response=JSON.parse(response);if(obj.ShowJsonAsTree)
+response=obj.ConvertJsonToRows(response,obj.ArrayChildNames);obj.Rows=response;obj.Refresh();obj.Update();if(callback){callback.apply(obj);}},undefined,this.AjaxSettings);}},Update:function(){}};window.TK.FormTree={_:window.TK.Tree,ValueProperty:null,inAddCheckboxesFunction:false,Data:[],Init:function(){if(this.Rows.length==0)
+return;let obj=this;var originalAddRows=obj.AddRows;obj.AddRows=function(rows){if(!rows)return;originalAddRows.apply(obj,[rows]);obj.AddCheckBoxes();};var originalAddRow=obj.AddRow;obj.AddRow=function(row,orderRows){var rowNode=originalAddRow.apply(obj,[row,orderRows]);if(obj.inAddRowsFunction)
+return;var checked=obj.Data&&rowNode.Data&&(rowNode.Data[obj.IdField]!==undefined&&rowNode.Data[obj.IdField]!==null&&obj.Data.some(function(d){return d===rowNode.Data[obj.IdField]}))||(obj.ValueProperty&&rowNode.Data[obj.ValueProperty]!==undefined&&rowNode.Data[obj.ValueProperty]!==null&&obj.Data.some(function(d){return d===rowNode.Data[obj.ValueProperty]}));obj.AddCheckBox(rowNode,checked);}
+obj.style.display='none';obj.Refresh();if(obj.Data){let checkedCheckboxes=obj.Checkboxes.filter(function(c){return c?c.checked:false});for(let i=0;i<checkedCheckboxes.length;i++){let boxChecked=checkedCheckboxes[i];obj.RecursiveParent(boxChecked.Parent.Row,function(parentRow){if(parentRow.CheckBox.checked)
+return;obj.SetParentCheckbox(parentRow);});}}
+obj.style.display='';},CheckBoxChange:function(changedRow,checkedRows){},CheckBoxClick:function(event,row){let sublistCheck=function(row){obj.RecursiveSublist(row,function(rowDescendant){let box=rowDescendant.CheckBox;if(box){box.checked=checkboxObj.checked;box.indeterminate=false;}});};let parentCheck=function(row){obj.RecursiveParent(row,obj.SetParentCheckbox);};let obj=this;let checkboxObj=row.CheckBox;if(event.ctrlKey){obj.lastBoxClick=checkboxObj;obj.CheckBoxChange(row,obj.Checkboxes.filter(function(b){return b.checked;}).map(function(b){return b.Parent;}));return;}
 if(event.shiftKey&&obj.lastBoxClick){if(obj.lastBoxClick===checkboxObj){obj.RecursiveSublist(checkboxObj.Parent,function(row){row.CheckBox.checked=false;});checkboxObj.indeterminate=false;checkboxObj.checked=true;obj.CheckBoxChange(row,obj.Checkboxes.filter(function(b){return b.checked;}).map(function(b){return b.Parent;}));return;}
 let goUp=checkboxObj.TreeId<obj.lastBoxClick.TreeId;let cboxes=obj.Checkboxes.filter(function(box){if(goUp)
 return box.TreeId<obj.lastBoxClick.TreeId&&box.TreeId>=checkboxObj.TreeId;return box.TreeId>obj.lastBoxClick.TreeId&&box.TreeId<=checkboxObj.TreeId;});cboxes.forEach(function(b){b.checked=obj.lastBoxClick.checked});sublistCheck(row.TreeDepth<=obj.lastBoxClick.Parent.Row.TreeDepth?row:obj.lastBoxClick.Parent.Row);parentCheck(row.TreeDepth>=obj.lastBoxClick.Parent.Row.TreeDepth?row:obj.lastBoxClick.Parent.Row);obj.CheckBoxChange(row,obj.Checkboxes.filter(function(b){return b.checked;}).map(function(b){return b.Parent;}));return;}
-obj.lastBoxClick=row.CheckBox;sublistCheck(row);parentCheck(row);obj.CheckBoxChange(row,obj.Checkboxes.filter(function(b){return b.checked;}).map(function(b){return b.Parent;}));},AddCheckBoxes:function(){var obj=this;obj.inAddCheckboxesFunction=true;for(var rowId in obj.CurRows){var row=obj.CurRows[rowId];obj.AddCheckBox(row);}
+obj.lastBoxClick=row.CheckBox;sublistCheck(row);parentCheck(row);obj.CheckBoxChange(row,obj.Checkboxes.filter(function(b){return b.checked;}).map(function(b){return b.Parent;}));},AddCheckBoxes:function(){var obj=this;obj.inAddCheckboxesFunction=true;for(var rowId in obj.CurRows){var row=obj.CurRows[rowId];let rowNode=row.Row;if(obj.ValueProperty&&!row.Row.Data[obj.ValueProperty]){continue;}
+let checked=obj.Data&&rowNode.Data&&(rowNode.Data[obj.IdField]!==undefined&&rowNode.Data[obj.IdField]!==null&&obj.Data.some(function(d){return d===rowNode.Data[obj.IdField]}))||(obj.ValueProperty&&rowNode.Data[obj.ValueProperty]!==undefined&&rowNode.Data[obj.ValueProperty]!==null&&obj.Data.some(function(d){return d===rowNode.Data[obj.ValueProperty]}));obj.AddCheckBox(row,checked);if(obj.ValueProperty){obj.RecursiveParent(row,function(parentRow){if(!parentRow.CheckBox)obj.AddCheckBox(parentRow)});}}
 obj.IndexCheckboxes();obj.inAddCheckboxesFunction=false;},AddCheckBox:function(row,checked){var obj=this;if(!row||row.CheckBox||!row.firstChild)
 return;let checkbox=TK.Initialize({_:"input",type:"checkbox",checked:checked?true:false,className:"toolkitTreeCheckbox"});checkbox.onclick=function(e){obj.CheckBoxClick(e,row);};row.CheckBox=checkbox;checkbox.Parent=row;if(row.firstChild.classList.contains('expandCollapseButton')&&row.childNodes.length>1)
 row.insertBefore(checkbox,row.childNodes[1]);else
 row.insertBefore(checkbox,row.firstChild);if(!obj.inAddCheckboxesFunction)
-obj.IndexCheckboxes();},IndexCheckboxes:function(){var obj=this;if(obj.parentNode){obj.Checkboxes=[];var lis=obj.parentNode.querySelectorAll(':scope ul>li>input.toolkitTreeCheckbox');if(lis){lis.forEach(function(a,i){a.TreeId=i+1;obj.Checkboxes.push(a);});}}},GetValue:function(){let obj=this;let result=[];for(var rowId in obj.CurRows){var row=obj.CurRows[rowId];if(row.CheckBox.checked){result.push(row.Data[obj.IdField]);}}
-return result;},SetParentCheckbox:function(parentRow){let obj=this;let checked=true;let indeterminate=false;obj.RecursiveSublist(parentRow,function(childRow){if(!checked&&indeterminate)
+obj.IndexCheckboxes();},IndexCheckboxes:function(){var obj=this;if(obj.parentNode){obj.Checkboxes=[];let treeIndex=1;for(var i=0;i<obj.children.length;i++){let row=obj.children[i];if(!row.Row||!row.CheckBox)
+continue;row.CheckBox.TreeId=treeIndex;obj.Checkboxes.push(row.CheckBox);treeIndex++;obj.RecursiveSublist(row,function(childNode){if(!childNode.CheckBox)
+return;childNode.CheckBox.TreeId=treeIndex;obj.Checkboxes.push(childNode.CheckBox);treeIndex++;});}}},GetValue:function(){let obj=this;let result=[];for(var rowId in obj.CurRows){var row=obj.CurRows[rowId];if(row.CheckBox&&row.CheckBox.checked){if(obj.ValueProperty&&!row.Data[obj.ValueProperty]){continue;}
+result.push(row.Data[obj.ValueProperty?obj.ValueProperty:obj.IdField]);}}
+return result;},SetParentCheckbox:function(parentRow){let obj=this;if(!parentRow.CheckBox)
+return;let checked=true;let indeterminate=false;obj.RecursiveSublist(parentRow,function(childRow){if(!checked&&indeterminate)
 return true;let box=childRow.CheckBox;if(box){checked=checked&&box.checked;indeterminate=indeterminate||box.checked;}});indeterminate=!checked&&indeterminate;parentRow.CheckBox.checked=checked;parentRow.CheckBox.indeterminate=indeterminate;},Checkboxes:[]}
 window.TK.AjaxFormTree={_:window.TK.FormTree,Url:null,Post:null,AjaxSettings:{},Init:function(){let obj=this;window.TK.AjaxTree.Init.apply(obj,[window.TK.FormTree.Init]);},Update:function(){}};"use strict";window.TK.Dashboard={_:"div",EnableMove:true,EnableCopy:true,EnableResize:true,EnableRemove:true,EnableEdit:true,EnableLimitX:true,EnableLimitY:true,EnableDrop:false,Spacing:5,SnapSize:100,EditMode:1,className:"toolkitDashboard",DashboardItems:[],DefaultWidth:600,AutoGrow:true,AutoShrink:false,AutoWidthCount:null,Init:function(){this.SetEditMode(this.EditMode);if(this.DashboardItems){var obj=this;setTimeout(function(){obj.Load(obj.DashboardItems);},1);}},SetEditMode:function(newEditMode){this.EditMode=newEditMode;var newClassName=this.className.replace(/toolkitDashboardEditable/g,"").replace(/toolkitDashboardAlwaysEditable/g,"");if(this.EditMode==1)
 newClassName+=" toolkitDashboardEditable toolkitDragDropContainer";else if(this.EditMode==2)
