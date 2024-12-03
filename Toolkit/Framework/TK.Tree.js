@@ -20,12 +20,8 @@ window.TK.Tree = {
             Text: { _: "span" }
         }
     },
-    Expanded: function (row, byUserClick, rowElement) {
-
-    },
-    Collapsed: function (row, byUserClick, rowElement) {
-
-    },
+    Expanded: function (row, byUserClick, rowElement) { },
+    Collapsed: function (row, byUserClick, rowElement) { },
     Init: function () {
         if (this.Rows.length == 0)
             return;
@@ -347,6 +343,53 @@ window.TK.Tree = {
 
         return currentRow;
     },
+    ConvertJsonToRows: function (json, arrayChildNames) {
+        let obj = this;
+        let rowId = 0;
+        let resultRows = [];
+        if (!arrayChildNames)
+            arrayChildNames = [];
+        let recursiveJsonProperties = function (top, skip) {
+            let parentId = rowId;
+            for (const propIndex in top) {
+
+                let prop = top[propIndex];
+                if (!prop || (skip && skip === propIndex)) {
+                    continue;
+                }
+                let proptype = typeof prop;
+
+                rowId++;
+                let rowObj = { Id: rowId, ParentId: parentId, Text: propIndex + ": " + prop };
+
+                if (proptype === 'boolean' || proptype === 'number' || proptype === 'string' || proptype === 'date') {
+                    if (obj.ValueProperty && propIndex == obj.ValueProperty)
+                        rowObj[obj.ValueProperty] = prop;
+                    // Don't show indexes for array's that don't contain objects
+                    if (Array.isArray(top))
+                        rowObj.Text = prop + "";
+                    resultRows.push(rowObj);
+                }
+
+                // Set right object name when dealing with arrays
+                else if (proptype === 'object') {
+                    let childArrayProp = null;
+                    rowObj.Text = propIndex + "";
+                    if (!Array.isArray(prop)) {
+                        childArrayProp = Object.keys(prop).find(k => arrayChildNames.includes(k));
+                        if (childArrayProp)
+                            rowObj.Text = prop[childArrayProp] + "";
+                    }
+                    resultRows.push(rowObj);
+                    recursiveJsonProperties(prop, childArrayProp);
+                }
+
+            }
+        }
+
+        recursiveJsonProperties(json);
+        return resultRows;
+    },
     RowClick: function (rowObj, jsEvent) { }
 };
 
@@ -355,6 +398,8 @@ window.TK.AjaxTree = {
     Url: null,
     Post: null,
     AjaxSettings: {},
+    ShowJsonAsTree: false, // When you want to show the ajax response in json directly
+    ArrayChildNames: [], // Set child name of array if that value must be the name of that array item
     Init: function (callback) {
         var obj = this;
         obj.Clear();
@@ -362,6 +407,10 @@ window.TK.AjaxTree = {
             Ajax.do(this.Url, this.Post, function (response) {
                 if (response && response.substr)
                     response = JSON.parse(response);
+
+                if (obj.ShowJsonAsTree)
+                    response = obj.ConvertJsonToRows(response, obj.ArrayChildNames);
+
                 obj.Rows = response;
                 obj.Refresh();
                 obj.Update();
@@ -379,6 +428,7 @@ window.TK.AjaxTree = {
 // For selecting multiple checkboxes next to each other use the shift key.
 window.TK.FormTree = {
     _: window.TK.Tree,
+    ValueProperty: null, // By default it retrieved the Id field. When set to something else it will be returned with GetValue()
     inAddCheckboxesFunction: false, // used by functions inside object do not override
     Data: [],
     Init: function () {
@@ -394,19 +444,24 @@ window.TK.FormTree = {
         var originalAddRow = obj.AddRow;
         obj.AddRow = function (row, orderRows) {
             var rowNode = originalAddRow.apply(obj, [row, orderRows]);
-            var checked = false;
-            if (obj.Data && rowNode.Data && rowNode.Data[obj.IdField] !== undefined && rowNode.Data[obj.IdField] !== null) {
-                checked = obj.Data.indexOf(rowNode.Data[obj.IdField]) >= 0;
-            }
+            // At the end of the add rows function the rest of the functionality will be executed
+            if (obj.inAddRowsFunction)
+                return;
+            var checked = obj.Data && rowNode.Data &&
+                (rowNode.Data[obj.IdField] !== undefined && rowNode.Data[obj.IdField] !== null && obj.Data.some(function (d) { return d === rowNode.Data[obj.IdField] }))
+                || (obj.ValueProperty && rowNode.Data[obj.ValueProperty] !== undefined && rowNode.Data[obj.ValueProperty] !== null && obj.Data.some(function (d) { return d === rowNode.Data[obj.ValueProperty] }));
+
             obj.AddCheckBox(rowNode, checked);
 
         }
+        obj.style.display = 'none'; // invisible when adding checkboxes and building tree makes it faster
         obj.Refresh();
         if (obj.Data) {
+
             let checkedCheckboxes = obj.Checkboxes.filter(function (c) { return c ? c.checked : false });
-            
+
             for (let i = 0; i < checkedCheckboxes.length; i++) {
-                let boxChecked = obj.Checkboxes[i];
+                let boxChecked = checkedCheckboxes[i];
                 obj.RecursiveParent(boxChecked.Parent.Row, function (parentRow) {
                     if (parentRow.CheckBox.checked)
                         return;
@@ -415,7 +470,7 @@ window.TK.FormTree = {
                 });
             }
         }
-
+        obj.style.display = '';
     },
     CheckBoxChange: function (changedRow, checkedRows) { },
     CheckBoxClick: function (event, row) {
@@ -492,7 +547,19 @@ window.TK.FormTree = {
         obj.inAddCheckboxesFunction = true;
         for (var rowId in obj.CurRows) {
             var row = obj.CurRows[rowId];
-            obj.AddCheckBox(row);
+            let rowNode = row.Row;
+            if (obj.ValueProperty && !row.Row.Data[obj.ValueProperty]) {
+                continue;
+            }
+
+            let checked = obj.Data && rowNode.Data &&
+                (rowNode.Data[obj.IdField] !== undefined && rowNode.Data[obj.IdField] !== null && obj.Data.some(function (d) { return d === rowNode.Data[obj.IdField] }))
+                || (obj.ValueProperty && rowNode.Data[obj.ValueProperty] !== undefined && rowNode.Data[obj.ValueProperty] !== null && obj.Data.some(function (d) { return d === rowNode.Data[obj.ValueProperty] }));
+
+            obj.AddCheckBox(row, checked);
+            if (obj.ValueProperty) {
+                obj.RecursiveParent(row, function (parentRow) { if (!parentRow.CheckBox) obj.AddCheckBox(parentRow) });
+            }
         }
         // Give each checkbox a tree Id
         obj.IndexCheckboxes();
@@ -500,6 +567,7 @@ window.TK.FormTree = {
     },
     AddCheckBox: function (row, checked) {
         var obj = this;
+
         if (!row || row.CheckBox || !row.firstChild)
             return;
 
@@ -525,11 +593,22 @@ window.TK.FormTree = {
         // Give each checkbox a tree Id
         if (obj.parentNode) {
             obj.Checkboxes = [];
-            var lis = obj.parentNode.querySelectorAll(':scope ul>li>input.toolkitTreeCheckbox');
-            if (lis) {
-                lis.forEach(function (a, i) {
-                    a.TreeId = i + 1;
-                    obj.Checkboxes.push(a);
+
+            let treeIndex = 1;
+            for (var i = 0; i < obj.children.length; i++) {
+                let row = obj.children[i];
+                if (!row.Row || !row.CheckBox)
+                    continue;
+
+                row.CheckBox.TreeId = treeIndex;
+                obj.Checkboxes.push(row.CheckBox);
+                treeIndex++;
+                obj.RecursiveSublist(row, function (childNode) {
+                    if (!childNode.CheckBox)
+                        return;
+                    childNode.CheckBox.TreeId = treeIndex;
+                    obj.Checkboxes.push(childNode.CheckBox);
+                    treeIndex++;
                 });
             }
         }
@@ -539,14 +618,20 @@ window.TK.FormTree = {
         let result = [];
         for (var rowId in obj.CurRows) {
             var row = obj.CurRows[rowId];
-            if (row.CheckBox.checked) {
-                result.push(row.Data[obj.IdField]);
+            if (row.CheckBox && row.CheckBox.checked) {
+                if (obj.ValueProperty && !row.Data[obj.ValueProperty]) {
+                    continue;
+                }
+                result.push(row.Data[obj.ValueProperty ? obj.ValueProperty : obj.IdField]);
             }
         }
         return result;
     },
     SetParentCheckbox: function (parentRow) {
         let obj = this;
+
+        if (!parentRow.CheckBox)
+            return;
 
         let checked = true;
         let indeterminate = false;

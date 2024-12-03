@@ -107,18 +107,20 @@
     <p>Retrieve tree rows with ajax.</p>
     <pre>
     {
-        Elements: {
-            AjaxTree:{
-                _: TK.AjaxTree,
-                Url: 'TreeExample.txt'
-            },
-            AjaxFormTree: {
-                _: TK.AjaxFormTree,
-                Url: 'TreeExample.txt'
-            }
-        }
+        _: TK.AjaxTree,
+        Url: 'TreeExample.txt'
     }
     </pre>
+    
+    <p>By setting the ShowJsonAsTree property to true, a json object can be shown within a tree similar to the array preview in your browsers development console.</p>
+    <pre>
+    {
+        _: TK.AjaxFormTree,
+        ShowJsonAsTree: true,
+        ArrayChildNames: ["Name"],
+        Url: 'TreeExample.txt'
+    }
+    </pre>    
 
     <h2>Tree forms</h2>
     <p>In forms or as a GUI element you want to select nodes in a tree. This can be done in groups or individual level.
@@ -150,6 +152,36 @@
         }
     }
     </pre>
+    
+    <p>By setting the ValueProperty, only rows with that property will have a value. It is also the value which .Data expects and the .GetValue method returns.</p>
+    <pre>
+    {
+        Elements: {
+            ValueTree:{
+                _: TK.FormTree,
+                EnableFullRowExpand: true,
+                ValueProperty: 'RealValue',
+                Data: [1],
+                Rows: [
+                    { Id: 1, ParentId: null, Text: "Item 1"},
+                    { Id: 2, ParentId: 1, Text: "Sub Item 1"},
+                    { Id: 3, ParentId: 1, Text: "Sub Item 2 "},
+                    { Id: 4, ParentId: 2, Text: "Sub Sub Item 1 "},
+                    { Id: 5, ParentId: 2, Text: "Sub Sub Item 2 ", RealValue: 1},
+                    { Id: 6, ParentId: 2, Text: "Sub Sub Item 3 ", RealValue: 2},
+                    { Id: 7, ParentId: 2, Text: "Sub Sub Item 4 "},
+                    { Id: 8, ParentId: 2, Text: "Sub Sub Item 5 "},
+                ]
+            },
+            ValueButton: {
+                innerText: 'Save',
+                onclick: function(){
+                    alert(JSON.stringify(this.Parent.Elements.ValueTree.GetValue()));
+                }
+            },
+        }
+    }
+    </pre>    
 
 </body>
 

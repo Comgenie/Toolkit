@@ -1,6 +1,6 @@
 [
-    { "Id": 1, "ParentId": null, "Text": "Ajax parent item"},
-    { "Id": 2, "ParentId": 1, "Text": "Ajax sub-item 1"},
+    { "Id": 1, "ParentId": null, "Text": "Ajax parent item", "Name": "Parent",  "ArrayExample": ["Child 1", "Child 2"]},
+    { "Id": 2, "ParentId": 1, "Text": "Ajax sub-item 1" },
     { "Id": 3, "ParentId": 1, "Text": "Ajax sub-item 2"},
     { "Id": 4, "ParentId": 2, "Text": "Ajax child 1"},
     { "Id": 5, "ParentId": 2, "Text": "Ajax child 2"}
