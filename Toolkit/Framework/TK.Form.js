@@ -163,7 +163,7 @@ window.TK.Form = {
                     this.Parent.insertBefore(dummy, this.Parent.Elements.DataLabel);
                     this.Parent.Elements.DataLabel.style.width = "auto";
                 }
-                
+
             },
             GetValue: function () { return this.checked; }
         },
@@ -180,10 +180,10 @@ window.TK.Form = {
                 else
                     this.value = this.DataSettings.ValueIsText ? "" : 0;
             },
-            GetValue: function () { 
-                return this.DataSettings.ValueIsText ? this.value : 
+            GetValue: function () {
+                return this.DataSettings.ValueIsText ? this.value :
                     this.value !== null && this.value !== undefined ? parseInt(this.value) :
-                    0;
+                        0;
             }
         },
         ajaxselect: {
@@ -248,7 +248,7 @@ window.TK.Form = {
             GetValue: function () { return this.value; }
         },
         form: {
-            _: "div", 
+            _: "div",
             className: "subForm",
             Init: function () {
                 var dataSettings = this.DataSettings;
@@ -264,7 +264,7 @@ window.TK.Form = {
                     Fields: dataSettings.Fields,
                     IgnoreRest: dataSettings.IgnoreRest,
                     SortByFields: dataSettings.SortByFields,
-                  //  Init: dataSettings.Init
+                    //  Init: dataSettings.Init
                 }, "Form");
             },
             GetValue: function (errors) {
@@ -292,7 +292,7 @@ window.TK.Form = {
                                 Fields: obj.DataSettings.Fields,
                                 IgnoreRest: obj.DataSettings.IgnoreRest,
                                 SortByFields: obj.DataSettings.SortByFields,
-                               // Init: obj.DataSettings.Init,
+                                // Init: obj.DataSettings.Init,
                                 Elements: {
                                     RemoveButton: {
                                         innerHTML: obj.DataSettings.RemoveButtonText ? obj.DataSettings.RemoveButtonText : "Remove",
@@ -342,7 +342,7 @@ window.TK.Form = {
             }
         }
     },
-    Init: function () {        
+    Init: function () {
         var obj = this;
         this.CurrentFields = {};
         var tmpFields = {};
@@ -351,7 +351,7 @@ window.TK.Form = {
             model = this.DefaultModel;
         else if (!model)
             return;
-        
+
 
         if (this.Templates) {
             for (var name in this.Templates) {
@@ -360,7 +360,7 @@ window.TK.Form = {
         }
 
         var callIsVisible = false;
-        for (var name in model) {            
+        for (var name in model) {
             var type = this.Fields && this.Fields[name] && this.Fields[name].Type ? this.Fields[name].Type : typeof model[name];
 
             if (this.IgnoreRest && (!this.Fields || !this.Fields[name]))
@@ -372,10 +372,10 @@ window.TK.Form = {
             };
             if (type != "ignore") {
                 var defaultTemplate = this.DefaultTemplates[type] ? this.DefaultTemplates[type] : this.DefaultTemplates.text;
-                var isRequired = getField("Required", false);                
+                var isRequired = getField("Required", false);
                 var row = {
                     style: { },
-                    className: "fieldRow field-" + name + (isRequired ? " fieldRequired" : "") + " " + (getField("Inline") ? "inlineBlock" : ""),                    
+                    className: "fieldRow field-" + name + (isRequired ? " fieldRequired" : "") + " " + (getField("Inline") ? "inlineBlock" : ""),
                     Elements: {
                         DataLabel: { innerHTML: getField("DisplayName",name), style: {} },
                         DataField: {
@@ -383,7 +383,7 @@ window.TK.Form = {
                             _Self: true,
                             /* required: isRequired, */
                             placeholder: getField("PlaceHolder",""),
-                            Data: model[name],                            
+                            Data: model[name],
                             DataName: name,
                             LinkedData: getField("LinkField") ? model[getField("LinkField")] : null,
                             DataSettings: (this.Fields && this.Fields[name] ? this.Fields[name] : null),
@@ -394,7 +394,7 @@ window.TK.Form = {
                             readOnly: getField("readOnly"),
                             IsVisible: getField("IsVisible"),
                             //Init: (this.Fields && this.Fields[name] && this.Fields[name].Init ? this.Fields[name].Init : undefined),
-                            Form: this 
+                            Form: this
                         }
                     }
                 };
@@ -446,27 +446,27 @@ window.TK.Form = {
                             obj.CurrentFields[name].Parent.style.display = obj.CurrentFields[name].IsVisible(curModel) ? "" : "none";
                         }
                     }
-                    
+
                     if (obj.AutoSave) {
                         obj.onsubmit();
                     }
-                };                
+                };
 
                 if (this.SortByFields) {
                     tmpFields[name] = row;
                 } else {
                     var rowObj = this.Add(row);
                     this.CurrentFields[name] = rowObj.Elements.DataField;
-                }                
+                }
 
             } else {
                 this.CurrentFields[name] = "ignore";
             }
         }
-        
+
         var parent = this;
         if (this.SortByFields && this.Fields) {
-            for (var fieldName in this.Fields) {                
+            for (var fieldName in this.Fields) {
 
                 if (this.Fields[fieldName].Type == "section") {
                     parent = this.Add({
@@ -478,9 +478,9 @@ window.TK.Form = {
                             }
                         }
                     });
-                    
+
                 }
-                
+
                 if (!tmpFields[fieldName]) {
                     if (this.Fields[fieldName]._) // This is just a template
                         parent.Add(this.Fields[fieldName], fieldName);
@@ -489,7 +489,7 @@ window.TK.Form = {
 
                 var rObj = parent.Add(tmpFields[fieldName]);
                 this.CurrentFields[fieldName] =  rObj.Elements.DataField;
-                
+
             }
         }
 
@@ -521,7 +521,7 @@ window.TK.Form = {
 
         if (applyToModelDirectly) { // Check for errors first
             var tmpErrorList = [];
-            var tmpModel = this.GetModel(tmpErrorList, false);            
+            var tmpModel = this.GetModel(tmpErrorList, false);
             if (tmpErrorList.length > 0) {
                 for (var i = 0; i < tmpErrorList.length; i++) {
                     errors.push(tmpErrorList[i]);
@@ -546,7 +546,7 @@ window.TK.Form = {
                     if (this.Fields && this.Fields[name] && this.Fields[name].Required && (newObj[name] === null || newObj[name] === "")) {
                         errors.push(this.Fields && this.Fields[name] && this.Fields[name].DisplayName ? this.Fields[name].DisplayName : name);
                         hasError = true;
-                        this.CurrentFields[name].Parent.classList.toggle("fieldError", hasError);
+                        this.CurrentFields[name].Parent.classList.add("fieldError");
                     }
                 }
 
@@ -575,8 +575,8 @@ window.TK.Form = {
             if (this.CustomValidation) {
                 this.CustomValidation(newObj, function (customErrors) {
                     obj.IsCurrentlySubmitting = false;
-                    if (!customErrors || customErrors.length == 0) {                        
-                        obj.Save(newObj);           
+                    if (!customErrors || customErrors.length == 0) {
+                        obj.Save(newObj);
                     } else {
                         obj.RenderErrors(customErrors, "");
                     }
@@ -589,13 +589,13 @@ window.TK.Form = {
                 this.Save(newObj);
                 if (this.SubmitResult)
                     this.SubmitResult(true, errors);
-            }            
+            }
         } else {
             this.RenderErrors(errors, this.RequiredText);
             this.IsCurrentlySubmitting = false;
             if (this.SubmitResult)
                 this.SubmitResult(false, errors);
-        }        
+        }
         this.LastErrors = errors;
         return false;
     }
