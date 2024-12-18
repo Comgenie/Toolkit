@@ -546,12 +546,12 @@ window.TK.Form = {
                     if (this.Fields && this.Fields[name] && this.Fields[name].Required && (newObj[name] === null || newObj[name] === "")) {
                         errors.push(this.Fields && this.Fields[name] && this.Fields[name].DisplayName ? this.Fields[name].DisplayName : name);
                         hasError = true;
-                        this.CurrentFields[name].Parent.className += " fieldError";
+                        this.CurrentFields[name].Parent.classList.toggle("fieldError", hasError);
                     }
                 }
 
                 if (!hasError) {
-                    this.CurrentFields[name].Parent.className = this.CurrentFields[name].Parent.className.replace("fieldError", "");
+                    this.CurrentFields[name].Parent.classList.remove("fieldError");
                 }
             }
         }
