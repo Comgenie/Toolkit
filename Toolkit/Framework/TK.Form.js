@@ -351,7 +351,14 @@ window.TK.Form = {
             model = this.DefaultModel;
         else if (!model)
             return;
-        
+
+        // If a default model is set and we're missing some properties in our active model, we'll add them using the default model
+        if (this.DefaultModel) {
+            for (var key in this.DefaultModel) {
+                if (model[key] === undefined)
+                    model[key] = this.DefaultModel[key];
+            }
+        }        
 
         if (this.Templates) {
             for (var name in this.Templates) {
