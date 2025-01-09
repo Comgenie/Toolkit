@@ -250,7 +250,9 @@ return;for(var i=0;i<this.Data.length;i++){this.Forms.push(this.Add({_:TK.Form,M
 continue;newObjs.push(this.Forms[i].GetModel(errors));}
 return newObjs;}}},Init:function(){var obj=this;this.CurrentFields={};var tmpFields={};var model=this[this.ModelProperty];if(!model&&this.DefaultModel)
 model=this.DefaultModel;else if(!model)
-return;if(this.Templates){for(var name in this.Templates){this.DefaultTemplates[name]=this.Templates[name];}}
+return;if(this.DefaultModel){for(var key in this.DefaultModel){if(model[key]===undefined)
+model[key]=this.DefaultModel[key];}}
+if(this.Templates){for(var name in this.Templates){this.DefaultTemplates[name]=this.Templates[name];}}
 var callIsVisible=false;for(var name in model){var type=this.Fields&&this.Fields[name]&&this.Fields[name].Type?this.Fields[name].Type:typeof model[name];if(this.IgnoreRest&&(!this.Fields||!this.Fields[name]))
 type="ignore";var getField=function(fieldName,fallBack){if(fallBack==undefined)
 fallBack=null;return obj.Fields&&obj.Fields[name]&&obj.Fields[name][fieldName]?obj.Fields[name][fieldName]:fallBack;};if(type!="ignore"){var defaultTemplate=this.DefaultTemplates[type]?this.DefaultTemplates[type]:this.DefaultTemplates.text;var isRequired=getField("Required",false);var row={style:{},className:"fieldRow field-"+name+(isRequired?" fieldRequired":"")+" "+(getField("Inline")?"inlineBlock":""),Elements:{DataLabel:{innerHTML:getField("DisplayName",name),style:{}},DataField:{_:getField("Template",defaultTemplate),_Self:true,placeholder:getField("PlaceHolder",""),Data:model[name],DataName:name,LinkedData:getField("LinkField")?model[getField("LinkField")]:null,DataSettings:(this.Fields&&this.Fields[name]?this.Fields[name]:null),onfocus:getField("onfocus"),onblur:getField("onblur"),onchange:getField("onchange"),disabled:getField("disabled",false),readOnly:getField("readOnly"),IsVisible:getField("IsVisible"),Form:this}}};if(this.LabelWidth){row.Elements.DataLabel.style.display="inline-block";row.Elements.DataLabel.style.width=this.LabelWidth+(this.LabelWidth.substr?"":"px");}
