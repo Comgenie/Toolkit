@@ -186,7 +186,7 @@ TK.Gauge = {
                             Stroke: indicator.Color ? indicator.Color : "#000",
                             X: indicatorX, Y: indicatorY,
                             X2: centerX, Y2: centerY + offsetY,
-                            LineDash: [1, 2],
+                            LineDash: [5, 5]
                         });
                     }
                 }
