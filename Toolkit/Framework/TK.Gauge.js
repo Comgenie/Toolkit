@@ -11,7 +11,12 @@ TK.Gauge = {
         { MinValue: 15, MaxValue: 30, Color: "#090" }
         */
     ],
-
+    Indicators: [
+        /*
+        { Value: 5, Color: "#C00", Text: "Danger", Height: 20, Width: 20 },
+        { Value: 25, Text: "OK" },
+        */
+    ],
     Width: 400,
     Height: 200,
     Value: 0,
@@ -20,15 +25,17 @@ TK.Gauge = {
     DonutSize: 0.8,
     Label: "",
     EnableValue: true,
-    ColorLabel: "#666",    
+    ColorLabel: "#666",
     FontLabel: "12pt Verdana",
     ColorValue: null, // Automatic (pick range color)
     FontValue: "14pt Verdana",
     TextValue: null, // Automatic (Use actual value)
+    FontIndicators: "8pt Verdana",
     EnableShadow: true,
     ColorCursor: "#666",
     AnimationLength: 1000,
     ExtraSpacingBottom: 0,
+    ExtraSpacingSide: 0,
     Style: 0,  // 0: Circular gauge, 1: Horizontal Gauge
     SizeBar: 20,
 
@@ -44,30 +51,37 @@ TK.Gauge = {
     },
     Refresh: function () {
         this.Canvas.Clear();
-        var centerX = this.Width / 2;
         var extraSpacingHeight = (this.Height * 0.1) + this.ExtraSpacingBottom;
+        var extraSpacingWidth = (this.Width * 0.1) + this.ExtraSpacingSide;
         if (this.Label)
             extraSpacingHeight += 25;
         if (this.EnableValue)
-            extraSpacingHeight += 25;        
+            extraSpacingHeight += 25;
 
-        var centerY = this.Height - extraSpacingHeight;        
-        
-        var size = this.Width > centerY * 2 ? centerY * 2 : this.Width;
+        var offsetY = 0;
+        if (this.Indicators.length > 0) {
+            offsetY += 25;
+            extraSpacingHeight += 25;
+            extraSpacingWidth += 25
+        }
+
+        var centerX = this.Width / 2;
+        var centerY = this.Height - extraSpacingHeight;
+
+        var size = this.Width > centerY * 2 ? centerY * 2 : this.Width - extraSpacingWidth * 2;
         this.MinValue = this.Ranges.Min(function (a) { return a.MinValue; });
         this.MaxValue = this.Ranges.Max(function (a) { return a.MaxValue; });
-        
+
         this.Difference = this.MaxValue - this.MinValue;
         this.DifferenceAngles = this.EndAngle - this.StartAngle;
 
-        for (var i = 0; i < this.Ranges.length; i++) {            
-
+        for (var i = 0; i < this.Ranges.length; i++) {
             if (this.Style == 0) {
                 var startAngle = this.StartAngle + (((this.Ranges[i].MinValue - this.MinValue) / this.Difference) * this.DifferenceAngles);
                 var sizeAngle = ((this.Ranges[i].MaxValue - this.Ranges[i].MinValue) / this.Difference) * this.DifferenceAngles;
                 this.Canvas.Add({
                     _: TK.Draw.Circle,
-                    X: centerX, Y: centerY, W: size, H: size,
+                    X: centerX, Y: centerY + offsetY, W: size, H: size,
                     Fill: this.Ranges[i].Color, DonutSize: this.DonutSize, Angle: startAngle, Size: sizeAngle,
                     Anchor: window.TK.Draw.AnchorCenter | window.TK.Draw.AnchorMiddle,
                 });
@@ -75,7 +89,7 @@ TK.Gauge = {
                 if (this.EnableShadow) {
                     this.Canvas.Add({
                         _: TK.Draw.Circle,
-                        X: centerX, Y: centerY, W: size * (this.DonutSize + 0.05), H: size * (this.DonutSize + 0.05),
+                        X: centerX, Y: centerY + offsetY, W: size * (this.DonutSize + 0.05), H: size * (this.DonutSize + 0.05),
                         Fill: "rgba(0,0,0,0.1)", DonutSize: 0.85, Angle: startAngle, Size: sizeAngle,
                         Anchor: window.TK.Draw.AnchorCenter | window.TK.Draw.AnchorMiddle,
                     });
@@ -85,15 +99,15 @@ TK.Gauge = {
                 var widthX = ((this.Ranges[i].MaxValue - this.Ranges[i].MinValue) / this.Difference) * this.Width;
                 this.Canvas.Add({
                     _: TK.Draw.Rect,
-                    X: fromX, Y: 10, W: widthX, H: this.SizeBar,
-                    Fill: this.Ranges[i].Color, 
-                    Anchor: window.TK.Draw.AnchorLeft| window.TK.Draw.AnchorTop,
+                    X: fromX, Y: 10 + offsetY, W: widthX, H: this.SizeBar,
+                    Fill: this.Ranges[i].Color,
+                    Anchor: window.TK.Draw.AnchorLeft | window.TK.Draw.AnchorTop,
                 });
 
                 if (this.EnableShadow) {
                     this.Canvas.Add({
                         _: TK.Draw.Rect,
-                        X: fromX, Y: this.SizeBar + 5, W: widthX, H: 5,
+                        X: fromX, Y: this.SizeBar + 5 + offsetY, W: widthX, H: 5,
                         Fill: "rgba(0,0,0,0.1)",
                         Anchor: window.TK.Draw.AnchorLeft | window.TK.Draw.AnchorTop,
                     });
@@ -102,11 +116,10 @@ TK.Gauge = {
         }
 
         // Draw cursor
-
         if (this.Style == 0) {
             this.Cursor = this.Canvas.Add({
                 _: TK.Draw.Rect,
-                X: centerX, Y: centerY, W: size * 0.025, H: size * (0.5 - ((1 - this.DonutSize) * 0.25)),
+                X: centerX, Y: centerY + offsetY, W: size * 0.025, H: size * (0.5 - ((1 - this.DonutSize) * 0.25)),
                 Fill: this.ColorCursor,
                 Rotate: 0,
                 Anchor: window.TK.Draw.AnchorCenter | window.TK.Draw.AnchorBottom,
@@ -114,20 +127,88 @@ TK.Gauge = {
 
             this.Canvas.Add({
                 _: TK.Draw.Circle,
-                X: centerX, Y: centerY, W: size * 0.1, H: size * 0.1,
+                X: centerX, Y: centerY + offsetY, W: size * 0.1, H: size * 0.1,
                 Fill: this.ColorCursor,
                 Anchor: window.TK.Draw.AnchorCenter | window.TK.Draw.AnchorMiddle,
             });
         } else {
-
             this.Cursor = this.Canvas.Add({
                 _: TK.Draw.Rect,
-                X: 0, Y: 0, W: 2, H: this.SizeBar + 20,
+                X: 0, Y: offsetY, W: 2, H: this.SizeBar + 20,
                 Fill: this.ColorCursor,
                 Anchor: window.TK.Draw.AnchorCenter | window.TK.Draw.AnchorTop,
             });
         }
-        var curY = centerY + (size * 0.1);
+
+        // Draw indicators
+        if (this.Indicators) {
+            for (let i = 0; i < this.Indicators.length; i++) {
+                let indicator = this.Indicators[i];
+                let indicatorW = indicator.Width ?? 10;
+                let indicatorH = indicator.Height ?? 10;
+
+                if (this.Style == 0) {
+                    let radius = size * 0.5;
+                    let indicatorAngle = this.StartAngle + ((indicator.Value - this.MinValue) / this.Difference) * this.DifferenceAngles;
+                    let radians = indicatorAngle * (Math.PI / 180);
+                    let indicatorX = centerX + radius * Math.cos(radians);
+                    let indicatorY = (centerY + radius * Math.sin(radians)) + offsetY;
+
+                    this.Canvas.Add({
+                        _: TK.Draw.Triangle,
+                        X: indicatorX, Y: indicatorY, W: indicatorW, H: indicatorH,
+                        Rotate: indicatorAngle + 90,
+                        Fill: indicator.Color ? indicator.Color : "#000",
+                        Anchor: window.TK.Draw.AnchorCenter | window.TK.Draw.AnchorBottom,
+                    });
+
+                    if (indicator.Text) {
+                        let textX = indicatorX + indicatorH * Math.cos(radians);
+                        let textY = indicatorY + indicatorH * Math.sin(radians);
+
+                        this.Canvas.Add({
+                            _: TK.Draw.Text,
+                            X: textX, Y: textY,
+                            Rotate: indicatorAngle + 90,
+                            Fill: indicator.Color ? indicator.Color : "#000",
+                            Font: this.FontIndicators,
+                            Text: indicator.Text,
+                            Anchor: window.TK.Draw.AnchorBottom | window.TK.Draw.AnchorCenter,
+                        });
+                    }
+                }
+                else if (this.Style == 1) {
+                    let indicatorX = (((indicator.Value - this.MinValue) / this.Difference) * this.Width - 2) + 2;
+                    let indicatorY = offsetY + 10 - indicatorH / 2
+
+                    this.Canvas.Add({
+                        _: TK.Draw.Triangle,
+                        X: indicatorX, Y: indicatorY, W: indicatorW, H: indicatorH,
+                        Fill: indicator.Color ? indicator.Color : "#000",
+                        Anchor: window.TK.Draw.AnchorCenter | window.TK.Draw.AnchorMiddle,
+                    });
+
+                    if (indicator.Text) {
+                        let indicatorText = this.Canvas.Add({
+                            _: TK.Draw.Text,
+                            X: indicatorX, Y: offsetY + 10 - indicatorH,
+                            Fill: indicator.Color ? indicator.Color : "#000",
+                            Font: this.FontIndicators,
+                            Text: indicator.Text,
+                            Anchor: window.TK.Draw.AnchorTop | window.TK.Draw.AnchorCenter,
+                        });
+
+                        indicatorText.Y -= indicatorText.MeasureHeight(indicator.Text, this.FontIndicators);
+                    }
+                }
+            }
+
+        }
+
+        var curY = centerY + (size * 0.1) + offsetY;
+        if (this.Style == 1) {
+            curY += 10;
+        }
 
         if (this.Label) {
             this.LabelText = this.Canvas.Add({
@@ -153,7 +234,7 @@ TK.Gauge = {
         }
 
         this.SetValue(this.Value);
-        this.Canvas.Refresh();        
+        this.Canvas.Refresh();
     },
     SetValue: function (newValue) {
         var animation = window.TK.Draw.EaseExponential;
