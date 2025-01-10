@@ -31,6 +31,7 @@ TK.Gauge = {
     FontValue: "14pt Verdana",
     TextValue: null, // Automatic (Use actual value)
     FontIndicators: "8pt Verdana",
+    DrawIndicatorLine: false,
     EnableShadow: true,
     ColorCursor: "#666",
     AnimationLength: 1000,
@@ -52,7 +53,7 @@ TK.Gauge = {
     Refresh: function () {
         this.Canvas.Clear();
         var extraSpacingHeight = (this.Height * 0.1) + this.ExtraSpacingBottom;
-        var extraSpacingWidth = (this.Width * 0.1) + this.ExtraSpacingSide;
+        var extraSpacingWidth = 0;
         if (this.Label)
             extraSpacingHeight += 25;
         if (this.EnableValue)
@@ -62,13 +63,13 @@ TK.Gauge = {
         if (this.Indicators.length > 0) {
             offsetY += 25;
             extraSpacingHeight += 25;
-            extraSpacingWidth += 25
+            extraSpacingWidth += ((this.Width * 0.1) + this.ExtraSpacingSide) * 2;
         }
 
         var centerX = this.Width / 2;
         var centerY = this.Height - extraSpacingHeight;
 
-        var size = this.Width > centerY * 2 ? centerY * 2 : this.Width - extraSpacingWidth * 2;
+        var size = this.Width > centerY * 2 ? centerY * 2 : this.Width - extraSpacingWidth;
         this.MinValue = this.Ranges.Min(function (a) { return a.MinValue; });
         this.MaxValue = this.Ranges.Max(function (a) { return a.MaxValue; });
 
@@ -123,6 +124,7 @@ TK.Gauge = {
                 Fill: this.ColorCursor,
                 Rotate: 0,
                 Anchor: window.TK.Draw.AnchorCenter | window.TK.Draw.AnchorBottom,
+                ZIndex: 2
             });
 
             this.Canvas.Add({
@@ -130,6 +132,7 @@ TK.Gauge = {
                 X: centerX, Y: centerY + offsetY, W: size * 0.1, H: size * 0.1,
                 Fill: this.ColorCursor,
                 Anchor: window.TK.Draw.AnchorCenter | window.TK.Draw.AnchorMiddle,
+                ZIndex: 2
             });
         } else {
             this.Cursor = this.Canvas.Add({
@@ -174,6 +177,16 @@ TK.Gauge = {
                             Font: this.FontIndicators,
                             Text: indicator.Text,
                             Anchor: window.TK.Draw.AnchorBottom | window.TK.Draw.AnchorCenter,
+                        });
+                    }
+
+                    if (this.DrawIndicatorLine) {
+                        this.Canvas.Add({
+                            _: TK.Draw.Line,
+                            Stroke: indicator.Color ? indicator.Color : "#000",
+                            X: indicatorX, Y: indicatorY,
+                            X2: centerX, Y2: centerY + offsetY,
+                            LineDash: [1, 2],
                         });
                     }
                 }
