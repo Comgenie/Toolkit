@@ -43,15 +43,16 @@
 {
     _: TK.Gauge,
     Width: 400,
-    Height: 200,
+    Height: 300,
     Ranges: [
         { MinValue: 0, MaxValue: 5, Color: "#C00" },
         { MinValue: 5, MaxValue: 15, Color: "#FC0" },
         { MinValue: 15, MaxValue: 30, Color: "#090" }
     ],
     Indicators: [
-        { Value: 5, Color: "#C00", Text: "Danger", Height: 20, Width: 20 },
-        { Value: 25, Text: "OK" },
+        { Value: 0, Color: "#C00", Text: "Danger" },
+        { Value: 15, Color: "#FC0", Text: "Average", Height: 15, Width: 12 },
+        { Value: 30, Color: "#090", Text: "OK" },
     ],
     Label: "Gauge 2",
     Value: 25

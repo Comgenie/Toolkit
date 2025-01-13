@@ -63,13 +63,15 @@ TK.Gauge = {
         if (this.Indicators.length > 0) {
             offsetY += 25;
             extraSpacingHeight += 25;
-            extraSpacingWidth += ((this.Width * 0.1) + this.ExtraSpacingSide) * 2;
+            if (this.Style == 0) {
+                extraSpacingWidth += ((this.Width * 0.1) + this.ExtraSpacingSide);
+            }
         }
 
         var centerX = this.Width / 2;
         var centerY = this.Height - extraSpacingHeight;
 
-        var size = this.Width > centerY * 2 ? centerY * 2 : this.Width - extraSpacingWidth;
+        var size = this.Width > centerY * 2 ? centerY * 2 - extraSpacingHeight / 2 : this.Width - extraSpacingWidth * 3;
         this.MinValue = this.Ranges.Min(function (a) { return a.MinValue; });
         this.MaxValue = this.Ranges.Max(function (a) { return a.MaxValue; });
 
