@@ -14,7 +14,6 @@ TK.Draw.Line = {
         } else {
             c.lineTo(this.X + this.W, this.Y + this.H);
         }
-
         this.DrawFS(c);
         c.closePath();
     }
