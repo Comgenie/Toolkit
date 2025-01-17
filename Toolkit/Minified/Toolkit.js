@@ -276,8 +276,8 @@ return tmpModel;}}
 for(var name in this.CurrentFields){if(this.CurrentFields[name]=="ignore"){if(!applyToModelDirectly&&model!=null)
 newObj[name]=model[name];}else{if(this.CurrentFields[name].IsVisible&&this.RemoveValueOfNotVisibleFields&&this.CurrentFields[name].Parent&&this.CurrentFields[name].Parent.style&&this.CurrentFields[name].Parent.style.display=="none"){if(applyToModelDirectly&&newObj!=null)
 newObj[name]=null;continue;}
-newObj[name]=this.CurrentFields[name].GetValue(errors);var hasError=false;if(errors){if(this.Fields&&this.Fields[name]&&this.Fields[name].Required&&(newObj[name]===null||newObj[name]==="")){errors.push(this.Fields&&this.Fields[name]&&this.Fields[name].DisplayName?this.Fields[name].DisplayName:name);hasError=true;this.CurrentFields[name].Parent.className+=" fieldError";}}
-if(!hasError){this.CurrentFields[name].Parent.className=this.CurrentFields[name].Parent.className.replace("fieldError","");}}}
+newObj[name]=this.CurrentFields[name].GetValue(errors);var hasError=false;if(errors){if(this.Fields&&this.Fields[name]&&this.Fields[name].Required&&(newObj[name]===null||newObj[name]==="")){errors.push(this.Fields&&this.Fields[name]&&this.Fields[name].DisplayName?this.Fields[name].DisplayName:name);hasError=true;this.CurrentFields[name].Parent.classList.add("fieldError");}}
+if(!hasError){this.CurrentFields[name].Parent.classList.remove("fieldError");}}}
 return newObj;},RenderErrors:function(errors,textBefore){if(this.Elements.ErrorText){this.Elements.ErrorText.innerHTML=textBefore+errors.join(", ");}else{this.Add({innerHTML:textBefore+errors.join(", "),className:"validationError"},"ErrorText");}},onsubmit:function(){if(this.IsCurrentlySubmitting)
 return false;this.IsCurrentlySubmitting=true;var obj=this;var errors=[];var newObj=this.GetModel(errors);if(errors.length==0){if(this.CustomValidation){this.CustomValidation(newObj,function(customErrors){obj.IsCurrentlySubmitting=false;if(!customErrors||customErrors.length==0){obj.Save(newObj);}else{obj.RenderErrors(customErrors,"");}
 if(obj.SubmitResult)
