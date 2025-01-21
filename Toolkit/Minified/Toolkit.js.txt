@@ -3786,7 +3786,7 @@ window.TK.Tree = {
                 if (e && e.target && (e.target.tagName == "INPUT" || e.target.tagName == "SELECT" || e.target.tagName == "TEXTAREA" || e.target.PreventRowClick))
                     return;
                 obj.RowClick(rowObj.Data, e, rowObj);
-                if (rowObj.EnableFullRowExpand && rowObj.ExpandCollapseButton) {
+                if (obj.EnableFullRowExpand && rowObj.ExpandCollapseButton) {
                     rowObj.ExpandCollapseButton.click();
                 }
                 e.stopPropagation();

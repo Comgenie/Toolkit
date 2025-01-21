@@ -477,7 +477,7 @@ this.CurRows={};var addedRows=[];for(var i=0;i<rows.length;i++){var rowElement=o
 obj.OrderRows(addedRows);obj.inAddRowsFunction=false;return addedRows;},AddRow:function(data){let obj=this;if(!this.CurRows)
 this.CurRows={};let rowId=data[this.IdField];if(this.CurRows["id"+rowId]){console.warn(rowId+' row id is already added and must be unique. Row not added.');return;}
 let row=obj.Add({_:obj.Template,TreeRoot:obj,Data:data,Row:{},onclick:function(e){let rowObj=this;if(e&&e.target&&(e.target.tagName=="INPUT"||e.target.tagName=="SELECT"||e.target.tagName=="TEXTAREA"||e.target.PreventRowClick))
-return;obj.RowClick(rowObj.Data,e,rowObj);if(rowObj.EnableFullRowExpand&&rowObj.ExpandCollapseButton){rowObj.ExpandCollapseButton.click();}
+return;obj.RowClick(rowObj.Data,e,rowObj);if(obj.EnableFullRowExpand&&rowObj.ExpandCollapseButton){rowObj.ExpandCollapseButton.click();}
 e.stopPropagation();return false;}});row.Row=row;if(data.AlwaysShowExpandButton){obj.AddExpandButtonToRowElement(row);}
 if(obj.CurrentFilter&&row.innerText.toLowerCase().indexOf(this.CurrentFilter)<0){row.style.display="none";}
 obj.CurRows["id"+rowId]=row;obj.Rows.push(data);if(!obj.inAddRowsFunction){obj.OrderRows(obj.Rows);}
