@@ -278,10 +278,11 @@ newObj[name]=model[name];}else{if(this.CurrentFields[name].IsVisible&&this.Remov
 newObj[name]=null;continue;}
 newObj[name]=this.CurrentFields[name].GetValue(errors);var hasError=false;if(errors){if(this.Fields&&this.Fields[name]&&this.Fields[name].Required&&(newObj[name]===null||newObj[name]==="")){errors.push(this.Fields&&this.Fields[name]&&this.Fields[name].DisplayName?this.Fields[name].DisplayName:name);hasError=true;this.CurrentFields[name].Parent.classList.add("fieldError");}}
 if(!hasError){this.CurrentFields[name].Parent.classList.remove("fieldError");}}}
-return newObj;},RenderErrors:function(errors,textBefore){if(this.Elements.ErrorText){this.Elements.ErrorText.innerHTML=textBefore+errors.join(", ");}else{this.Add({innerHTML:textBefore+errors.join(", "),className:"validationError"},"ErrorText");}},onsubmit:function(){if(this.IsCurrentlySubmitting)
-return false;this.IsCurrentlySubmitting=true;var obj=this;var errors=[];var newObj=this.GetModel(errors);if(errors.length==0){if(this.CustomValidation){this.CustomValidation(newObj,function(customErrors){obj.IsCurrentlySubmitting=false;if(!customErrors||customErrors.length==0){obj.Save(newObj);}else{obj.RenderErrors(customErrors,"");}
+return newObj;},RenderErrors:function(errors,textBefore){if(this.Elements.ErrorText){this.Elements.ErrorText.innerHTML=textBefore+errors.join(", ");}else{this.Add({innerHTML:textBefore+errors.join(", "),className:"validationError"},"ErrorText");}},ClearErrors:function(){if(this.Elements.ErrorText)
+this.Elements.ErrorText.Remove();},onsubmit:function(){if(this.IsCurrentlySubmitting)
+return false;this.IsCurrentlySubmitting=true;var obj=this;var errors=[];var newObj=this.GetModel(errors);if(errors.length==0){if(this.CustomValidation){this.CustomValidation(newObj,function(customErrors){obj.IsCurrentlySubmitting=false;if(!customErrors||customErrors.length==0){obj.ClearErrors();obj.Save(newObj);}else{obj.RenderErrors(customErrors,"");}
 if(obj.SubmitResult)
-obj.SubmitResult(!customErrors||customErrors.length==0,customErrors);});}else{this.IsCurrentlySubmitting=false;this.Save(newObj);if(this.SubmitResult)
+obj.SubmitResult(!customErrors||customErrors.length==0,customErrors);});}else{this.IsCurrentlySubmitting=false;this.ClearErrors();this.Save(newObj);if(this.SubmitResult)
 this.SubmitResult(true,errors);}}else{this.RenderErrors(errors,this.RequiredText);this.IsCurrentlySubmitting=false;if(this.SubmitResult)
 this.SubmitResult(false,errors);}
 this.LastErrors=errors;return false;}};"use strict";window.TK.Navigator={_:"div",DefaultHash:"index",Seperator:"/",Current:null,CurrentElement:null,UseTemplates:false,Init:function(){var obj=this;if(this.Templates){this.UseTemplates=true;}

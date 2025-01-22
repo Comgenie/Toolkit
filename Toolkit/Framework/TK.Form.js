@@ -570,6 +570,10 @@ window.TK.Form = {
             this.Add({ innerHTML: textBefore + errors.join(", "), className: "validationError" }, "ErrorText");
         }
     },
+    ClearErrors: function () {
+        if (this.Elements.ErrorText)
+            this.Elements.ErrorText.Remove();
+    },
     onsubmit: function () {
         if (this.IsCurrentlySubmitting)
             return false;
@@ -582,6 +586,7 @@ window.TK.Form = {
                 this.CustomValidation(newObj, function (customErrors) {
                     obj.IsCurrentlySubmitting = false;
                     if (!customErrors || customErrors.length == 0) {
+                        obj.ClearErrors();
                         obj.Save(newObj);
                     } else {
                         obj.RenderErrors(customErrors, "");
@@ -592,6 +597,7 @@ window.TK.Form = {
                 });
             } else {
                 this.IsCurrentlySubmitting = false;
+                this.ClearErrors();
                 this.Save(newObj);
                 if (this.SubmitResult)
                     this.SubmitResult(true, errors);
