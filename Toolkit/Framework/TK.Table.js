@@ -16,7 +16,7 @@ window.TK.Table = {
     EnablePartialInit: false, // TODO: Only add rows as TR elements which are currently visible
     PageSize: null,
     PageOffset: 0,
-    SpecificColumns: null,    
+    SpecificColumns: null,
     ColumnTitles: {},
     Templates: {},
     HeaderTemplates: {},
@@ -24,8 +24,9 @@ window.TK.Table = {
     SortedDesc: false,
     SortCallBack: null,
     FilterCallBack: null,
+    PaginateCallback: null,
     MaxRows: null,
-    CurrentFilter: null,    
+    CurrentFilter: null,
     DefaultTemplate: {
         _: "td",
         Data: null,
@@ -37,8 +38,10 @@ window.TK.Table = {
         onclick: function (event) {
             if (event)
                 event.stopPropagation();
+
             if (window.event)
                 window.event.cancelBubble = true;
+
             return true;
         },
         Elements: {
@@ -48,21 +51,27 @@ window.TK.Table = {
                 className: "tableRowCheckBox",
                 onclick: function (event) {
                     this.Parent.Table.LastCheckBoxRange = null;
-                    if (event.shiftKey && this.Parent.Table.PreviousCheckBox) {
-                        // Select everything in between
-                        this.Parent.Table.LastCheckBoxRange = [];
-                        var curIndex = this.Parent.Parent.RowIndex;
-                        var otherIndex = this.Parent.Table.PreviousCheckBox.Parent.Parent.RowIndex;
-                        for (var i = curIndex; i != otherIndex; i = (curIndex < otherIndex ? i + 1 : i - 1)) {
-                            var checkBoxElement = this.Parent.Table.querySelectorAll(".Element-row" + i + " input[type=checkbox].tableRowCheckBox")[0];
-                            if (checkBoxElement.Parent.Parent.style.display == "none")
-                                continue; // Skip filtered rows
-                            if (checkBoxElement.checked != this.Parent.Table.PreviousCheckBox.checked) {
-                                this.Parent.Table.LastCheckBoxRange.push(checkBoxElement.Parent.Row);
-                                checkBoxElement.checked = this.Parent.Table.PreviousCheckBox.checked;
-                            }                            
-                            checkBoxElement.UpdateData();
+
+                    if (!event.shiftKey || !this.Parent.Table.PreviousCheckBox)
+                        return;
+
+                    // Select everything in between
+                    this.Parent.Table.LastCheckBoxRange = [];
+                    let currentIndex = this.Parent.Parent.RowIndex;
+                    let otherIndex = this.Parent.Table.PreviousCheckBox.Parent.Parent.RowIndex;
+
+                    for (let i = currentIndex; i != otherIndex; i = (currentIndex < otherIndex ? i + 1 : i - 1)) {
+                        const checkBoxElement = this.Parent.Table.querySelectorAll(".Element-row" + i + " input[type=checkbox].tableRowCheckBox")[0];
+
+                        if (checkBoxElement.Parent.Parent.style.display === "none")
+                            continue; // Skip filtered rows
+
+                        if (checkBoxElement.checked != this.Parent.Table.PreviousCheckBox.checked) {
+                            this.Parent.Table.LastCheckBoxRange.push(checkBoxElement.Parent.Row);
+                            checkBoxElement.checked = this.Parent.Table.PreviousCheckBox.checked;
                         }
+
+                        checkBoxElement.UpdateData();
                     }
                 },
                 onblur: function () {
@@ -71,12 +80,13 @@ window.TK.Table = {
                 onchange: function (event) {
                     this.UpdateData();
                     if (this.Parent.Table.EnableSelectAllCheckBox) {
-                        var selectAll = this.Parent.Table.querySelectorAll(".tableSelectAllCheckBox")[0];
+                        const selectAll = this.Parent.Table.querySelectorAll(".tableSelectAllCheckBox")[0];
                         if (selectAll) {
-                            var checkBoxElements = this.Parent.Table.Elements.tbody.Elements.ToArray()
+                            const checkBoxElements = this.Parent.Table.Elements.tbody.Elements.ToArray()
                                 .Where(function (a) { return a.Elements.CheckBoxes && a.Elements.CheckBoxes.Elements.CheckBox && a.style.display != "none"; })
                                 .Select(function (a) { return a.Elements.CheckBoxes.Elements.CheckBox });
-                            selectAll.checked = checkBoxElements.length == this.Parent.Table.SelectedRows().length;
+
+                            selectAll.checked = checkBoxElements.length === this.Parent.Table.SelectedRows().length;
                         }
                     }
 
@@ -86,9 +96,11 @@ window.TK.Table = {
                         } else {
                             if (this.Parent.Table.LastCheckBoxRange.indexOf(this.Parent.Row) < 0)
                                 this.Parent.Table.LastCheckBoxRange.push(this.Parent.Row);
+
                             this.Parent.Table.CheckboxCheck(this.Parent.Table.LastCheckBoxRange, this.checked);
                         }
                     }
+
                     this.Parent.Table.LastCheckBoxRange = null;
                 },
                 UpdateData: function () {
@@ -106,8 +118,10 @@ window.TK.Table = {
         onclick: function (event) {
             if (event)
                 event.stopPropagation();
+
             if (window.event)
                 window.event.cancelBubble = true;
+
             return true;
         },
         Elements: {
@@ -116,23 +130,27 @@ window.TK.Table = {
                 innerHTML: "Remove",
                 onclick: function (event) {
                     // Find with button clicked and delete it from Rows variable in the table
-                    var table = this.Parent.Table;
-                    var thisRow = this.Parent.Parent.Row;
-                    // When the row was succesfully deleted in the save function remove current row
-                    if (table.Save(thisRow, true) !== false) {
-                        for (var i = 0; i < table.Rows.length; i++) {
-                            if (table.Rows[i] == thisRow) {
-                                table.Rows.splice(i, 1);
-                                break;
-                            }
-                        }
+                    const table = this.Parent.Table;
+                    const thisRow = this.Parent.Parent.Row;
 
-                        var thisRowNode = this.Parent.Parent;
-                        // When the user was editing the row a form is showing on the next row. When this is the case remove that form as well.
-                        if (thisRowNode.subTr)
-                            thisRowNode.subTr.Remove();
-                        thisRowNode.Remove();
+                    // When the row was succesfully deleted in the save function remove current row
+                    if (table.Save(thisRow, true) === false)
+                        return;
+
+                    for (let i = 0; i < table.Rows.length; i++) {
+                        if (table.Rows[i] === thisRow) {
+                            table.Rows.splice(i, 1);
+                            break;
+                        }
                     }
+
+                    const thisRowNode = this.Parent.Parent;
+
+                    // When the user was editing the row a form is showing on the next row. When this is the case remove that form as well.
+                    if (thisRowNode.subTr)
+                        thisRowNode.subTr.Remove();
+
+                    thisRowNode.Remove();
                 }
             }
         }
@@ -143,56 +161,62 @@ window.TK.Table = {
     FormAlwaysLoaded: false, // If true, the subViews are initialized directly, but shown/hidden using style.display
     Init: function () {
         if (this.SortedBy && this.Rows && this.Rows.OrderBy) {
-            var sortedBy = this.SortedBy;
+            const sortedBy = this.SortedBy;
             this.Rows = this.SortedDesc ? this.Rows.OrderByDesc(function (a) { return a[sortedBy]; }) : this.Rows.OrderBy(function (a) { return a[sortedBy]; });
         }
         this.Refresh();
     },
     RowClick: function (rowObj, trElement) {
-        var obj = this;
-        if (this.Form) {
-            if (!trElement) { // Optional parameter, Find the TR element based on the given row Obj                
-                if (!this.Elements.tbody)
-                    return;
-                for (var rowId in this.Elements.tbody.Elements) {
-                    var row = this.Elements.tbody.Elements[rowId];
-                    if (row.Row == rowObj) {
-                        trElement = row;
-                        break;
-                    }
-                }
-                if (!trElement)
-                    return;
-            }
-            if (obj.FormAlwaysLoaded) {
-                if (trElement.subTr) {
-                    trElement.subTr.style.display = trElement.subTr.style.display == "" ? "none" : "";
-                    return;
-                }
-            } else {
-                if (trElement.subTr) {
-                    trElement.subTr.parentNode.removeChild(trElement.subTr);
-                    trElement.subTr = null;
-                    return;
+        const obj = this;
+
+        if (!this.Form)
+            return;
+
+        // Optional parameter, Find the TR element based on the given row Obj
+        if (!trElement) {
+            if (!this.Elements.tbody)
+                return;
+
+            for (let rowId in this.Elements.tbody.Elements) {
+                const row = this.Elements.tbody.Elements[rowId];
+                if (row.Row == rowObj) {
+                    trElement = row;
+                    break;
                 }
             }
-            var template = {
-                _: obj.Form,
-                Model: rowObj,
-                ApplyToModelDirectly: true,
-                
-            };
-            if (obj.Form.Save == undefined) {
-                template.Save = function (model) {
-                    obj.Save(model, false);
-                    obj.UpdateRow(trElement);                    
-                };
-            }
-            if (obj.Form.ApplyToModelDirectly == undefined) {
-                template.ApplyToModelDirectly = true;
-            }
-            this.OpenViewForRow(trElement, template);
+
+            if (!trElement)
+                return;
         }
+
+        if (trElement.subTr) {
+            if (obj.FormAlwaysLoaded) {
+                trElement.subTr.style.display = trElement.subTr.style.display == "" ? "none" : "";
+                return;
+            }
+
+            trElement.subTr.parentNode.removeChild(trElement.subTr);
+            trElement.subTr = null;
+            return;
+        }
+
+        const template = {
+            _: obj.Form,
+            Model: rowObj,
+            ApplyToModelDirectly: true,
+
+        };
+        if (obj.Form.Save === undefined) {
+            template.Save = function (model) {
+                obj.Save(model, false);
+                obj.UpdateRow(trElement);
+            };
+        }
+        if (obj.Form.ApplyToModelDirectly === undefined) {
+            template.ApplyToModelDirectly = true;
+        }
+
+        this.OpenViewForRow(trElement, template);
     },
     RowDoubleClick: function (rowObj, trElement) { },
     Save: function (rowObj, isRemoved) {
@@ -201,50 +225,55 @@ window.TK.Table = {
     OpenViewForRow: function (trElement, template) {
         if (!template || trElement.subTr)
             return;
-        var childElements = trElement.Elements.ToArray();
-        var tds = 0;
+
+        const childElements = trElement.Elements.ToArray();
+        let tds = 0;
+
         for (var i = 0; i < childElements.length; i++) {
             tds += childElements[i].colSpan ? parseInt(childElements[i].colSpan) : 1;
         }
-        
+
         trElement.subTr = trElement.Parent.Add(
-        {
-            _: "tr",      
-            ThisIsASubTR: true,
-            Destroy: function () {
-                trElement.subTr = null;
-            },
-            Elements: {
-                Editor: {
-                    _: "td",
-                    className: "subView",
-                    colSpan: tds,
-                    Elements: {
-                        View: template
+            {
+                _: "tr",
+                ThisIsASubTR: true,
+                Destroy: function () {
+                    trElement.subTr = null;
+                },
+                Elements: {
+                    Editor: {
+                        _: "td",
+                        className: "subView",
+                        colSpan: tds,
+                        Elements: {
+                            View: template
+                        }
                     }
                 }
-            }
-        });
+            });
+
         trElement.parentNode.insertBefore(trElement.subTr, trElement.nextSibling);
     },
     CheckboxCheck: function (rowsChanged, isChecked) { },
     SelectedRows: function () {
         if (!this.EnableCheckBoxes)
             return [];
+
         return this.Elements.tbody.Elements.ToArray()
             .Where(function (a) { return a.Elements.CheckBoxes && a.Elements.CheckBoxes.Elements.CheckBox && a.Elements.CheckBoxes.Elements.CheckBox.checked; })
             .Select(function (a) { return a.Row });
     },
     ApplyFilter: function (filter, skipCallback) {
-        this.CurrentFilter = filter == null ? "" : filter.toLowerCase ? filter.toLowerCase() : filter;
+        this.CurrentFilter = filter === null ? "" : filter.toLowerCase ? filter.toLowerCase() : filter;
+
         if (this.FilterCallBack && !skipCallback) {
             this.FilterCallBack();
             return;
         }
 
-        if (!this.Elements.tbody) {
+        if (!this.Elements.tbody)
             return;
-        }
+
         if (this.Elements.thead && this.ColumnFilter) {
             for (var name in this.ColumnFilter) {
                 if (this.Elements.thead.Elements.tr.Elements[name]) {
@@ -252,18 +281,22 @@ window.TK.Table = {
                 }
             }
         }
-        this.Elements.tbody.style.display = "none"; // This prevents row style changes to cause render updates, making it a lot faster
-        var rows = 0;
 
-        for (var rowId in this.Elements.tbody.Elements) {
-            var row = this.Elements.tbody.Elements[rowId];
+        this.Elements.tbody.style.display = "none"; // This prevents row style changes to cause render updates, making it a lot faster
+        let rows = 0;
+
+        for (let rowId in this.Elements.tbody.Elements) {
+            const row = this.Elements.tbody.Elements[rowId];
+
             if (!row.innerText || row.ThisIsASubTR)
                 continue;
 
-            if (this.MaxRows != null && rows >= this.MaxRows) {
+            if (this.MaxRows !== null && rows >= this.MaxRows) {
                 row.style.display = "none";
+
                 if (row.subTr)
                     row.subTr.style.display = "none";
+
                 continue;
             }
 
@@ -274,44 +307,52 @@ window.TK.Table = {
                 rows++;
                 continue;
             }
-            
-            if (this.CurrentFilter == "" || this.CurrentFilter == null || !row.innerText || (this.CurrentFilter && this.CurrentFilter.toLowerCase && row.innerText.toLowerCase().indexOf(this.CurrentFilter) >= 0) || (this.CurrentFilter && !this.CurrentFilter.toLowerCase && this.CurrentFilter(row.Row, row))) {
+
+            if (this.CurrentFilter === "" || this.CurrentFilter === null || !row.innerText || (this.CurrentFilter && this.CurrentFilter.toLowerCase && row.innerText.toLowerCase().indexOf(this.CurrentFilter) >= 0) || (this.CurrentFilter && !this.CurrentFilter.toLowerCase && this.CurrentFilter(row.Row, row))) {
                 row.style.display = "";
+
                 if (row.subTr)
                     row.subTr.style.display = "";
+
                 rows++;
             } else {
                 row.style.display = "none";
+
                 if (row.subTr)
                     row.subTr.style.display = "none";
             }
 
-            if (this.PageSize != null && ((rows - 1) < this.PageOffset || (rows-1) >= this.PageOffset + this.PageSize)) {
+            if (this.PageSize !== null && ((rows - 1) < this.PageOffset || (rows - 1) >= this.PageOffset + this.PageSize) && !this.PaginateCallback) {
                 row.style.display = "none";
+
                 if (row.subTr)
                     row.subTr.style.display = "none";
+
                 continue;
             }
         }
-        this.Elements.tbody.style.display = "";
-        this.VisibleRowCount = rows;
 
-        var ttnc = this.Near(".toolkitTableNavigationContainer");
-        if (ttnc)
-            ttnc.Init();
+        this.Elements.tbody.style.display = "";
+        this.VisibleRowCount = this.PaginateCallback ? this.VisibleRowCount : rows;
+
+        const tkTableNavigationContainer = this.Near(".toolkitTableNavigationContainer");
+
+        if (tkTableNavigationContainer)
+            tkTableNavigationContainer.Init();
 
         return rows;
     },
     Refresh: function () {
-        var obj = this;
+        const obj = this;
+
         this.Clear();
         this.PreviousCheckBox = null;
-        if (this.Rows.length == 0) {
+
+        if (this.Rows.length === 0)
             return;
-        }
 
         // Build header
-        var thead = {
+        const thead = {
             _: "thead",
             Elements: {
                 tr: {
@@ -320,7 +361,9 @@ window.TK.Table = {
                 }
             }
         };
-        var columns = [];
+
+        let columns = [];
+
         if (this.EnableCheckBoxes) {
             columns.push("CheckBoxes");
             if (!this.DisableFilterForColumns)
@@ -352,7 +395,7 @@ window.TK.Table = {
                                     if (checkBoxElements[i].checked != this.checked) {
                                         changedRange.push(checkBoxElements[i].Parent.Row);
                                         checkBoxElements[i].checked = this.checked;
-                                    }                                    
+                                    }
                                     checkBoxElements[i].UpdateData();
                                 }
                                 if (obj.CheckboxCheck)
@@ -427,7 +470,7 @@ window.TK.Table = {
             };
 
             // Enable filter button on column
-            if (this.EnableFilter && (!this.DisableFilterForColumns || this.DisableFilterForColumns.indexOf(name) < 0 )) {
+            if (this.EnableFilter && (!this.DisableFilterForColumns || this.DisableFilterForColumns.indexOf(name) < 0)) {
                 thead.Elements.tr.Elements[name].Elements.FilterButton = {
                     className: "toolkitFilterButton",
                     innerHTML: "v",
@@ -470,7 +513,7 @@ window.TK.Table = {
                                             for (var name in obj.ColumnFilter) {
                                                 if (!obj.ColumnFilter[name])
                                                     continue;
-                                                                                                
+
                                                 if (obj.ColumnFilter[name].toLowerCase) { // text match, match if any of the text is in there
                                                     var lowerColumnSearch = obj.ColumnFilter[name].toLowerCase();
 
@@ -490,7 +533,7 @@ window.TK.Table = {
                                             }
                                             return true;
                                         };
-                                        
+
                                         if (values.length < obj.ThresholdFilterMultiselect) {
                                             // Show multi select
                                             values = values.OrderBy(function (a) { return a; });
@@ -511,7 +554,7 @@ window.TK.Table = {
                                                     } else {
                                                         obj.ColumnFilter[currentHeader.DataColumnName] = null;
                                                     }
-                                                    obj.ApplyFilter(filterFunc);                           
+                                                    obj.ApplyFilter(filterFunc);
                                                 }
                                             };
                                             filterTable.ColumnTitles[currentHeader.DataColumnName] = "Filter";
@@ -531,7 +574,7 @@ window.TK.Table = {
                                                 onkeyup: function (event) {
 
                                                     obj.ColumnFilter[currentHeader.DataColumnName] = (this.value == "") ? null : this.value;
-                                                    obj.ApplyFilter(filterFunc);    
+                                                    obj.ApplyFilter(filterFunc);
 
                                                     var x = event.which || event.keyCode;
                                                     if (x == 13) {
@@ -562,7 +605,9 @@ window.TK.Table = {
                 };
             }
         }
+
         this.TableUseColumns = columns;
+
         // Build contents
         var tbody = {
             _: "tbody",
@@ -608,26 +653,26 @@ window.TK.Table = {
                 });
 
                 var total = null;
-                
+
                 for (var j = 0; j < allRowValues.length; j++) {
                     if (allRowValues[j] !== undefined && allRowValues[j] !== null && allRowValues[j] === +allRowValues[j])
                         total = (total === null ? 0 : total) + allRowValues[j];
-                }      
+                }
                 if (total === null)
                     total = "";
-                
+
                 tfoot.Elements.SubTotals.Elements[name] = {
                     _: this.Templates[name] ? this.Templates[name] : this.DefaultTemplate,
                     className: "totalColumn-" + name,
                     Data: total,
                     Values: allRowValues,
-                    Table: this 
+                    Table: this
                 };
             }
-            
+
         }
 
-        if (this.MaxRows != null || this.CurrentFilter != null || this.PageSize != null) {
+        if (this.MaxRows !== null || this.CurrentFilter !== null || this.PageSize !== null) {
             this.ApplyFilter(this.CurrentFilter, true);
             includeTFoot = true;
             if (this.PageSize) {
@@ -641,7 +686,7 @@ window.TK.Table = {
                             Init: function () {
                                 this.Clear();
                                 var pageCount = Math.ceil(obj.VisibleRowCount / obj.PageSize);
-                                var currentPage = Math.floor(obj.PageOffset / obj.PageSize) + 1;                                
+                                var currentPage = Math.floor(obj.PageOffset / obj.PageSize) + 1;
                                 var maxBeforeAfter = 3;
                                 var template = {
                                     _: "button",
@@ -650,6 +695,12 @@ window.TK.Table = {
                                     innerHTML: i,
                                     onclick: function () {
                                         obj.PageOffset = this.Offset;
+
+                                        if (obj.PaginateCallback) {
+                                            obj.PaginateCallback();
+                                            return;
+                                        }
+
                                         obj.Refresh();
                                     }
                                 };
@@ -675,7 +726,7 @@ window.TK.Table = {
                                     template.innerHTML = pageCount;
                                     this.Add(template);
                                 }
-                            }                        
+                            }
                         }
                     }
                 };
@@ -687,96 +738,107 @@ window.TK.Table = {
     },
     AddRow: function (row, rowClick) {
         this.Rows.push(row);
+
         if (this.Elements.tbody) {
-            var tr = this.AddNewRowsToTableBody()[0];
-            if (!tr) {
+            const tr = this.AddNewRowsToTableBody()[0];
+
+            if (!tr)
                 this.Refresh();
-            } else  if (rowClick && tr) {
+
+            if (rowClick && tr) {
                 this.RowClick(tr.Row, tr);
                 return;
             }
         } else {
-            this.Refresh();            
+            this.Refresh();
         }
 
-        if (rowClick) {
+        if (rowClick)
             this.RowClick(row);
-        }
     },
     UpdateRow: function (trRow) {
-        var template = this.GenerateRowTemplate(trRow.Row, trRow.RowIndex);
-        var tr = this.Elements.tbody.Add(template, "row" + trRow.RowIndex);
+        const template = this.GenerateRowTemplate(trRow.Row, trRow.RowIndex);
+        const tr = this.Elements.tbody.Add(template, "row" + trRow.RowIndex);
         trRow.parentNode.insertBefore(tr, trRow);
-        if (trRow.subTr) {
+
+        if (trRow.subTr)
             trRow.subTr.Remove();
-        }
-        trRow.Remove();        
+
+        trRow.Remove();
     },
     AddNewRowsToTableBody: function (tbody) {
         if (!tbody)
             tbody = this.Elements.tbody;
-        var newElements = [];
-        var obj = this;
-        for (var i = this.CurrentAddedRowCount; i < this.Rows.length; i++) {
-            var tr = this.GenerateRowTemplate(this.Rows[i], i);
+
+        const newElements = [];
+
+        for (let i = this.CurrentAddedRowCount; i < this.Rows.length; i++) {
+            const tr = this.GenerateRowTemplate(this.Rows[i], i);
+
             if (tbody.Add) {
                 newElements.push(tbody.Add(tr, "row" + i));
-            } else {
-                tbody.Elements["row" + i] = tr;
+                continue;
             }
+
+            tbody.Elements["row" + i] = tr;
         }
+
         this.CurrentAddedRowCount = this.Rows.length;
         return newElements;
     },
-    GenerateRowTemplate: function (rowObj, rowIndex) {        
-        var obj = this;
-        var tr = {
+    GenerateRowTemplate: function (rowObj, rowIndex) {
+        const obj = this;
+        const tr = {
             _: "tr",
             Elements: {},
             Row: rowObj,
             RowIndex: rowIndex,
             onclick: function (event) {
                 if (obj.EnableFullRowCheckBoxToggle) {
-                    var checkBoxElement = this.querySelector("input[type=checkbox]");
-                    if (checkBoxElement != null) {
+                    const checkBoxElement = this.querySelector("input[type=checkbox]");
+
+                    if (checkBoxElement !== null) {
+
                         if (obj.EnableFullRowClickDeselectOthers && !event.shiftKey && !event.ctrlKey) {
-                            var allCheckBoxes = obj.querySelectorAll("input[type=checkbox]");
+                            const allCheckBoxes = obj.querySelectorAll("input[type=checkbox]");
+
                             for (var i = 0; i < allCheckBoxes.length; i++) {
                                 allCheckBoxes[i].checked = false;
                             }
                         }
+
                         checkBoxElement.checked = !checkBoxElement.checked;
                         checkBoxElement.onclick(event);
                         checkBoxElement.onchange();
                         obj.PreviousCheckBox = checkBoxElement;
                     }
                 }
+
                 obj.RowClick(this.Row, this);
             },
             ondblclick: function () {
-                if (obj.RowDoubleClick) {
+                if (obj.RowDoubleClick)
                     obj.RowDoubleClick(this.Row, this);
-                }
             }
         };
-        
-        for (var j = 0; j < this.TableUseColumns.length; j++) {
-            var name = this.TableUseColumns[j];
-            var templateToUse = this.DefaultTemplate;
-            if (this.Templates[name]) {
+
+        for (let j = 0; j < this.TableUseColumns.length; j++) {
+            const name = this.TableUseColumns[j];
+            let templateToUse = this.DefaultTemplate;
+
+            if (this.Templates[name])
                 templateToUse = this.Templates[name];
-            }
+
             tr.Elements[name] = {
                 _: templateToUse,
                 DataColumnName: name,
                 Data: rowObj[name],
                 Row: rowObj,
                 Table: this
-                
             };
 
             if (rowObj[name] && rowObj[name].substr && rowObj[name].substr(0, 6) == "/Date(") {
-                var tmp = rowObj[name].substr(6);
+                let tmp = rowObj[name].substr(6);
                 tmp = tmp.substr(0, tmp.length - 2);
                 rowObj[name + "-SortValue"] = new Date(parseInt(tmp)).getTime();
             }
@@ -790,52 +852,80 @@ window.TK.AjaxTable = {
     Url: null,
     Post: null,
     AjaxSettings: {},
-    
+
     Init: function () {
-        this.RefreshData();        
+        this.RefreshData();
     },
-    RefreshData: function () {        
-        this.Clear();        
-        var obj = this;
-        
-        if (this.Url) {
-            var url = this.Url;
-            
-            if (url.indexOf("SORTBY") >= 0) {
-                // Sort using ajax requests
-                var tmp = this.SortedBy ? this.SortedBy : "";
+    RefreshData: function () {
+        this.Clear();
+        const obj = this;
 
-                url = url.replace("SORTBY", encodeURIComponent(tmp));
-                url = url.replace("SORTDESC", this.SortedDesc);
-                this.SortCallBack = function () {
-                    obj.RefreshData();
-                };
-            }
+        if (!this.Url)
+            return;
 
-            if (url.indexOf("FILTER") >= 0) {
-                // Limit rows using ajax requests
-                var filter = this.CurrentFilter ? this.CurrentFilter : "";
-                url = url.replace("FILTER", encodeURIComponent(filter));
-                this.FilterCallBack = function () {
-                    obj.RefreshData();
-                };
-            }
-            if (url.indexOf("COUNT") >= 0) {
-                // Limit rows using ajax requests
-                // TODO
-            }
+        let url = this.Url;
 
+        if (url.indexOf("SORTBY") >= 0) {
+            // Sort using ajax requests
+            let tmp = this.SortedBy ? this.SortedBy : "";
+
+            url = url.replace("SORTBY", encodeURIComponent(tmp));
+            url = url.replace("SORTDESC", this.SortedDesc);
+
+            this.SortCallBack = function () {
+                obj.RefreshData();
+            };
+        }
+
+        if (url.indexOf("FILTER") >= 0) {
+            // Limit rows using ajax requests
+            let filter = this.CurrentFilter ? this.CurrentFilter : "";
+
+            url = url.replace("FILTER", encodeURIComponent(filter));
+
+            this.FilterCallBack = function () {
+                obj.RefreshData();
+            };
+        }
+
+        if (url.indexOf("COUNT") >= 0) {
+            // Limit rows using ajax requests
+            let count = this.MaxRows ? this.MaxRows : 10;
+            url = url.replace("COUNT", encodeURIComponent(count))
+        }
+
+        if (url.indexOf("OFFSET") >= 0 && url.indexOf("PAGESIZE") >= 0) {
+            // Lazy load with server side pagination using ajax requests when both an offset and pagesize are defined.
+            let offset = this.PageOffset
+            let pageSize = this.PageSize ? this.PageSize : 10
+
+            url = url.replace("OFFSET", encodeURIComponent(offset))
+            url = url.replace("PAGESIZE", encodeURIComponent(pageSize))
+
+            obj.PaginateCallback = function () {
+                obj.RefreshData();
+            }
 
             Ajax.do(url, this.Post, function (response) {
-                if (!obj.Post || typeof obj.Post === "string" || obj.Post instanceof String) {
-                    obj.Rows = JSON.parse(response);
-                } else {
-                    obj.Rows = response;
-                }
+                let json = JSON.parse(response);
+                obj.Rows = json.Rows;
+                obj.VisibleRowCount = json.Total;
                 obj.Refresh();
                 obj.Update();
             }, undefined, this.AjaxSettings);
+
+            return;
         }
+
+        Ajax.do(url, this.Post, function (response) {
+            if (!obj.Post || typeof obj.Post === "string" || obj.Post instanceof String) {
+                obj.Rows = JSON.parse(response);
+            } else {
+                obj.Rows = response;
+            }
+            obj.Refresh();
+            obj.Update();
+        }, undefined, this.AjaxSettings);
     },
     Update: function () { }
 };
