@@ -448,8 +448,10 @@ window.TK.Form = {
                         if (obj.CurrentFields[name] && obj.CurrentFields[name].IsVisible && obj.CurrentFields[name].Parent && obj.CurrentFields[name].Parent.style) {
                             // Get model and call obj.CurrentFields[name].DataSettings.IsVisible(model);
                             if (!curModel)
-                                curModel = obj.GetModel([]);
+                                curModel = obj.GetModel();
                             obj.CurrentFields[name].Parent.style.display = obj.CurrentFields[name].IsVisible(curModel) ? "" : "none";
+                        } else if (obj.CurrentFields[name] && obj.CurrentFields[name].Required && !curModel) { // When the user enters a field with an isrequired-error, we want to directly remove the error
+                            curModel = obj.GetModel();
                         }
                     }
 
@@ -501,7 +503,7 @@ window.TK.Form = {
 
         if (callIsVisible) {
             // There is at least 1 IsVisible function, so we'll get the model and call all methods now the elements are actually created            
-            var curModel = this.GetModel([]);
+            var curModel = this.GetModel();
             for (var name in this.CurrentFields) {
                 if (this.CurrentFields[name] && this.CurrentFields[name].IsVisible && this.CurrentFields[name].Parent && this.CurrentFields[name].Parent.style) {
                     this.CurrentFields[name].Parent.style.display = this.CurrentFields[name].IsVisible(curModel) ? "" : "none";
@@ -522,6 +524,12 @@ window.TK.Form = {
     GetModel: function (errors, applyToModelDirectly) {
         if (applyToModelDirectly === undefined)
             applyToModelDirectly = this.ApplyToModelDirectly;
+
+        if (errors === null || errors === undefined) {
+            errors = [];
+            errors.SkipErrorSetting = true;
+        }
+
         var model = this[this.ModelProperty];
         var newObj = applyToModelDirectly ? model : {};
 
@@ -552,7 +560,8 @@ window.TK.Form = {
                     if (this.Fields && this.Fields[name] && this.Fields[name].Required && (newObj[name] === null || newObj[name] === "")) {
                         errors.push(this.Fields && this.Fields[name] && this.Fields[name].DisplayName ? this.Fields[name].DisplayName : name);
                         hasError = true;
-                        this.CurrentFields[name].Parent.classList.add("fieldError");
+                        if (!errors.SkipErrorSetting)
+                            this.CurrentFields[name].Parent.classList.add("fieldError");
                     }
                 }
 

@@ -263,20 +263,22 @@ row.Elements.DataField.origOnBlur=row.Elements.DataField.onblur;row.Elements.Dat
 this.origOnBlur();if(obj.AutoSave){obj.onsubmit();}};row.Elements.DataField.origOnchange=row.Elements.DataField.onchange;row.Elements.DataField.onchange=function(){if(this.origOnchange)
 this.origOnchange();var curModel=null;for(var name in obj.CurrentFields){if(obj.CurrentFields[name]&&obj.CurrentFields[name].DataSettings&&obj.CurrentFields[name].DataSettings.LinkField&&obj.CurrentFields[name].DataSettings.LinkField==this.DataName){obj.CurrentFields[name].LinkedData=this.GetValue();obj.CurrentFields[name].Clear();obj.CurrentFields[name].Init();}
 if(obj.CurrentFields[name]&&obj.CurrentFields[name].IsVisible&&obj.CurrentFields[name].Parent&&obj.CurrentFields[name].Parent.style){if(!curModel)
-curModel=obj.GetModel([]);obj.CurrentFields[name].Parent.style.display=obj.CurrentFields[name].IsVisible(curModel)?"":"none";}}
+curModel=obj.GetModel();obj.CurrentFields[name].Parent.style.display=obj.CurrentFields[name].IsVisible(curModel)?"":"none";}else if(obj.CurrentFields[name]&&obj.CurrentFields[name].Required&&!curModel){curModel=obj.GetModel();}}
 if(obj.AutoSave){obj.onsubmit();}};if(this.SortByFields){tmpFields[name]=row;}else{var rowObj=this.Add(row);this.CurrentFields[name]=rowObj.Elements.DataField;}}else{this.CurrentFields[name]="ignore";}}
 var parent=this;if(this.SortByFields&&this.Fields){for(var fieldName in this.Fields){if(this.Fields[fieldName].Type=="section"){parent=this.Add({_:"fieldset",Elements:{Legend:{_:"legend",innerHTML:this.Fields[fieldName].DisplayName}}});}
 if(!tmpFields[fieldName]){if(this.Fields[fieldName]._)
 parent.Add(this.Fields[fieldName],fieldName);continue;}
 var rObj=parent.Add(tmpFields[fieldName]);this.CurrentFields[fieldName]=rObj.Elements.DataField;}}
-if(callIsVisible){var curModel=this.GetModel([]);for(var name in this.CurrentFields){if(this.CurrentFields[name]&&this.CurrentFields[name].IsVisible&&this.CurrentFields[name].Parent&&this.CurrentFields[name].Parent.style){this.CurrentFields[name].Parent.style.display=this.CurrentFields[name].IsVisible(curModel)?"":"none";}}}
+if(callIsVisible){var curModel=this.GetModel();for(var name in this.CurrentFields){if(this.CurrentFields[name]&&this.CurrentFields[name].IsVisible&&this.CurrentFields[name].Parent&&this.CurrentFields[name].Parent.style){this.CurrentFields[name].Parent.style.display=this.CurrentFields[name].IsVisible(curModel)?"":"none";}}}
 if(this.SaveButtonText){this.Add({_:"button",type:"submit",innerHTML:this.SaveButtonText},"SaveButton");}},Save:function(obj){},GetModel:function(errors,applyToModelDirectly){if(applyToModelDirectly===undefined)
-applyToModelDirectly=this.ApplyToModelDirectly;var model=this[this.ModelProperty];var newObj=applyToModelDirectly?model:{};if(applyToModelDirectly){var tmpErrorList=[];var tmpModel=this.GetModel(tmpErrorList,false);if(tmpErrorList.length>0){for(var i=0;i<tmpErrorList.length;i++){errors.push(tmpErrorList[i]);}
+applyToModelDirectly=this.ApplyToModelDirectly;if(errors===null||errors===undefined){errors=[];errors.SkipErrorSetting=true;}
+var model=this[this.ModelProperty];var newObj=applyToModelDirectly?model:{};if(applyToModelDirectly){var tmpErrorList=[];var tmpModel=this.GetModel(tmpErrorList,false);if(tmpErrorList.length>0){for(var i=0;i<tmpErrorList.length;i++){errors.push(tmpErrorList[i]);}
 return tmpModel;}}
 for(var name in this.CurrentFields){if(this.CurrentFields[name]=="ignore"){if(!applyToModelDirectly&&model!=null)
 newObj[name]=model[name];}else{if(this.CurrentFields[name].IsVisible&&this.RemoveValueOfNotVisibleFields&&this.CurrentFields[name].Parent&&this.CurrentFields[name].Parent.style&&this.CurrentFields[name].Parent.style.display=="none"){if(applyToModelDirectly&&newObj!=null)
 newObj[name]=null;continue;}
-newObj[name]=this.CurrentFields[name].GetValue(errors);var hasError=false;if(errors){if(this.Fields&&this.Fields[name]&&this.Fields[name].Required&&(newObj[name]===null||newObj[name]==="")){errors.push(this.Fields&&this.Fields[name]&&this.Fields[name].DisplayName?this.Fields[name].DisplayName:name);hasError=true;this.CurrentFields[name].Parent.classList.add("fieldError");}}
+newObj[name]=this.CurrentFields[name].GetValue(errors);var hasError=false;if(errors){if(this.Fields&&this.Fields[name]&&this.Fields[name].Required&&(newObj[name]===null||newObj[name]==="")){errors.push(this.Fields&&this.Fields[name]&&this.Fields[name].DisplayName?this.Fields[name].DisplayName:name);hasError=true;if(!errors.SkipErrorSetting)
+this.CurrentFields[name].Parent.classList.add("fieldError");}}
 if(!hasError){this.CurrentFields[name].Parent.classList.remove("fieldError");}}}
 return newObj;},RenderErrors:function(errors,textBefore){if(this.Elements.ErrorText){this.Elements.ErrorText.innerHTML=textBefore+errors.join(", ");}else{this.Add({innerHTML:textBefore+errors.join(", "),className:"validationError"},"ErrorText");}},ClearErrors:function(){if(this.Elements.ErrorText)
 this.Elements.ErrorText.Remove();},onsubmit:function(){if(this.IsCurrentlySubmitting)
