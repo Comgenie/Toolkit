@@ -50,7 +50,7 @@ window.TK.DateTime = {
         {
             this.Data = new Date(parseInt(this.Data) * 1000).toISOString();
         }
-        this.RenderDateInput(this.Elements.Selection, this.Data);
+        this.RenderDateInput(this.Elements.Selection, this.Data, true);
         this.RefreshDateInput(true);
         this.Elements.DateInputContainer.Elements.TimeZoneInfo.style.display = (this.EnableTimeZone ? "" : "none");
     },
@@ -156,7 +156,7 @@ window.TK.DateTime = {
                             return;
                         }
                         this.className = "";
-                        this.Parent.Parent.RenderDateInput(this.Parent.Parent.Elements.Selection, tmpDateTime.toISOString());
+                        this.Parent.Parent.RenderDateInput(this.Parent.Parent.Elements.Selection, tmpDateTime.toISOString(), true);
                     },
                     onblur: function () {
                         if (this.Parent.Parent.readOnly || this.Parent.Parent.disabled)
@@ -294,7 +294,7 @@ window.TK.DateTime = {
             this.RefreshDateInput(true);
         }
     },
-    RenderDateInput: function (element, dateISO) {
+    RenderDateInput: function (element, dateISO, dontFocus) {
         var obj = this;     
         if (this.NotFirst && dateISO != this.Data) {
             this.Data = dateISO;
@@ -404,8 +404,8 @@ window.TK.DateTime = {
                 element.style.display = "none";
             };
             element.appendChild(applyButton);
-
-            obj.Elements.DateInputContainer.Elements.DateInput.focus();
+            if (!dontFocus)
+                obj.Elements.DateInputContainer.Elements.DateInput.focus();
             return;
         }
         element.InRelativeEditor = false;
