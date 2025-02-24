@@ -30,6 +30,7 @@ TK.Gauge = {
     ColorValue: null, // Automatic (pick range color)
     FontValue: "14pt Verdana",
     TextValue: null, // Automatic (Use actual value)
+    ExtraSpacingValue: 2,
     FontIndicators: "8pt Verdana",
     DrawIndicatorLine: false,
     EnableShadow: true,
@@ -54,10 +55,20 @@ TK.Gauge = {
         this.Canvas.Clear();
         var extraSpacingHeight = (this.Height * 0.1) + this.ExtraSpacingBottom;
         var extraSpacingWidth = 0;
-        if (this.Label)
-            extraSpacingHeight += 25;
-        if (this.EnableValue)
-            extraSpacingHeight += 25;
+
+        var pxLabels = 0;
+        if (this.Label) {
+            pxLabels = TK.Draw.Text.MeasureHeight(this.Label, this.FontLabel);
+            extraSpacingHeight += pxLabels ? pxLabels : 25;
+        }
+
+        var pxValue = 0;
+        if (this.EnableValue) {
+            pxValue = TK.Draw.Text.MeasureHeight("1234", this.FontValue);
+            if (pxValue)
+                pxValue += this.ExtraSpacingValue;
+            extraSpacingHeight += (pxValue ? pxValue : 25);
+        }
 
         var offsetY = 0;
         if (this.Indicators.length > 0) {
@@ -220,31 +231,28 @@ TK.Gauge = {
 
         }
 
-        var curY = centerY + (size * 0.1) + offsetY;
-        if (this.Style == 1) {
-            curY += 10;
-        }
-
+        // Draw labels and value text from bottom
         if (this.Label) {
             this.LabelText = this.Canvas.Add({
                 _: TK.Draw.Text,
-                X: centerX, Y: curY,
+                X: centerX, Y: this.Height - pxValue,
                 Fill: this.ColorLabel,
                 Font: this.FontLabel,
                 Text: this.Label,
-                Anchor: window.TK.Draw.AnchorCenter | window.TK.Draw.AnchorMiddle,
+                Anchor: window.TK.Draw.AnchorCenter | window.TK.Draw.AnchorBottom,
+                TextAnchor: window.TK.Draw.AnchorCenter | window.TK.Draw.AnchorBottom,
             });
-            curY += 25;
         }
 
         if (this.EnableValue) {
             this.ValueText = this.Canvas.Add({
                 _: TK.Draw.Text,
-                X: centerX, Y: curY,
+                X: centerX, Y: this.Height,
                 Fill: this.ColorValue ? this.ColorValue : "#000",
                 Font: this.FontValue,
                 Text: this.Value,
-                Anchor: window.TK.Draw.AnchorCenter | window.TK.Draw.AnchorMiddle,
+                Anchor: window.TK.Draw.AnchorCenter | window.TK.Draw.AnchorBottom,
+                TextAnchor: window.TK.Draw.AnchorCenter | window.TK.Draw.AnchorBottom,
             });
         }
 
