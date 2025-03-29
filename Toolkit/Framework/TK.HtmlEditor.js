@@ -203,7 +203,20 @@ TK.HtmlEditor = {
                 }
             },
             onkeydown: function (e) {
+                var keepFormatInNodes = ["UL", "OL", "LI"]; // We don't want to escape from some elements, as it will break the ability to use them
                 if (e.keyCode === 13 && !e.shiftKey) {
+                    var selection = window.getSelection();
+                    if (selection && selection.focusNode) {
+                        var node = selection.focusNode;
+                        if (node.nodeName && keepFormatInNodes.indexOf(node.nodeName) >= 0)
+                            return;
+
+                        for (var i = 0; i < 2 && node.parentNode; i++) {
+                            node = node.parentNode;
+                            if (node.nodeName && keepFormatInNodes.indexOf(node.nodeName) >= 0)
+                                return;
+                        }
+                    }
                     this.RemoveFormat = true;
                 }
             },
