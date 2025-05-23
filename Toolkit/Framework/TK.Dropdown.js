@@ -1,4 +1,4 @@
-﻿"use strict";
+"use strict";
 /* Minify Order(200) */
 window.TK.Dropdown = {
     _: "div",
@@ -12,6 +12,7 @@ window.TK.Dropdown = {
     MaxDisplayItems: 10, // Maximum items to show before scrolling
     SelectedClass: "toolkitDropdownSelected", // Class for selected items
     OpenClass: "toolkitDropdownOpen", // Class when dropdown is open
+    SearchOptions: false, // Allows the user to search through the options
     ListItemTemplate: {
         _: "li",
         Dropdown: null,
@@ -30,6 +31,7 @@ window.TK.Dropdown = {
     },
     Init: function () {
         var obj = this;
+        // When used in TK.Form the DataSettings will be set to configure the dropdown
         if (this.DataSettings) {
             var fields = ["Placeholder", "MaxDisplayItems", "Multiple", "Options", "SelectedClass", "OpenClass"];
             for (var i = 0; i < fields.length; i++) {
@@ -60,7 +62,27 @@ window.TK.Dropdown = {
             _: "div",
             className: "toolkitDropdownOptions",
             style: { display: "none", maxHeight: this.MaxDisplayItems * 35 + "px" }, 
+            Dropdown: obj,
             Elements: {
+                Search: {
+                    _: "input",
+                    type: "text",
+                    placeholder: "Search...",
+                    style:{
+                        width: 'calc(100% - 4px)',
+                        padding: '5px',
+                        margin: '2px',
+                        boxSizing: 'border-box'
+                    },
+                    Init: function() {
+                        this.Self.Dropdown.SearchField = this;
+                        if(!this.Self.Dropdown.SearchOptions)
+                            this.style.display = 'none';
+                    },
+                    onkeyup: function(e){
+                        obj.RefreshOptions();
+                    }
+                },
                 OptionsList: {
                     _: "ul",
                     style: { listStyle: "none", padding: 0, margin: 0 },
@@ -74,9 +96,16 @@ window.TK.Dropdown = {
 
     RefreshOptions: function () {
         var obj = this;
+        // Clear all current option nodes
         this.Elements.Options.Elements.OptionsList.Clear();
-        for (var i = 0; i < this.Options.length;i++) {
-            var option = this.Options[i];
+
+        let options = obj.Options;
+        let searchText = obj.SearchField.value.toUpperCase();
+        if(searchText && obj.SearchOptions)
+            options = options.filter(a => a.Text.toUpperCase().indexOf(searchText) > -1);
+
+        for (var i = 0; i < options.length;i++) {
+            var option = options[i];
             if (option.Text === undefined || option.Text === null)
                 option.Text = option.Value;
             else if (option.Value === undefined || option.Value === null)
