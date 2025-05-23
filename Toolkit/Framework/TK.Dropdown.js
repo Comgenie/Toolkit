@@ -12,7 +12,8 @@ window.TK.Dropdown = {
     MaxDisplayItems: 10, // Maximum items to show before scrolling
     SelectedClass: "toolkitDropdownSelected", // Class for selected items
     OpenClass: "toolkitDropdownOpen", // Class when dropdown is open
-    SearchOptions: false, // Allows the user to search through the options
+    EnableSearch: false, // Allows the user to search through the options
+    SearchPlaceholder: "Search...",
     ListItemTemplate: {
         _: "li",
         Dropdown: null,
@@ -20,7 +21,7 @@ window.TK.Dropdown = {
         Init: function () {
             this.innerText = this.Data.Text;
             this.Value = this.Data.Value;
-            this.className = this.Dropdown.IsSelected(this.Data.Value) ? this.Dropdown.SelectedClass : "";  
+            this.className = this.Dropdown.IsSelected(this.Data.Value) ? this.Dropdown.SelectedClass : "";
         },
         onclick: function (a) {
             this.Dropdown.SelectItem(this.Value);
@@ -61,32 +62,34 @@ window.TK.Dropdown = {
         this.Add({
             _: "div",
             className: "toolkitDropdownOptions",
-            style: { display: "none", maxHeight: this.MaxDisplayItems * 35 + "px" }, 
+            style: { display: "none", maxHeight: this.MaxDisplayItems * 35 + "px" },
             Dropdown: obj,
-            Elements: {
-                Search: {
-                    _: "input",
-                    type: "text",
-                    placeholder: "Search...",
-                    style:{
-                        width: 'calc(100% - 4px)',
-                        padding: '5px',
-                        margin: '2px',
-                        boxSizing: 'border-box'
-                    },
-                    Init: function() {
-                        this.Self.Dropdown.SearchField = this;
-                        if(!this.Self.Dropdown.SearchOptions)
-                            this.style.display = 'none';
-                    },
-                    onkeyup: function(e){
-                        obj.RefreshOptions();
-                    }
-                },
-                OptionsList: {
+            Init: function () {
+                if (obj.EnableSearch) {
+                    this.Elements.Search = this.Add({
+                        _: "input",
+                        type: "text",
+                        placeholder: obj.SearchPlaceholder,
+                        style: {
+                            width: 'calc(100% - 4px)',
+                            padding: '5px',
+                            margin: '2px',
+                            boxSizing: 'border-box'
+                        },
+                        Init: function () {
+                            obj.SearchField = this;
+                        },
+                        onkeyup: function (e) {
+                            obj.RefreshOptions();
+                        }
+                    });
+                }
+
+                this.Elements.OptionsList = this.Add({
                     _: "ul",
                     style: { listStyle: "none", padding: 0, margin: 0 },
-                },
+                });
+
             },
         }, "Options");
 
@@ -100,11 +103,13 @@ window.TK.Dropdown = {
         this.Elements.Options.Elements.OptionsList.Clear();
 
         let options = obj.Options;
-        let searchText = obj.SearchField.value.toUpperCase();
-        if(searchText && obj.SearchOptions)
-            options = options.filter(a => a.Text.toUpperCase().indexOf(searchText) > -1);
+        if (obj.EnableSearch && obj.SearchField) {
+            let searchText = obj.SearchField.value.toUpperCase();
+            if (searchText)
+                options = options.filter(a => a.Text.toUpperCase().indexOf(searchText) > -1);
+        }
 
-        for (var i = 0; i < options.length;i++) {
+        for (var i = 0; i < options.length; i++) {
             var option = options[i];
             if (option.Text === undefined || option.Text === null)
                 option.Text = option.Value;
@@ -177,7 +182,7 @@ window.TK.Dropdown = {
                         });
                         break;
                     }
-                    
+
                 }
             }
         } else if (!this.Multiple && this.Data) {
@@ -215,6 +220,6 @@ window.TK.Dropdown = {
 if (window.TK.Form) {
     window.TK.Form.DefaultTemplates.dropdown = {
         _: TK.Dropdown,
-        
+
     };
 }
