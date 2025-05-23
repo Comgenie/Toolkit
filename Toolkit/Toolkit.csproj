@@ -111,6 +111,7 @@
     <Content Include="Framework\TK.Draw.Rect.js" />
     <Content Include="Framework\TK.Draw.Line.js" />
     <Content Include="Framework\TK.Draw.Text.js" />
+    <Content Include="Framework\TK.Draw.Triangle.js" />
     <Content Include="Framework\TK.Slider.js" />
     <Content Include="Framework\TK.Dropdown.js" />
     <Content Include="Framework\TK.Switch.js" />

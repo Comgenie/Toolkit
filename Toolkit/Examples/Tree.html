@@ -73,6 +73,48 @@
             }
         }
     }
+}</pre>
+
+    <p>Similar to the TK.Table apply filter, a function can be passed as well.</p>
+    <pre>
+{
+    Elements: {
+        ApplyFilterButton: {
+            innerText: "Apply filter for fruits longer than 6 characters",
+            onclick: function() {
+                this.Near("Tree").ApplyFilter(function(item) {
+                    return item.Text.length > 6;
+                }, true);
+            }
+        },
+        Tree: {
+            _: TK.Tree,
+            Rows: [
+                { Id: 1, ParentId: null, Text: "Fruit"},
+                {  Id: 2, ParentId: 1, Text: "Citrus"},
+                {   Id: 3, ParentId: 2, Text: "Orange"},
+                {   Id: 4, ParentId: 2, Text: "Grapefruit"},
+                {   Id: 5, ParentId: 2, Text: "Mandarin"},
+                {   Id: 6, ParentId: 2, Text: "Lime"},
+                {  Id: 7, ParentId: 1, Text: "Berries"},
+                {   Id: 8, ParentId: 7, Text: "Strawberries"},
+                {   Id: 9, ParentId: 7, Text: "Raspberries"},
+                {   Id: 10,ParentId: 7, Text: "Blueberries"},
+                {   Id: 11,ParentId: 7, Text: "Kiwifruit"},
+                {  Id: 12, ParentId: 1, Text: "Apple"},
+                { Id: 13, ParentId: null, Text: "Vegetables"},
+                {  Id: 14, ParentId: 13, Text: "Leafy green"},
+                {   Id: 15, ParentId: 14, Text: "Lettuce"},
+                {   Id: 16, ParentId: 14, Text: "Spinach"},
+                {  Id: 17, ParentId: 13, Text: "Cruciferous"},
+                {   Id: 18, ParentId: 17, Text: "Cabbage"},
+                {   Id: 19, ParentId: 17, Text: "Cauliflower"}
+            ],
+            RowClick: function(row) {
+                alert(JSON.stringify(row));
+            }
+        }
+    }
 }
 </pre>
 
@@ -107,18 +149,20 @@
     <p>Retrieve tree rows with ajax.</p>
     <pre>
     {
-        Elements: {
-            AjaxTree:{
-                _: TK.AjaxTree,
-                Url: 'TreeExample.txt'
-            },
-            AjaxFormTree: {
-                _: TK.AjaxFormTree,
-                Url: 'TreeExample.txt'
-            }
-        }
+        _: TK.AjaxTree,
+        Url: 'TreeExample.txt'
     }
     </pre>
+    
+    <p>By setting the ShowJsonAsTree property to true, a json object can be shown within a tree similar to the array preview in your browsers development console.</p>
+    <pre>
+    {
+        _: TK.AjaxFormTree,
+        ShowJsonAsTree: true,
+        ArrayChildNames: ["Name"],
+        Url: 'TreeExample.txt'
+    }
+    </pre>    
 
     <h2>Tree forms</h2>
     <p>In forms or as a GUI element you want to select nodes in a tree. This can be done in groups or individual level.
@@ -150,6 +194,36 @@
         }
     }
     </pre>
+    
+    <p>By setting the ValueProperty, only rows with that property will have a value. It is also the value which .Data expects and the .GetValue method returns.</p>
+    <pre>
+    {
+        Elements: {
+            ValueTree:{
+                _: TK.FormTree,
+                EnableFullRowExpand: true,
+                ValueProperty: 'RealValue',
+                Data: [1],
+                Rows: [
+                    { Id: 1, ParentId: null, Text: "Item 1"},
+                    { Id: 2, ParentId: 1, Text: "Sub Item 1"},
+                    { Id: 3, ParentId: 1, Text: "Sub Item 2 "},
+                    { Id: 4, ParentId: 2, Text: "Sub Sub Item 1 "},
+                    { Id: 5, ParentId: 2, Text: "Sub Sub Item 2 ", RealValue: 1},
+                    { Id: 6, ParentId: 2, Text: "Sub Sub Item 3 ", RealValue: 2},
+                    { Id: 7, ParentId: 2, Text: "Sub Sub Item 4 "},
+                    { Id: 8, ParentId: 2, Text: "Sub Sub Item 5 "},
+                ]
+            },
+            ValueButton: {
+                innerText: 'Save',
+                onclick: function(){
+                    alert(JSON.stringify(this.Parent.Elements.ValueTree.GetValue()));
+                }
+            },
+        }
+    }
+    </pre>    
 
 </body>
 

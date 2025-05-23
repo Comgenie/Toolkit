@@ -527,6 +527,7 @@ TK.Draw.DrawableObject = {
     BlendMode: null, // Any value of globalCompositeOperation
     LineWidth: 1,
     LineCap: null,
+    LineDash: null,
     Rotate: null,
     Shadow: null, // [X, Y, Size, Color]
     ShadowForLine: false,
@@ -634,6 +635,10 @@ TK.Draw.DrawableObject = {
             c.lineCap = this.LineCap;
         }
 
+        if (this.LineDash) {
+            c.setLineDash(this.LineDash);
+        }
+
         if (!this.ShadowForLine) {
             c.shadowColor = "rgba(0,0,0,0)";
             c.shadowBlur = 0;
@@ -644,6 +649,10 @@ TK.Draw.DrawableObject = {
             c.strokeStyle = this.Stroke;
             if (!this.DrawAndTransformDisabled)
                 c.stroke();
+        }
+
+        if (this.LineDash) {
+            c.setLineDash([]);
         }
 
         c.globalAlpha = 1;

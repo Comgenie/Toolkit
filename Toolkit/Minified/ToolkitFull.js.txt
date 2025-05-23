@@ -1835,7 +1835,7 @@ window.TK.Form = {
                     this.Parent.insertBefore(dummy, this.Parent.Elements.DataLabel);
                     this.Parent.Elements.DataLabel.style.width = "auto";
                 }
-                
+
             },
             GetValue: function () { return this.checked; }
         },
@@ -1852,10 +1852,10 @@ window.TK.Form = {
                 else
                     this.value = this.DataSettings.ValueIsText ? "" : 0;
             },
-            GetValue: function () { 
-                return this.DataSettings.ValueIsText ? this.value : 
+            GetValue: function () {
+                return this.DataSettings.ValueIsText ? this.value :
                     this.value !== null && this.value !== undefined ? parseInt(this.value) :
-                    0;
+                        0;
             }
         },
         ajaxselect: {
@@ -1920,7 +1920,7 @@ window.TK.Form = {
             GetValue: function () { return this.value; }
         },
         form: {
-            _: "div", 
+            _: "div",
             className: "subForm",
             Init: function () {
                 var dataSettings = this.DataSettings;
@@ -1936,7 +1936,7 @@ window.TK.Form = {
                     Fields: dataSettings.Fields,
                     IgnoreRest: dataSettings.IgnoreRest,
                     SortByFields: dataSettings.SortByFields,
-                  //  Init: dataSettings.Init
+                    //  Init: dataSettings.Init
                 }, "Form");
             },
             GetValue: function (errors) {
@@ -1964,7 +1964,7 @@ window.TK.Form = {
                                 Fields: obj.DataSettings.Fields,
                                 IgnoreRest: obj.DataSettings.IgnoreRest,
                                 SortByFields: obj.DataSettings.SortByFields,
-                               // Init: obj.DataSettings.Init,
+                                // Init: obj.DataSettings.Init,
                                 Elements: {
                                     RemoveButton: {
                                         innerHTML: obj.DataSettings.RemoveButtonText ? obj.DataSettings.RemoveButtonText : "Remove",
@@ -2014,7 +2014,7 @@ window.TK.Form = {
             }
         }
     },
-    Init: function () {        
+    Init: function () {
         var obj = this;
         this.CurrentFields = {};
         var tmpFields = {};
@@ -2023,7 +2023,13 @@ window.TK.Form = {
             model = this.DefaultModel;
         else if (!model)
             return;
-        
+        // If a default model is set and we're missing some properties in our active model, we'll add them using the default model
+        if (this.DefaultModel) {
+            for (var key in this.DefaultModel) {
+                if (model[key] === undefined)
+                    model[key] = this.DefaultModel[key];
+            }
+        }
 
         if (this.Templates) {
             for (var name in this.Templates) {
@@ -2032,7 +2038,7 @@ window.TK.Form = {
         }
 
         var callIsVisible = false;
-        for (var name in model) {            
+        for (var name in model) {
             var type = this.Fields && this.Fields[name] && this.Fields[name].Type ? this.Fields[name].Type : typeof model[name];
 
             if (this.IgnoreRest && (!this.Fields || !this.Fields[name]))
@@ -2044,10 +2050,10 @@ window.TK.Form = {
             };
             if (type != "ignore") {
                 var defaultTemplate = this.DefaultTemplates[type] ? this.DefaultTemplates[type] : this.DefaultTemplates.text;
-                var isRequired = getField("Required", false);                
+                var isRequired = getField("Required", false);
                 var row = {
                     style: { },
-                    className: "fieldRow field-" + name + (isRequired ? " fieldRequired" : "") + " " + (getField("Inline") ? "inlineBlock" : ""),                    
+                    className: "fieldRow field-" + name + (isRequired ? " fieldRequired" : "") + " " + (getField("Inline") ? "inlineBlock" : ""),
                     Elements: {
                         DataLabel: { innerHTML: getField("DisplayName",name), style: {} },
                         DataField: {
@@ -2055,7 +2061,7 @@ window.TK.Form = {
                             _Self: true,
                             /* required: isRequired, */
                             placeholder: getField("PlaceHolder",""),
-                            Data: model[name],                            
+                            Data: model[name],
                             DataName: name,
                             LinkedData: getField("LinkField") ? model[getField("LinkField")] : null,
                             DataSettings: (this.Fields && this.Fields[name] ? this.Fields[name] : null),
@@ -2066,7 +2072,7 @@ window.TK.Form = {
                             readOnly: getField("readOnly"),
                             IsVisible: getField("IsVisible"),
                             //Init: (this.Fields && this.Fields[name] && this.Fields[name].Init ? this.Fields[name].Init : undefined),
-                            Form: this 
+                            Form: this
                         }
                     }
                 };
@@ -2114,31 +2120,33 @@ window.TK.Form = {
                         if (obj.CurrentFields[name] && obj.CurrentFields[name].IsVisible && obj.CurrentFields[name].Parent && obj.CurrentFields[name].Parent.style) {
                             // Get model and call obj.CurrentFields[name].DataSettings.IsVisible(model);
                             if (!curModel)
-                                curModel = obj.GetModel([]);
+                                curModel = obj.GetModel();
                             obj.CurrentFields[name].Parent.style.display = obj.CurrentFields[name].IsVisible(curModel) ? "" : "none";
+                        } else if (obj.CurrentFields[name] && obj.CurrentFields[name].Required && !curModel) { // When the user enters a field with an isrequired-error, we want to directly remove the error
+                            curModel = obj.GetModel();
                         }
                     }
-                    
+
                     if (obj.AutoSave) {
                         obj.onsubmit();
                     }
-                };                
+                };
 
                 if (this.SortByFields) {
                     tmpFields[name] = row;
                 } else {
                     var rowObj = this.Add(row);
                     this.CurrentFields[name] = rowObj.Elements.DataField;
-                }                
+                }
 
             } else {
                 this.CurrentFields[name] = "ignore";
             }
         }
-        
+
         var parent = this;
         if (this.SortByFields && this.Fields) {
-            for (var fieldName in this.Fields) {                
+            for (var fieldName in this.Fields) {
 
                 if (this.Fields[fieldName].Type == "section") {
                     parent = this.Add({
@@ -2150,9 +2158,9 @@ window.TK.Form = {
                             }
                         }
                     });
-                    
+
                 }
-                
+
                 if (!tmpFields[fieldName]) {
                     if (this.Fields[fieldName]._) // This is just a template
                         parent.Add(this.Fields[fieldName], fieldName);
@@ -2161,13 +2169,13 @@ window.TK.Form = {
 
                 var rObj = parent.Add(tmpFields[fieldName]);
                 this.CurrentFields[fieldName] =  rObj.Elements.DataField;
-                
+
             }
         }
 
         if (callIsVisible) {
             // There is at least 1 IsVisible function, so we'll get the model and call all methods now the elements are actually created            
-            var curModel = this.GetModel([]);
+            var curModel = this.GetModel();
             for (var name in this.CurrentFields) {
                 if (this.CurrentFields[name] && this.CurrentFields[name].IsVisible && this.CurrentFields[name].Parent && this.CurrentFields[name].Parent.style) {
                     this.CurrentFields[name].Parent.style.display = this.CurrentFields[name].IsVisible(curModel) ? "" : "none";
@@ -2188,12 +2196,18 @@ window.TK.Form = {
     GetModel: function (errors, applyToModelDirectly) {
         if (applyToModelDirectly === undefined)
             applyToModelDirectly = this.ApplyToModelDirectly;
+
+        if (errors === null || errors === undefined) {
+            errors = [];
+            errors.SkipErrorSetting = true;
+        }
+
         var model = this[this.ModelProperty];
         var newObj = applyToModelDirectly ? model : {};
 
         if (applyToModelDirectly) { // Check for errors first
             var tmpErrorList = [];
-            var tmpModel = this.GetModel(tmpErrorList, false);            
+            var tmpModel = this.GetModel(tmpErrorList, false);
             if (tmpErrorList.length > 0) {
                 for (var i = 0; i < tmpErrorList.length; i++) {
                     errors.push(tmpErrorList[i]);
@@ -2218,12 +2232,13 @@ window.TK.Form = {
                     if (this.Fields && this.Fields[name] && this.Fields[name].Required && (newObj[name] === null || newObj[name] === "")) {
                         errors.push(this.Fields && this.Fields[name] && this.Fields[name].DisplayName ? this.Fields[name].DisplayName : name);
                         hasError = true;
-                        this.CurrentFields[name].Parent.className += " fieldError";
+                        if (!errors.SkipErrorSetting)
+                            this.CurrentFields[name].Parent.classList.add("fieldError");
                     }
                 }
 
                 if (!hasError) {
-                    this.CurrentFields[name].Parent.className = this.CurrentFields[name].Parent.className.replace("fieldError", "");
+                    this.CurrentFields[name].Parent.classList.remove("fieldError");
                 }
             }
         }
@@ -2236,6 +2251,10 @@ window.TK.Form = {
             this.Add({ innerHTML: textBefore + errors.join(", "), className: "validationError" }, "ErrorText");
         }
     },
+    ClearErrors: function () {
+        if (this.Elements.ErrorText)
+            this.Elements.ErrorText.Remove();
+    },
     onsubmit: function () {
         if (this.IsCurrentlySubmitting)
             return false;
@@ -2247,8 +2266,9 @@ window.TK.Form = {
             if (this.CustomValidation) {
                 this.CustomValidation(newObj, function (customErrors) {
                     obj.IsCurrentlySubmitting = false;
-                    if (!customErrors || customErrors.length == 0) {                        
-                        obj.Save(newObj);           
+                    if (!customErrors || customErrors.length == 0) {
+                        obj.ClearErrors();
+                        obj.Save(newObj);
                     } else {
                         obj.RenderErrors(customErrors, "");
                     }
@@ -2258,16 +2278,17 @@ window.TK.Form = {
                 });
             } else {
                 this.IsCurrentlySubmitting = false;
+                this.ClearErrors();
                 this.Save(newObj);
                 if (this.SubmitResult)
                     this.SubmitResult(true, errors);
-            }            
+            }
         } else {
             this.RenderErrors(errors, this.RequiredText);
             this.IsCurrentlySubmitting = false;
             if (this.SubmitResult)
                 this.SubmitResult(false, errors);
-        }        
+        }
         this.LastErrors = errors;
         return false;
     }
@@ -3064,6 +3085,7 @@ window.TK.Table = {
     SortedDesc: false,
     SortCallBack: null,
     FilterCallBack: null,
+    Update: function () {  }, // Executed after table is rendered
     MaxRows: null,
     CurrentFilter: null,    
     DefaultTemplate: {
@@ -3347,6 +3369,8 @@ window.TK.Table = {
         this.Clear();
         this.PreviousCheckBox = null;
         if (this.Rows.length == 0) {
+            if (this.Update)
+                this.Update();
             return;
         }
 
@@ -3724,6 +3748,9 @@ window.TK.Table = {
 
         if (includeTFoot)
             this.Add(tfoot, "tfoot");
+
+        if (this.Update)
+            this.Update();
     },
     AddRow: function (row, rowClick) {
         this.Rows.push(row);
@@ -3872,12 +3899,10 @@ window.TK.AjaxTable = {
                 } else {
                     obj.Rows = response;
                 }
-                obj.Refresh();
-                obj.Update();
+                obj.Refresh();                
             }, undefined, this.AjaxSettings);
         }
-    },
-    Update: function () { }
+    }
 };
 "use strict";
 window.TK.Toast = {
@@ -3994,12 +4019,8 @@ window.TK.Tree = {
             Text: { _: "span" }
         }
     },
-    Expanded: function (row, byUserClick, rowElement) {
-
-    },
-    Collapsed: function (row, byUserClick, rowElement) {
-
-    },
+    Expanded: function (row, byUserClick, rowElement) { },
+    Collapsed: function (row, byUserClick, rowElement) { },
     Init: function () {
         if (this.Rows.length == 0)
             return;
@@ -4085,7 +4106,7 @@ window.TK.Tree = {
                 if (e && e.target && (e.target.tagName == "INPUT" || e.target.tagName == "SELECT" || e.target.tagName == "TEXTAREA" || e.target.PreventRowClick))
                     return;
                 obj.RowClick(rowObj.Data, e, rowObj);
-                if (rowObj.EnableFullRowExpand && rowObj.ExpandCollapseButton) {
+                if (obj.EnableFullRowExpand && rowObj.ExpandCollapseButton) {
                     rowObj.ExpandCollapseButton.click();
                 }
                 e.stopPropagation();
@@ -4194,8 +4215,9 @@ window.TK.Tree = {
     },
 
     ApplyFilter: function (filter, showAllChildNodes, callBackFoundRows) {
-        filter = filter.toLowerCase();
-        if (filter == "") {
+        let obj = this;
+        const isFunction = typeof filter === "function";
+        if (!filter) {
             this.Refresh(); // Collapse everything
             return;
         }
@@ -4211,25 +4233,32 @@ window.TK.Tree = {
         var foundRows = [];
 
         // Then make everything matching visible, including all parents and optionally all child nodes
-        var filterParts = filter.split(/;/g);
-        for (var i = 0; i < filterParts.length; i++) {
-            for (var item in this.CurRows) {
-                var row = this.CurRows[item];
-                var txt = "";
-                if (row.SubList) { // Only look at the text of this element
-                    for (var j = 0; j < row.childNodes.length; j++) {
-                        if (row.childNodes[j] != row.SubList)
-                            txt += row.childNodes[j].innerText;
-                    }
+        function processRow(filterString) {
+            for (var item in obj.CurRows) {
+                var row = obj.CurRows[item];
+                let matchesFilter = false;
+
+                if (isFunction) {
+                    matchesFilter = filter(row.Data, row);
                 } else {
-                    txt = row.innerText;
+                    var txt = "";
+                    if (row.SubList) { // Only look at the text of this element
+                        for (var j = 0; j < row.childNodes.length; j++) {
+                            if (row.childNodes[j] != row.SubList)
+                                txt += row.childNodes[j].innerText;
+                        }
+                    } else {
+                        txt = row.innerText;
+                    }
+
+                    matchesFilter = txt.toLowerCase().indexOf(filterString) >= 0;
                 }
 
-                if (txt.toLowerCase().indexOf(filterParts[i]) >= 0) {
+                if (matchesFilter) {
                     row.style.display = "";
                     foundRows.push(row);
 
-                    if (!this.AutoExpandChildNodesDuringFilter && row.className.indexOf("collapsed") < 0) {
+                    if (!obj.AutoExpandChildNodesDuringFilter && row.className.indexOf("collapsed") < 0) {
                         row.className = row.className.replace(/expanded/g, "") + " collapsed";
                         if (row.ExpandCollapseButton)
                             row.ExpandCollapseButton.Update();
@@ -4243,7 +4272,7 @@ window.TK.Tree = {
                             var removeClass = "collapsed";
                             var setStyle = "";
 
-                            if (!this.AutoExpandChildNodesDuringFilter) {
+                            if (!obj.AutoExpandChildNodesDuringFilter) {
                                 addClass = "collapsed";
                                 removeClass = "expanded";
                                 setStyle = "none";
@@ -4256,9 +4285,9 @@ window.TK.Tree = {
                                 if (li.className.indexOf(addClass) < 0) {
                                     li.className = li.className.replace(removeClass, "") + " " + addClass;
                                     if (addClass == "expanded")
-                                        this.Expanded(li.Data, false, curList);
+                                        obj.Expanded(li.Data, false, curList);
                                     else
-                                        this.Collapsed(li.Data, false, curList);
+                                        obj.Collapsed(li.Data, false, curList);
 
                                     if (li.ExpandCollapseButton)
                                         li.ExpandCollapseButton.Update();
@@ -4276,13 +4305,24 @@ window.TK.Tree = {
                         row = row.parentNode;
                         if (row.SubList && row.className.indexOf("expanded") < 0) {
                             row.className = row.className.replace(/collapsed/g, "") + " expanded";
-                            this.Expanded(row.Data, false, row);
+                            obj.Expanded(row.Data, false, row);
                             if (row.ExpandCollapseButton)
                                 row.ExpandCollapseButton.Update();
                         }
                         row.style.display = "";
                     }
                 }
+            }
+        }
+
+        if (isFunction) {
+            processRow()
+        }
+        else {
+            var filterString = (filter || "").toLowerCase();
+            var filterParts = filterString.split(/;/g);
+            for (var i = 0; i < filterParts.length; i++) {
+                processRow(filterParts[i]);
             }
         }
         this.style.display = "";
@@ -4321,6 +4361,53 @@ window.TK.Tree = {
 
         return currentRow;
     },
+    ConvertJsonToRows: function (json, arrayChildNames) {
+        let obj = this;
+        let rowId = 0;
+        let resultRows = [];
+        if (!arrayChildNames)
+            arrayChildNames = [];
+        let recursiveJsonProperties = function (top, skip) {
+            let parentId = rowId;
+            for (const propIndex in top) {
+
+                let prop = top[propIndex];
+                if (!prop || (skip && skip === propIndex)) {
+                    continue;
+                }
+                let proptype = typeof prop;
+
+                rowId++;
+                let rowObj = { Id: rowId, ParentId: parentId, Text: propIndex + ": " + prop };
+
+                if (proptype === 'boolean' || proptype === 'number' || proptype === 'string' || proptype === 'date') {
+                    if (obj.ValueProperty && propIndex == obj.ValueProperty)
+                        rowObj[obj.ValueProperty] = prop;
+                    // Don't show indexes for array's that don't contain objects
+                    if (Array.isArray(top))
+                        rowObj.Text = prop + "";
+                    resultRows.push(rowObj);
+                }
+
+                // Set right object name when dealing with arrays
+                else if (proptype === 'object') {
+                    let childArrayProp = null;
+                    rowObj.Text = propIndex + "";
+                    if (!Array.isArray(prop)) {
+                        childArrayProp = Object.keys(prop).find(k => arrayChildNames.includes(k));
+                        if (childArrayProp)
+                            rowObj.Text = prop[childArrayProp] + "";
+                    }
+                    resultRows.push(rowObj);
+                    recursiveJsonProperties(prop, childArrayProp);
+                }
+
+            }
+        }
+
+        recursiveJsonProperties(json);
+        return resultRows;
+    },
     RowClick: function (rowObj, jsEvent) { }
 };
 
@@ -4329,6 +4416,8 @@ window.TK.AjaxTree = {
     Url: null,
     Post: null,
     AjaxSettings: {},
+    ShowJsonAsTree: false, // When you want to show the ajax response in json directly
+    ArrayChildNames: [], // Set child name of array if that value must be the name of that array item
     Init: function (callback) {
         var obj = this;
         obj.Clear();
@@ -4336,6 +4425,10 @@ window.TK.AjaxTree = {
             Ajax.do(this.Url, this.Post, function (response) {
                 if (response && response.substr)
                     response = JSON.parse(response);
+
+                if (obj.ShowJsonAsTree)
+                    response = obj.ConvertJsonToRows(response, obj.ArrayChildNames);
+
                 obj.Rows = response;
                 obj.Refresh();
                 obj.Update();
@@ -4353,6 +4446,7 @@ window.TK.AjaxTree = {
 // For selecting multiple checkboxes next to each other use the shift key.
 window.TK.FormTree = {
     _: window.TK.Tree,
+    ValueProperty: null, // By default it retrieved the Id field. When set to something else it will be returned with GetValue()
     inAddCheckboxesFunction: false, // used by functions inside object do not override
     Data: [],
     Init: function () {
@@ -4368,19 +4462,24 @@ window.TK.FormTree = {
         var originalAddRow = obj.AddRow;
         obj.AddRow = function (row, orderRows) {
             var rowNode = originalAddRow.apply(obj, [row, orderRows]);
-            var checked = false;
-            if (obj.Data && rowNode.Data && rowNode.Data[obj.IdField] !== undefined && rowNode.Data[obj.IdField] !== null) {
-                checked = obj.Data.indexOf(rowNode.Data[obj.IdField]) >= 0;
-            }
+            // At the end of the add rows function the rest of the functionality will be executed
+            if (obj.inAddRowsFunction)
+                return;
+            var checked = obj.Data && rowNode.Data &&
+                (rowNode.Data[obj.IdField] !== undefined && rowNode.Data[obj.IdField] !== null && obj.Data.some(function (d) { return d === rowNode.Data[obj.IdField] }))
+                || (obj.ValueProperty && rowNode.Data[obj.ValueProperty] !== undefined && rowNode.Data[obj.ValueProperty] !== null && obj.Data.some(function (d) { return d === rowNode.Data[obj.ValueProperty] }));
+
             obj.AddCheckBox(rowNode, checked);
 
         }
+        obj.style.display = 'none'; // invisible when adding checkboxes and building tree makes it faster
         obj.Refresh();
         if (obj.Data) {
+
             let checkedCheckboxes = obj.Checkboxes.filter(function (c) { return c ? c.checked : false });
-            
+
             for (let i = 0; i < checkedCheckboxes.length; i++) {
-                let boxChecked = obj.Checkboxes[i];
+                let boxChecked = checkedCheckboxes[i];
                 obj.RecursiveParent(boxChecked.Parent.Row, function (parentRow) {
                     if (parentRow.CheckBox.checked)
                         return;
@@ -4389,7 +4488,7 @@ window.TK.FormTree = {
                 });
             }
         }
-
+        obj.style.display = '';
     },
     CheckBoxChange: function (changedRow, checkedRows) { },
     CheckBoxClick: function (event, row) {
@@ -4466,7 +4565,19 @@ window.TK.FormTree = {
         obj.inAddCheckboxesFunction = true;
         for (var rowId in obj.CurRows) {
             var row = obj.CurRows[rowId];
-            obj.AddCheckBox(row);
+            let rowNode = row.Row;
+            if (obj.ValueProperty && !row.Row.Data[obj.ValueProperty]) {
+                continue;
+            }
+
+            let checked = obj.Data && rowNode.Data &&
+                (rowNode.Data[obj.IdField] !== undefined && rowNode.Data[obj.IdField] !== null && obj.Data.some(function (d) { return d === rowNode.Data[obj.IdField] }))
+                || (obj.ValueProperty && rowNode.Data[obj.ValueProperty] !== undefined && rowNode.Data[obj.ValueProperty] !== null && obj.Data.some(function (d) { return d === rowNode.Data[obj.ValueProperty] }));
+
+            obj.AddCheckBox(row, checked);
+            if (obj.ValueProperty) {
+                obj.RecursiveParent(row, function (parentRow) { if (!parentRow.CheckBox) obj.AddCheckBox(parentRow) });
+            }
         }
         // Give each checkbox a tree Id
         obj.IndexCheckboxes();
@@ -4474,6 +4585,7 @@ window.TK.FormTree = {
     },
     AddCheckBox: function (row, checked) {
         var obj = this;
+
         if (!row || row.CheckBox || !row.firstChild)
             return;
 
@@ -4499,11 +4611,22 @@ window.TK.FormTree = {
         // Give each checkbox a tree Id
         if (obj.parentNode) {
             obj.Checkboxes = [];
-            var lis = obj.parentNode.querySelectorAll(':scope ul>li>input.toolkitTreeCheckbox');
-            if (lis) {
-                lis.forEach(function (a, i) {
-                    a.TreeId = i + 1;
-                    obj.Checkboxes.push(a);
+
+            let treeIndex = 1;
+            for (var i = 0; i < obj.children.length; i++) {
+                let row = obj.children[i];
+                if (!row.Row || !row.CheckBox)
+                    continue;
+
+                row.CheckBox.TreeId = treeIndex;
+                obj.Checkboxes.push(row.CheckBox);
+                treeIndex++;
+                obj.RecursiveSublist(row, function (childNode) {
+                    if (!childNode.CheckBox)
+                        return;
+                    childNode.CheckBox.TreeId = treeIndex;
+                    obj.Checkboxes.push(childNode.CheckBox);
+                    treeIndex++;
                 });
             }
         }
@@ -4513,14 +4636,20 @@ window.TK.FormTree = {
         let result = [];
         for (var rowId in obj.CurRows) {
             var row = obj.CurRows[rowId];
-            if (row.CheckBox.checked) {
-                result.push(row.Data[obj.IdField]);
+            if (row.CheckBox && row.CheckBox.checked) {
+                if (obj.ValueProperty && !row.Data[obj.ValueProperty]) {
+                    continue;
+                }
+                result.push(row.Data[obj.ValueProperty ? obj.ValueProperty : obj.IdField]);
             }
         }
         return result;
     },
     SetParentCheckbox: function (parentRow) {
         let obj = this;
+
+        if (!parentRow.CheckBox)
+            return;
 
         let checked = true;
         let indeterminate = false;
@@ -5152,7 +5281,7 @@ window.TK.DateTime = {
         {
             this.Data = new Date(parseInt(this.Data) * 1000).toISOString();
         }
-        this.RenderDateInput(this.Elements.Selection, this.Data);
+        this.RenderDateInput(this.Elements.Selection, this.Data, true);
         this.RefreshDateInput(true);
         this.Elements.DateInputContainer.Elements.TimeZoneInfo.style.display = (this.EnableTimeZone ? "" : "none");
     },
@@ -5258,7 +5387,7 @@ window.TK.DateTime = {
                             return;
                         }
                         this.className = "";
-                        this.Parent.Parent.RenderDateInput(this.Parent.Parent.Elements.Selection, tmpDateTime.toISOString());
+                        this.Parent.Parent.RenderDateInput(this.Parent.Parent.Elements.Selection, tmpDateTime.toISOString(), true);
                     },
                     onblur: function () {
                         if (this.Parent.Parent.readOnly || this.Parent.Parent.disabled)
@@ -5396,7 +5525,7 @@ window.TK.DateTime = {
             this.RefreshDateInput(true);
         }
     },
-    RenderDateInput: function (element, dateISO) {
+    RenderDateInput: function (element, dateISO, dontFocus) {
         var obj = this;     
         if (this.NotFirst && dateISO != this.Data) {
             this.Data = dateISO;
@@ -5506,8 +5635,8 @@ window.TK.DateTime = {
                 element.style.display = "none";
             };
             element.appendChild(applyButton);
-
-            obj.Elements.DateInputContainer.Elements.DateInput.focus();
+            if (!dontFocus)
+                obj.Elements.DateInputContainer.Elements.DateInput.focus();
             return;
         }
         element.InRelativeEditor = false;
@@ -6030,7 +6159,20 @@ TK.HtmlEditor = {
                 }
             },
             onkeydown: function (e) {
+                var keepFormatInNodes = ["UL", "OL", "LI"]; // We don't want to escape from some elements, as it will break the ability to use them
                 if (e.keyCode === 13 && !e.shiftKey) {
+                    var selection = window.getSelection();
+                    if (selection && selection.focusNode) {
+                        var node = selection.focusNode;
+                        if (node.nodeName && keepFormatInNodes.indexOf(node.nodeName) >= 0)
+                            return;
+
+                        for (var i = 0; i < 2 && node.parentNode; i++) {
+                            node = node.parentNode;
+                            if (node.nodeName && keepFormatInNodes.indexOf(node.nodeName) >= 0)
+                                return;
+                        }
+                    }
                     this.RemoveFormat = true;
                 }
             },
@@ -6578,6 +6720,7 @@ TK.Draw.DrawableObject = {
     BlendMode: null, // Any value of globalCompositeOperation
     LineWidth: 1,
     LineCap: null,
+    LineDash: null,
     Rotate: null,
     Shadow: null, // [X, Y, Size, Color]
     ShadowForLine: false,
@@ -6685,6 +6828,10 @@ TK.Draw.DrawableObject = {
             c.lineCap = this.LineCap;
         }
 
+        if (this.LineDash) {
+            c.setLineDash(this.LineDash);
+        }
+
         if (!this.ShadowForLine) {
             c.shadowColor = "rgba(0,0,0,0)";
             c.shadowBlur = 0;
@@ -6695,6 +6842,10 @@ TK.Draw.DrawableObject = {
             c.strokeStyle = this.Stroke;
             if (!this.DrawAndTransformDisabled)
                 c.stroke();
+        }
+
+        if (this.LineDash) {
+            c.setLineDash([]);
         }
 
         c.globalAlpha = 1;
@@ -6968,7 +7119,6 @@ TK.Draw.Line = {
         } else {
             c.lineTo(this.X + this.W, this.Y + this.H);
         }
-
         this.DrawFS(c);
         c.closePath();
     }
@@ -7473,6 +7623,43 @@ TK.Draw.Text = {
         c.font = font;
 
         return c.measureText(txt);
+    }
+};
+"use strict";
+/* Minify Skip */
+/* Minify Order(155) */
+
+TK.Draw.Triangle = {
+    DrawType: "Triangle",
+    _: TK.Draw.DrawableObject,
+    TriangleAlign: TK.Draw.AnchorTop,
+    Draw: function (c) {
+        c.beginPath();
+        this.Transform(c);
+
+        var p = [[this.X, this.Y], [this.X + this.W, this.Y], [this.X + this.W, this.Y + this.H], [this.X, this.Y + this.H]];
+        var start = [
+            TK.Draw.AnchorTop | TK.Draw.AnchorLeft, TK.Draw.AnchorTop | TK.Draw.AnchorRight, TK.Draw.AnchorBottom | TK.Draw.AnchorRight, TK.Draw.AnchorBottom | TK.Draw.AnchorLeft,
+            TK.Draw.AnchorTop, TK.Draw.AnchorRight, TK.Draw.AnchorBottom, TK.Draw.AnchorLeft
+        ];
+        for (var i = 0; i < start.length; i++) {
+            if (start[i] != this.TriangleAlign)
+                continue;
+
+            c.moveTo(p[i % 4][0], p[i % 4][1]);
+            c.lineTo(p[(i + 1) % 4][0], p[(i + 1) % 4][1]);
+            if (i < 4) {                
+                c.lineTo(p[(i + 3) % 4][0], p[(i + 3) % 4][1]);
+            } else if (i % 2 == 0) {
+                c.lineTo(p[i % 4][0] + (p[(i + 1) % 4][0] - p[i % 4][0]) / 2, p[(i + 2) % 4][1]);
+            } else {
+                c.lineTo(p[(i + 2) % 4][0], p[i % 4][1] + (p[(i + 1) % 4][1] - p[i % 4][1]) / 2);
+            }
+            c.lineTo(p[i % 4][0], p[i % 4][1]);
+            break;
+        }
+        this.DrawFS(c);
+        c.closePath();
     }
 };
 "use strict";
@@ -9130,7 +9317,12 @@ TK.Gauge = {
         { MinValue: 15, MaxValue: 30, Color: "#090" }
         */
     ],
-
+    Indicators: [
+        /*
+        { Value: 5, Color: "#C00", Text: "Danger", Height: 20, Width: 20 },
+        { Value: 25, Text: "OK" },
+        */
+    ],
     Width: 400,
     Height: 200,
     Value: 0,
@@ -9139,15 +9331,19 @@ TK.Gauge = {
     DonutSize: 0.8,
     Label: "",
     EnableValue: true,
-    ColorLabel: "#666",    
+    ColorLabel: "#666",
     FontLabel: "12pt Verdana",
     ColorValue: null, // Automatic (pick range color)
     FontValue: "14pt Verdana",
     TextValue: null, // Automatic (Use actual value)
+    ExtraSpacingValue: 2,
+    FontIndicators: "8pt Verdana",
+    DrawIndicatorLine: false,
     EnableShadow: true,
     ColorCursor: "#666",
     AnimationLength: 1000,
     ExtraSpacingBottom: 0,
+    ExtraSpacingSide: 0,
     Style: 0,  // 0: Circular gauge, 1: Horizontal Gauge
     SizeBar: 20,
 
@@ -9163,30 +9359,49 @@ TK.Gauge = {
     },
     Refresh: function () {
         this.Canvas.Clear();
-        var centerX = this.Width / 2;
         var extraSpacingHeight = (this.Height * 0.1) + this.ExtraSpacingBottom;
-        if (this.Label)
-            extraSpacingHeight += 25;
-        if (this.EnableValue)
-            extraSpacingHeight += 25;        
+        var extraSpacingWidth = 0;
 
-        var centerY = this.Height - extraSpacingHeight;        
-        
-        var size = this.Width > centerY * 2 ? centerY * 2 : this.Width;
+        var pxLabels = 0;
+        if (this.Label) {
+            pxLabels = TK.Draw.Text.MeasureHeight(this.Label, this.FontLabel);
+            extraSpacingHeight += pxLabels ? pxLabels : 25;
+        }
+
+        var pxValue = 0;
+        if (this.EnableValue) {
+            pxValue = TK.Draw.Text.MeasureHeight("1234", this.FontValue);
+            if (pxValue)
+                pxValue += this.ExtraSpacingValue;
+            extraSpacingHeight += (pxValue ? pxValue : 25);
+        }
+
+        var offsetY = 0;
+        if (this.Indicators.length > 0) {
+            offsetY += 25;
+            extraSpacingHeight += 25;
+            if (this.Style == 0) {
+                extraSpacingWidth += ((this.Width * 0.1) + this.ExtraSpacingSide);
+            }
+        }
+
+        var centerX = this.Width / 2;
+        var centerY = this.Height - extraSpacingHeight;
+
+        var size = this.Width > centerY * 2 ? centerY * 2 - extraSpacingHeight / 2 : this.Width - extraSpacingWidth * 3;
         this.MinValue = this.Ranges.Min(function (a) { return a.MinValue; });
         this.MaxValue = this.Ranges.Max(function (a) { return a.MaxValue; });
-        
+
         this.Difference = this.MaxValue - this.MinValue;
         this.DifferenceAngles = this.EndAngle - this.StartAngle;
 
-        for (var i = 0; i < this.Ranges.length; i++) {            
-
+        for (var i = 0; i < this.Ranges.length; i++) {
             if (this.Style == 0) {
                 var startAngle = this.StartAngle + (((this.Ranges[i].MinValue - this.MinValue) / this.Difference) * this.DifferenceAngles);
                 var sizeAngle = ((this.Ranges[i].MaxValue - this.Ranges[i].MinValue) / this.Difference) * this.DifferenceAngles;
                 this.Canvas.Add({
                     _: TK.Draw.Circle,
-                    X: centerX, Y: centerY, W: size, H: size,
+                    X: centerX, Y: centerY + offsetY, W: size, H: size,
                     Fill: this.Ranges[i].Color, DonutSize: this.DonutSize, Angle: startAngle, Size: sizeAngle,
                     Anchor: window.TK.Draw.AnchorCenter | window.TK.Draw.AnchorMiddle,
                 });
@@ -9194,7 +9409,7 @@ TK.Gauge = {
                 if (this.EnableShadow) {
                     this.Canvas.Add({
                         _: TK.Draw.Circle,
-                        X: centerX, Y: centerY, W: size * (this.DonutSize + 0.05), H: size * (this.DonutSize + 0.05),
+                        X: centerX, Y: centerY + offsetY, W: size * (this.DonutSize + 0.05), H: size * (this.DonutSize + 0.05),
                         Fill: "rgba(0,0,0,0.1)", DonutSize: 0.85, Angle: startAngle, Size: sizeAngle,
                         Anchor: window.TK.Draw.AnchorCenter | window.TK.Draw.AnchorMiddle,
                     });
@@ -9204,15 +9419,15 @@ TK.Gauge = {
                 var widthX = ((this.Ranges[i].MaxValue - this.Ranges[i].MinValue) / this.Difference) * this.Width;
                 this.Canvas.Add({
                     _: TK.Draw.Rect,
-                    X: fromX, Y: 10, W: widthX, H: this.SizeBar,
-                    Fill: this.Ranges[i].Color, 
-                    Anchor: window.TK.Draw.AnchorLeft| window.TK.Draw.AnchorTop,
+                    X: fromX, Y: 10 + offsetY, W: widthX, H: this.SizeBar,
+                    Fill: this.Ranges[i].Color,
+                    Anchor: window.TK.Draw.AnchorLeft | window.TK.Draw.AnchorTop,
                 });
 
                 if (this.EnableShadow) {
                     this.Canvas.Add({
                         _: TK.Draw.Rect,
-                        X: fromX, Y: this.SizeBar + 5, W: widthX, H: 5,
+                        X: fromX, Y: this.SizeBar + 5 + offsetY, W: widthX, H: 5,
                         Fill: "rgba(0,0,0,0.1)",
                         Anchor: window.TK.Draw.AnchorLeft | window.TK.Draw.AnchorTop,
                     });
@@ -9221,58 +9436,134 @@ TK.Gauge = {
         }
 
         // Draw cursor
-
         if (this.Style == 0) {
             this.Cursor = this.Canvas.Add({
                 _: TK.Draw.Rect,
-                X: centerX, Y: centerY, W: size * 0.025, H: size * (0.5 - ((1 - this.DonutSize) * 0.25)),
+                X: centerX, Y: centerY + offsetY, W: size * 0.025, H: size * (0.5 - ((1 - this.DonutSize) * 0.25)),
                 Fill: this.ColorCursor,
                 Rotate: 0,
                 Anchor: window.TK.Draw.AnchorCenter | window.TK.Draw.AnchorBottom,
+                ZIndex: 2
             });
 
             this.Canvas.Add({
                 _: TK.Draw.Circle,
-                X: centerX, Y: centerY, W: size * 0.1, H: size * 0.1,
+                X: centerX, Y: centerY + offsetY, W: size * 0.1, H: size * 0.1,
                 Fill: this.ColorCursor,
                 Anchor: window.TK.Draw.AnchorCenter | window.TK.Draw.AnchorMiddle,
+                ZIndex: 2
             });
         } else {
-
             this.Cursor = this.Canvas.Add({
                 _: TK.Draw.Rect,
-                X: 0, Y: 0, W: 2, H: this.SizeBar + 20,
+                X: 0, Y: offsetY, W: 2, H: this.SizeBar + 20,
                 Fill: this.ColorCursor,
                 Anchor: window.TK.Draw.AnchorCenter | window.TK.Draw.AnchorTop,
             });
         }
-        var curY = centerY + (size * 0.1);
 
+        // Draw indicators
+        if (this.Indicators) {
+            for (let i = 0; i < this.Indicators.length; i++) {
+                let indicator = this.Indicators[i];
+                let indicatorW = indicator.Width ?? 10;
+                let indicatorH = indicator.Height ?? 10;
+
+                if (this.Style == 0) {
+                    let radius = size * 0.5;
+                    let indicatorAngle = this.StartAngle + ((indicator.Value - this.MinValue) / this.Difference) * this.DifferenceAngles;
+                    let radians = indicatorAngle * (Math.PI / 180);
+                    let indicatorX = centerX + radius * Math.cos(radians);
+                    let indicatorY = (centerY + radius * Math.sin(radians)) + offsetY;
+
+                    this.Canvas.Add({
+                        _: TK.Draw.Triangle,
+                        X: indicatorX, Y: indicatorY, W: indicatorW, H: indicatorH,
+                        Rotate: indicatorAngle + 90,
+                        Fill: indicator.Color ? indicator.Color : "#000",
+                        Anchor: window.TK.Draw.AnchorCenter | window.TK.Draw.AnchorBottom,
+                    });
+
+                    if (indicator.Text) {
+                        let textX = indicatorX + indicatorH * Math.cos(radians);
+                        let textY = indicatorY + indicatorH * Math.sin(radians);
+
+                        this.Canvas.Add({
+                            _: TK.Draw.Text,
+                            X: textX, Y: textY,
+                            Rotate: indicatorAngle + 90,
+                            Fill: indicator.Color ? indicator.Color : "#000",
+                            Font: this.FontIndicators,
+                            Text: indicator.Text,
+                            Anchor: window.TK.Draw.AnchorBottom | window.TK.Draw.AnchorCenter,
+                        });
+                    }
+
+                    if (this.DrawIndicatorLine) {
+                        this.Canvas.Add({
+                            _: TK.Draw.Line,
+                            Stroke: indicator.Color ? indicator.Color : "#000",
+                            X: indicatorX, Y: indicatorY,
+                            X2: centerX, Y2: centerY + offsetY,
+                            LineDash: [5, 5]
+                        });
+                    }
+                }
+                else if (this.Style == 1) {
+                    let indicatorX = (((indicator.Value - this.MinValue) / this.Difference) * this.Width - 2) + 2;
+                    let indicatorY = offsetY + 10 - indicatorH / 2
+
+                    this.Canvas.Add({
+                        _: TK.Draw.Triangle,
+                        X: indicatorX, Y: indicatorY, W: indicatorW, H: indicatorH,
+                        Fill: indicator.Color ? indicator.Color : "#000",
+                        Anchor: window.TK.Draw.AnchorCenter | window.TK.Draw.AnchorMiddle,
+                    });
+
+                    if (indicator.Text) {
+                        let indicatorText = this.Canvas.Add({
+                            _: TK.Draw.Text,
+                            X: indicatorX, Y: offsetY + 10 - indicatorH,
+                            Fill: indicator.Color ? indicator.Color : "#000",
+                            Font: this.FontIndicators,
+                            Text: indicator.Text,
+                            Anchor: window.TK.Draw.AnchorTop | window.TK.Draw.AnchorCenter,
+                        });
+
+                        indicatorText.Y -= indicatorText.MeasureHeight(indicator.Text, this.FontIndicators);
+                    }
+                }
+            }
+
+        }
+
+        // Draw labels and value text from bottom
         if (this.Label) {
             this.LabelText = this.Canvas.Add({
                 _: TK.Draw.Text,
-                X: centerX, Y: curY,
+                X: centerX, Y: this.Height - pxValue,
                 Fill: this.ColorLabel,
                 Font: this.FontLabel,
                 Text: this.Label,
-                Anchor: window.TK.Draw.AnchorCenter | window.TK.Draw.AnchorMiddle,
+                Anchor: window.TK.Draw.AnchorCenter | window.TK.Draw.AnchorBottom,
+                TextAnchor: window.TK.Draw.AnchorCenter | window.TK.Draw.AnchorBottom,
             });
-            curY += 25;
         }
 
         if (this.EnableValue) {
             this.ValueText = this.Canvas.Add({
                 _: TK.Draw.Text,
-                X: centerX, Y: curY,
+                X: centerX, Y: this.Height,
                 Fill: this.ColorValue ? this.ColorValue : "#000",
                 Font: this.FontValue,
                 Text: this.Value,
-                Anchor: window.TK.Draw.AnchorCenter | window.TK.Draw.AnchorMiddle,
+                Anchor: window.TK.Draw.AnchorCenter | window.TK.Draw.AnchorBottom,
+                TextAnchor: window.TK.Draw.AnchorCenter | window.TK.Draw.AnchorBottom,
             });
         }
 
         this.SetValue(this.Value);
-        this.Canvas.Refresh();        
+        this.Canvas.Refresh();
     },
     SetValue: function (newValue) {
         var animation = window.TK.Draw.EaseExponential;
@@ -10226,6 +10517,231 @@ TK.Interface = {
         }
     },
     Elements: {}
+};"use strict";
+/* Minify Skip */
+/* Minify Order(200) */
+
+window.TK.Sankey = {
+    _: TK.Draw, // Inherit from TK.Draw for canvas rendering
+    NodeWidth: 20, // Width of the sankey block
+    NodePadding: 25, // Padding at the top/bottom between sankey blocks
+    Nodes: [], // Array of { NodeId: "Node1", Name: "Node 1", Color: "#0081D5" }
+    Links: [], // Array of { Source: "Node1", Target: "Node2", Value: 100, Color: "#FF9947" }
+    LabelFont: "8pt Arial",
+    LabelColor: "#333",
+    ColorLinesFromTarget: false, // When set to false, it will use the source instead
+    ColorLines: "rgba(255,255,255,0.2)",
+    ColorLinesRatio: 0.5,
+    PaddingSides: 0, // Px, set to 0 to calculate it automatically
+
+    Init: function () {
+        this.GenerateLookupFields();
+        this.CalculateLayers();       
+        this.CalculateScalesAndSizes();
+        if (this.PaddingSides == 0)
+            this.CalculatePadding();
+        this.DrawNodes();
+        this.Refresh();
+    },
+    GenerateLookupFields: function () {
+        this.NodesDict = {};
+        for (var i = 0; i < this.Nodes.length; i++) {
+            var n = this.Nodes[i];
+            if (!n.NodeId)
+                continue;
+            
+            this.NodesDict[n.NodeId] = n;
+            n.SourceLinks = this.Links.Where(a => a.Source == n.NodeId);
+            n.TargetLinks = this.Links.Where(a => a.Target == n.NodeId);
+        }
+    },
+    CalculateLayers: function () {        
+        // Put the nodes in seperate layers based on its links
+        this.Layers = [];
+
+        // Start with nodes without any Target set to it, those are the ones at the first layer (on the left)
+        var nodes = this.Nodes.Where(a => a.TargetLinks.length == 0);
+        this.Layers.push(nodes);
+
+        // Loop through all the layers based on the targets
+        while (nodes.length > 0) {
+            var nodeIdsNextLayer = [];
+            for (var i = 0; i < nodes.length; i++) {
+                for (var j = 0; j < nodes[i].SourceLinks.length; j++) {
+                    nodeIdsNextLayer.push(nodes[i].SourceLinks[j].Target);
+                }
+            }
+            nodeIdsNextLayer = nodeIdsNextLayer.Unique();
+
+            nodes = this.Nodes.Where(a => nodeIdsNextLayer.indexOf(a.NodeId) >= 0);
+            if (nodes.length > 0)
+                this.Layers.push(nodes);
+        }
+
+        // We've now got layers with possibly duplicates, we will keep all the nodes in the highest layers
+        var seenNodeIds = {};
+        for (var i = this.Layers.length - 1; i >= 0; i--) {
+            var newLayer = [];
+            for (var j = 0; j < this.Layers[i].length; j++) {
+                var n = this.Layers[i][j];
+                if (seenNodeIds[n.NodeId])
+                    continue;
+                    
+                newLayer.push(n);
+                seenNodeIds[n.NodeId] = n;                
+            }
+            this.Layers[i] = newLayer;
+        }
+    },
+    CalculateScalesAndSizes: function () {
+        // Find the layer with most required vertical size, base the value scale on that one so it will always fit within the height
+        var smallestScale = 0;
+        var smallestScaleInLayer = 0;
+        for (var i = 0; i < this.Layers.length; i++) {            
+            var totalSource = 0;
+            var totalTarget = 0;
+            var totalHighest = 0;
+            for (var j = 0; j < this.Layers[i].length; j++) {
+                var n = this.Layers[i][j];
+                n.TotalSource = 0;
+                n.TotalTarget = 0;
+                for (var k = 0; k < n.SourceLinks.length; k++) {
+                    n.TotalSource += n.SourceLinks[k].Value;
+                }
+                for (var k = 0; k < n.TargetLinks.length; k++) {
+                    n.TotalTarget += n.TargetLinks[k].Value;
+                }
+                n.HighestValue = Math.max(n.TotalSource, n.TotalTarget);
+
+                totalSource += n.TotalSource;
+                totalTarget += n.TotalTarget;
+                totalHighest += n.HighestValue;
+            }
+            var highestValue = totalHighest;
+            this.Layers[i].HighestValue = highestValue;
+            if (highestValue == 0 || highestValue == null || highestValue == undefined || isNaN(highestValue))
+                continue;
+
+            var totalPaddingSpace = (this.NodePadding * (this.Layers[i].length - 1)) + 30; // 30 extra padding
+            var totalAvailableSpace = this.Height - totalPaddingSpace;
+            var scale = totalAvailableSpace / highestValue; // 1000 / 10 = 100
+            if (smallestScale == 0 || smallestScale > scale) {
+                smallestScale = scale;
+                smallestScaleInLayer = i;
+            }
+        }
+
+        this.ValueScale = smallestScale;
+    },
+    CalculatePadding: function () {
+        if (this.Layers.length == 0)
+            return;
+
+        var maxRequiredWidth = this.Layers[0].Select(a => a.Name).concat(this.Layers[this.Layers.length - 1].Select(a => a.Name))
+            .Where(a => a != null && a != "")
+            .Unique()
+            .Select(a => TK.Draw.Text.MeasureWidth(a, this.LabelFont))
+            .Max();
+        this.PaddingSides = maxRequiredWidth + 10;
+    },
+    DrawNodes: function () {
+        // We're finished calculating and arranging all required positions of the nodes, so here we'll just draw everything
+        this.Clear();
+        var xPos = this.PaddingSides;
+
+        var widthPerLayer = this.Layers.length <= 1 ? this.Width : ((this.Width - (this.PaddingSides * 2) - this.NodeWidth) / (this.Layers.length - 1));        
+
+        // Draw node blocks
+        for (var i = 0; i < this.Layers.length; i++)
+        {
+            var totalPaddingSpace = this.NodePadding * (this.Layers[i].length - 1);
+            var totalRequiredSpace = (this.Layers[i].HighestValue * this.ValueScale) + totalPaddingSpace;
+            
+            var yPos = (this.Height / 2) - (totalRequiredSpace / 2);
+
+            for (var j = 0; j < this.Layers[i].length; j++) {
+                var n = this.Layers[i][j];
+                var nodeHeight = n.HighestValue * this.ValueScale;
+
+                // Node block
+                n.Rect = this.Add({
+                    _: TK.Draw.Rect,
+                    X: xPos, Y: yPos, W: this.NodeWidth, H: nodeHeight,
+                    Fill: n.Color,
+                    Anchor: window.TK.Draw.AnchorTop | window.TK.Draw.AnchorLeft,
+
+                    // To be populated below, based on the amount of links added
+                    SourceAmount: 0, // left side
+                    TargetAmount: 0 // right side
+                });                
+
+                n.Text = this.Add({
+                    _: TK.Draw.Text,
+                    X: xPos + (this.NodeWidth / 2), Y: yPos + (nodeHeight / 2), // W: this.NodeWidth, H: nodeHeight,
+                    Fill: this.LabelColor,
+                    Font: this.LabelFont,
+                    Anchor: window.TK.Draw.AnchorCenter | window.TK.Draw.AnchorMiddle,
+                    TextAlign: window.TK.Draw.AnchorCenter | window.TK.Draw.AnchorMiddle,
+                    Text: n.Name,
+                    ZIndex: 100
+                });
+                n.Text.FillWidthHeight();
+
+                if (i == 0 && n.Text.W <= this.PaddingSides) { // Space before the first block
+                    n.Text.X = this.PaddingSides / 2;
+                } else if (i + 1 == this.Layers.length && n.Text.W <= this.PaddingSides) { // Space before the first block
+                    n.Text.X = this.Width - this.PaddingSides / 2;
+                } else {
+                    n.TextBg = this.Add({
+                        _: TK.Draw.Rect,
+                        X: xPos + (this.NodeWidth / 2) - 1, Y: yPos + (nodeHeight / 2) - 1, W: n.Text.W + 10, H: n.Text.H + 10,
+                        Fill: "rgba(255,255,255,0.8)",
+                        RoundCorners: [3, 3, 3, 3],
+                        LineWidth: 0,
+                        Anchor: window.TK.Draw.AnchorCenter | window.TK.Draw.AnchorMiddle,
+                        ZIndex: 90
+                    });
+                }
+
+                yPos += nodeHeight + this.NodePadding;
+            }
+            xPos += widthPerLayer;
+        }
+
+        // Draw lines
+        for (var i = 0; i < this.Layers.length; i++) {
+            for (var j = 0; j < this.Layers[i].length; j++) {
+                var n = this.Layers[i][j];
+                var pos = 0;
+                for (var k = 0; k < n.SourceLinks.length; k++) {
+                    var link = n.SourceLinks[k];
+                    var otherNode = this.NodesDict[link.Target];
+                    if (!otherNode || !otherNode.Rect)
+                        continue;
+
+                    var sourceOffset = n.Rect.TargetAmount * this.ValueScale;
+                    var targetOffset = otherNode.Rect.SourceAmount * this.ValueScale;
+                    var height = link.Value * this.ValueScale;
+                    n.Rect.TargetAmount += link.Value;
+                    otherNode.Rect.SourceAmount += link.Value;
+
+                    if (height < 1)
+                        height = 1;
+
+                    this.Add({
+                        _: TK.Draw.LineThroughPoints,
+                        //Stroke: "#666",
+                        Fill: TK.Draw.ColorToDifferentColor(this.ColorLinesFromTarget ? otherNode.Color : n.Color, this.ColorLines, this.ColorLinesRatio),
+                        Smoothing: TK.Draw.SmoothQuadratic,
+                        Points: [
+                            [n.Rect.X + n.Rect.W, n.Rect.Y + sourceOffset], [otherNode.Rect.X, otherNode.Rect.Y + targetOffset]
+                        ],
+                        Heights: [height, height]
+                    });
+                }
+            }
+        }
+    }    
 };"use strict";
 /* Minify Order(200) */
 window.TK.Slider = {

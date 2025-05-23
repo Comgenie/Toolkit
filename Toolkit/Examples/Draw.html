@@ -14,6 +14,7 @@
     <script src="/Framework/TK.Draw.Text.js"></script>
     <script src="/Framework/TK.Draw.Circle.js"></script>
     <script src="/Framework/TK.Draw.Image.js"></script>
+    <script src="/Framework/TK.Draw.Triangle.js"></script>
     <script src="Example.js"></script>
 </head>
 <body>
@@ -306,6 +307,44 @@
             Scaling: 2, // Cover
             Anchor: window.TK.Draw.AnchorMiddle | window.TK.Draw.AnchorCenter,
             ImageAlign: window.TK.Draw.AnchorMiddle | window.TK.Draw.AnchorRight,
+        }
+    }
+}</pre>
+
+    <h3>Draw triangles</h3>
+    <p>The direction of the triangle can be decided by the TriangleAlign property which accepts one or two anchor points.</p>
+    <pre>{
+    _: TK.Draw,
+    Width: 600,
+    Height: 300,
+    Elements: {
+        BoxA: {
+            _: TK.Draw.Rect,
+            X: 110, Y: 60, W: 200, H: 100,       
+            Stroke: "#000",
+            LineWidth: 2,            
+            Anchor: window.TK.Draw.AnchorMiddle | window.TK.Draw.AnchorCenter
+        },
+        TriangleA: {
+            _: TK.Draw.Triangle,
+            X: 110, Y: 60, W: 200, H: 100,       
+            Fill: "#F00",
+            Anchor: window.TK.Draw.AnchorMiddle | window.TK.Draw.AnchorCenter,
+            TriangleAlign: TK.Draw.AnchorTop | TK.Draw.AnchorLeft
+        },
+        BoxB: {
+            _: TK.Draw.Rect,
+            X: 320, Y: 60, W: 200, H: 100,       
+            Stroke: "#000",
+            LineWidth: 2,            
+            Anchor: window.TK.Draw.AnchorMiddle | window.TK.Draw.AnchorCenter
+        },
+        TriangleB: {
+            _: TK.Draw.Triangle,
+            X: 320, Y: 60, W: 200, H: 100,       
+            Fill: "#00F",
+            Anchor: window.TK.Draw.AnchorMiddle | window.TK.Draw.AnchorCenter,
+            TriangleAlign: TK.Draw.AnchorRight
         }
     }
 }</pre>
