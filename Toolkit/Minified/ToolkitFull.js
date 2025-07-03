@@ -491,13 +491,16 @@ continue;var parent=this.CurRows["id"+parentId];this.AddExpandButtonToRowElement
 for(var rowKey in obj.children){var row=obj.children[rowKey];if(!row||!row.Row)
 continue;row.TreeDepth=0;obj.RecursiveSublist(row,function(childRow){if(!childRow.Parent.TreeDepth)
 childRow.TreeDepth=1;else
-childRow.TreeDepth=childRow.Parent.TreeDepth+1;});}},RemoveRows:function(rows){for(var i=0;i<rows.length;i++){var rowId=rows[i][this.IdField];var rowElement=this.CurRows["id"+rowId];if(rowElement)
+childRow.TreeDepth=childRow.Parent.TreeDepth+1;});}},CollapseAllRows:function(){const rows=this.querySelectorAll(".expanded");if(!rows)
+return;for(var i=0;i<rows.length;i++){const rowElement=rows[i];if(!rowElement.SubList)
+continue;rowElement.SubList.style.display="none";rowElement.className=rowElement.className.replace(/expanded/g,"")+" collapsed";this.Collapsed(rowElement.Data,false,rowElement);if(rowElement.ExpandCollapseButton){rowElement.ExpandCollapseButton.Update();}}},RemoveRows:function(rows){for(var i=0;i<rows.length;i++){var rowId=rows[i][this.IdField];var rowElement=this.CurRows["id"+rowId];if(rowElement)
 rowElement.parentNode.removeChild(rowElement);var posIndex=this.Rows.indexOf(rows[i]);if(posIndex>=0){this.Rows.splice(posIndex,1);}}},Refresh:function(){this.Clear();var rows=this.Rows;this.Rows=[];this.CurRows={};this.AddRows(rows);},RecursiveSublist:function(row,subItemFunction){var obj=this;if(!row.SubList)
 return;for(var rowDescendantKey in row.SubList.childNodes){var rowDescendant=row.SubList.childNodes[rowDescendantKey];if(!rowDescendant.Row)
 continue;let breakLoop=subItemFunction.apply(obj,[rowDescendant]);if(breakLoop)
 break;obj.RecursiveSublist(rowDescendant,subItemFunction);}},RecursiveParent:function(row,parentFunction){var obj=this;if(!row.Parent||!row.Parent.Row)
 return;let breakRecursion=parentFunction.apply(obj,[row.Parent]);if(breakRecursion)
-return;obj.RecursiveParent(row.Parent,parentFunction);},ApplyFilter:function(filter,showAllChildNodes,callBackFoundRows){let obj=this;const isFunction=typeof filter==="function";if(!filter){this.Refresh();return;}
+return;obj.RecursiveParent(row.Parent,parentFunction);},ApplyFilter:function(filter,showAllChildNodes,callBackFoundRows){let obj=this;const isFunction=typeof filter==="function";if(!filter){for(var item in this.CurRows){var row=this.CurRows[item];row.style.display="";}
+this.CollapseAllRows();return;}
 this.style.display="none";for(var item in this.CurRows){var row=this.CurRows[item];row.style.display="none";}
 var foundRows=[];function processRow(filterString){for(var item in obj.CurRows){var row=obj.CurRows[item];let matchesFilter=false;if(isFunction){matchesFilter=filter(row.Data,row);}else{var txt="";if(row.SubList){for(var j=0;j<row.childNodes.length;j++){if(row.childNodes[j]!=row.SubList)
 txt+=row.childNodes[j].innerText;}}else{txt=row.innerText;}
