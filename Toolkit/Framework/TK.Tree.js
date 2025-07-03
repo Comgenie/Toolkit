@@ -166,6 +166,24 @@ window.TK.Tree = {
             });
         }
     },
+    CollapseAllRows: function () {
+        const rows = this.querySelectorAll(".expanded");
+        if (!rows)
+            return;
+
+        for (var i = 0; i < rows.length; i++) {
+            const rowElement = rows[i];
+            if (!rowElement.SubList)
+                continue;
+
+            rowElement.SubList.style.display = "none";
+            rowElement.className = rowElement.className.replace(/expanded/g, "") + " collapsed";
+            this.Collapsed(rowElement.Data, false, rowElement);
+            if (rowElement.ExpandCollapseButton) {
+                rowElement.ExpandCollapseButton.Update();
+            }
+        }
+    },
     RemoveRows: function (rows) {
         for (var i = 0; i < rows.length; i++) {
             var rowId = rows[i][this.IdField];
@@ -219,7 +237,12 @@ window.TK.Tree = {
         let obj = this;
         const isFunction = typeof filter === "function";
         if (!filter) {
-            this.Refresh(); // Collapse everything
+            for (var item in this.CurRows) {
+                var row = this.CurRows[item];
+                row.style.display = "";
+            }
+
+            this.CollapseAllRows();
             return;
         }
 
