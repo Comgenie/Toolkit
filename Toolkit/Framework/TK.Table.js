@@ -24,6 +24,7 @@ window.TK.Table = {
     SortedDesc: false,
     SortCallBack: null,
     FilterCallBack: null,
+    Update: function () {  }, // Executed after table is rendered
     MaxRows: null,
     CurrentFilter: null,    
     DefaultTemplate: {
@@ -307,6 +308,8 @@ window.TK.Table = {
         this.Clear();
         this.PreviousCheckBox = null;
         if (this.Rows.length == 0) {
+            if (this.Update)
+                this.Update();
             return;
         }
 
@@ -684,6 +687,9 @@ window.TK.Table = {
 
         if (includeTFoot)
             this.Add(tfoot, "tfoot");
+
+        if (this.Update)
+            this.Update();
     },
     AddRow: function (row, rowClick) {
         this.Rows.push(row);
@@ -832,10 +838,8 @@ window.TK.AjaxTable = {
                 } else {
                     obj.Rows = response;
                 }
-                obj.Refresh();
-                obj.Update();
+                obj.Refresh();                
             }, undefined, this.AjaxSettings);
         }
-    },
-    Update: function () { }
+    }
 };
