@@ -174,6 +174,11 @@ window.TK.Dropdown = {
 
     ToggleDropdown: function () {
         this.Elements.Options.style.display = this.Elements.Options.style.display === "none" ? "block" : "none";
+        if (this.Elements.Options.offsetTop + this.Elements.Options.offsetHeight > document.documentElement.clientHeight) {
+            this.Elements.Options.style.top = (this.Elements.Display.offsetTop - this.Elements.Options.offsetHeight) + "px";
+        } else {
+            this.Elements.Options.style.top = "";
+        }
         this.className = this.className.indexOf(this.OpenClass) >= 0 ? this.className.replace(this.OpenClass, "") : this.className + " " + this.OpenClass;
     },
 
