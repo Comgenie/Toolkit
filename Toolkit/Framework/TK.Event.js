@@ -18,10 +18,22 @@ window.TK.Event = {
         if (!window.TK.EventHandlers)
             return;
         for (var i = 0; i < window.TK.EventHandlers.length; i++) {
-            if (window.TK.EventHandlers[i].Subscribe.indexOf(eventType) >= 0) {
+            if (window.TK.EventHandlers[i].Subscribe === null || window.TK.EventHandlers[i].Subscribe.indexOf(eventType) >= 0) {
                 window.TK.EventHandlers[i].Receive(eventType, eventData);
             }
         }
     },
     Receive: function (eventType, eventData) { /* Callback */ }
+};
+
+// A helper class to forward all events to the parent element to methods with the given prefix
+window.TK.MappedEvent = {
+    _: window.TK.Event,
+    Subscribe: null, // Receive all events
+    Prefix: "Handle",
+    Receive: function (eventType, eventData) {
+        if (this.Parent && this.Parent[this.Prefix + eventType]) {
+            this.Parent[this.Prefix + eventType](eventData);
+        }
+    }
 };

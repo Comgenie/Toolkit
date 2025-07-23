@@ -15,7 +15,7 @@
 
     <h1>TK.Event</h1>
     <h2>Subscribe for events</h2>
-    
+
     <pre>
 {
     Elements: {
@@ -24,7 +24,7 @@
             Subscribe: ["Test"], // Subscribe for event type Test
             Receive: function(eventType, eventData) {
                 this.Parent.Elements.ReceivedEvents.Add({ 
-                    _: "p", innerHTML: eventData
+                    _: "p", innerText: eventData
                 });
             }
         },
@@ -42,6 +42,26 @@
     innerHTML: "Press me and look at the example output above",
     onclick: function() {
         TK.Event.Send("Test", "This is the data")
+    }
+}
+</pre>
+
+    <h2>Auto mapped event handler example</h2>
+    <p>An useful extension on the TK.Event for handling events using event types mapped to function names.</p>
+    <pre>
+{
+    HandleTest: function(eventData) {
+        this.Elements.ReceivedEvents.Add({ 
+            _: "p", innerText: eventData
+        });
+    },
+    Elements: {
+        Events: {
+            _: TK.MappedEvent
+        },
+        ReceivedEvents: {
+            innerHTML: "Events received will be displayed here"
+        }
     }
 }
 </pre>
