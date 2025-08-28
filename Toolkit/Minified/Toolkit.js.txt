@@ -5883,13 +5883,16 @@ TK.HtmlEditor = {
                     if (this.Parent.EnableHTMLPasting && e.clipboardData.types && e.clipboardData.types.indexOf("text/html") >= 0) {
                         try {
                             var html = e.clipboardData.getData("text/html");
-                            document.execCommand("insertHTML", false, this.Parent.RemoveScripts ? this.Parent.RemoveScriptsHandler(html) : html);
+                            var processedHtml = this.Parent.RemoveScripts ? this.Parent.RemoveScriptsHandler(html) : html;
+                            document.execCommand("insertHTML", false, processedHtml + "&nbsp;");
+                            this.PositionCursor();
                             return;
                         } catch (errie) { } // If insertHTML is not supported for any reason, we will still paste it as text                        
                     }
 
                     var text = e.clipboardData.getData("text");
-                    document.execCommand("insertText", false, text);                    
+                    document.execCommand("insertText", false, text + " ");
+                    this.PositionCursor();
                 }
             },
             onkeydown: function (e) {
@@ -5914,6 +5917,16 @@ TK.HtmlEditor = {
                 if (this.RemoveFormat) {
                     document.execCommand("formatBlock", false, "div");
                     this.RemoveFormat = null;
+                }
+            },
+            PositionCursor: function () {
+                var selection = window.getSelection();
+                if (selection.rangeCount > 0) {
+                    var range = selection.getRangeAt(0);
+                    range.setStart(range.endContainer, range.endOffset - 1);
+                    range.collapse(true);
+                    selection.removeAllRanges();
+                    selection.addRange(range);
                 }
             }
         }
