@@ -2083,6 +2083,7 @@ window.TK.Form = {
                             disabled: getField("disabled", false),
                             readOnly: getField("readOnly"),
                             IsVisible: getField("IsVisible"),
+                            maxLength: getField("maxLength"),
                             //Init: (this.Fields && this.Fields[name] && this.Fields[name].Init ? this.Fields[name].Init : undefined),
                             Form: this
                         }
