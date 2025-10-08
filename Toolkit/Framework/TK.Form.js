@@ -399,12 +399,17 @@ window.TK.Form = {
                             disabled: getField("disabled", false),
                             readOnly: getField("readOnly"),
                             IsVisible: getField("IsVisible"),
-                            maxLength: getField("maxLength"),
                             //Init: (this.Fields && this.Fields[name] && this.Fields[name].Init ? this.Fields[name].Init : undefined),
                             Form: this
                         }
                     }
                 };
+
+                // Set max length seperately as a null value is seen as 0.
+                var maxLength = getField("maxLength");
+                if (maxLength) {
+                    row.Elements.DataField.maxLength = maxLength;
+                }
 
                 if (this.LabelWidth) {
                     row.Elements.DataLabel.style.display = "inline-block";
