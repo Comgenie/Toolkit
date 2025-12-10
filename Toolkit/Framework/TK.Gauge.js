@@ -215,9 +215,17 @@ TK.Gauge = {
                     });
 
                     if (indicator.Text) {
+                        let textWidth = TK.Draw.Text.MeasureWidth(indicator.Text, this.FontIndicators);
+                        let textX = indicatorX;
+                        if (textX - textWidth / 2 < 0) {
+                            textX = textWidth / 2;
+                        } else if (textX + textWidth / 2 > this.Width) {
+                            textX = this.Width - textWidth / 2;
+                        }
+
                         let indicatorText = this.Canvas.Add({
                             _: TK.Draw.Text,
-                            X: indicatorX, Y: offsetY + 10 - indicatorH,
+                            X: textX, Y: offsetY + 10 - indicatorH,
                             Fill: indicator.Color ? indicator.Color : "#000",
                             Font: this.FontIndicators,
                             Text: indicator.Text,
