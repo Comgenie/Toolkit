@@ -1,4 +1,4 @@
-﻿"use strict";
+"use strict";
 /* Minify Order(200) */
 window.TK.Dropdown = {
     _: "div",
@@ -12,6 +12,8 @@ window.TK.Dropdown = {
     MaxDisplayItems: 10, // Maximum items to show before scrolling
     SelectedClass: "toolkitDropdownSelected", // Class for selected items
     OpenClass: "toolkitDropdownOpen", // Class when dropdown is open
+    EnableSearch: false, // Allows the user to search through the options
+    SearchPlaceholder: "Search...",
     ListItemTemplate: {
         _: "li",
         Dropdown: null,
@@ -19,7 +21,7 @@ window.TK.Dropdown = {
         Init: function () {
             this.innerText = this.Data.Text;
             this.Value = this.Data.Value;
-            this.className = this.Dropdown.IsSelected(this.Data.Value) ? this.Dropdown.SelectedClass : "";  
+            this.className = this.Dropdown.IsSelected(this.Data.Value) ? this.Dropdown.SelectedClass : "";
         },
         onclick: function (a) {
             this.Dropdown.SelectItem(this.Value);
@@ -30,6 +32,7 @@ window.TK.Dropdown = {
     },
     Init: function () {
         var obj = this;
+        // When used in TK.Form the DataSettings will be set to configure the dropdown
         if (this.DataSettings) {
             var fields = ["Placeholder", "MaxDisplayItems", "Multiple", "Options", "SelectedClass", "OpenClass"];
             for (var i = 0; i < fields.length; i++) {
@@ -59,12 +62,34 @@ window.TK.Dropdown = {
         this.Add({
             _: "div",
             className: "toolkitDropdownOptions",
-            style: { display: "none", maxHeight: this.MaxDisplayItems * 35 + "px" }, 
-            Elements: {
-                OptionsList: {
+            style: { display: "none", maxHeight: this.MaxDisplayItems * 35 + "px" },
+            Dropdown: obj,
+            Init: function () {
+                if (obj.EnableSearch) {
+                    this.Elements.Search = this.Add({
+                        _: "input",
+                        type: "text",
+                        placeholder: obj.SearchPlaceholder,
+                        style: {
+                            width: 'calc(100% - 4px)',
+                            padding: '5px',
+                            margin: '2px',
+                            boxSizing: 'border-box'
+                        },
+                        Init: function () {
+                            obj.SearchField = this;
+                        },
+                        onkeyup: function (e) {
+                            obj.RefreshOptions();
+                        }
+                    });
+                }
+
+                this.Elements.OptionsList = this.Add({
                     _: "ul",
                     style: { listStyle: "none", padding: 0, margin: 0 },
-                },
+                });
+
             },
         }, "Options");
 
@@ -74,9 +99,18 @@ window.TK.Dropdown = {
 
     RefreshOptions: function () {
         var obj = this;
+        // Clear all current option nodes
         this.Elements.Options.Elements.OptionsList.Clear();
-        for (var i = 0; i < this.Options.length;i++) {
-            var option = this.Options[i];
+
+        let options = obj.Options;
+        if (obj.EnableSearch && obj.SearchField) {
+            let searchText = obj.SearchField.value.toUpperCase();
+            if (searchText)
+                options = options.filter(a => a.Text.toUpperCase().indexOf(searchText) > -1);
+        }
+
+        for (var i = 0; i < options.length; i++) {
+            var option = options[i];
             if (option.Text === undefined || option.Text === null)
                 option.Text = option.Value;
             else if (option.Value === undefined || option.Value === null)
@@ -148,7 +182,7 @@ window.TK.Dropdown = {
                         });
                         break;
                     }
-                    
+
                 }
             }
         } else if (!this.Multiple && this.Data) {
@@ -191,6 +225,6 @@ window.TK.Dropdown = {
 if (window.TK.Form) {
     window.TK.Form.DefaultTemplates.dropdown = {
         _: TK.Dropdown,
-        
+
     };
 }
