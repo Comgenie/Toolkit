@@ -14,6 +14,11 @@
     <a href="/" class="home">Toolkit</a>
 
     <h1>TK.ServerChannel</h1>
+
+    <div class="pageWarning">
+        <p>The shared Tiseda API instance is currently unavailable. Host your <a href="https://github.com/Comgenie/Toolkit/tree/master/ToolkitServer">own API instance</a> to make use of this feature.</p>
+    </div>
+
     <h2>Join a public shared channel</h2>
     <p>Using this component it is possible to create a real time communication channel to send messages to other browsers listening to the same channel (max 4KB per message). The communication is done by WebSocket with a fallback to ajax requests to the Toolkit Server API. This component will re-use the same websocket connection when added multiple times within the same page. When the communication is not needed anymore, remove this component using the .Remove() method on this component or any parent elements.</p>
     <p><strong>Security notice:</strong> This communication can be seen and new messages can be sent by anyone knowing the channel name!</p>
@@ -51,7 +56,7 @@
     <p>Only clients with an identity are allowed to see or sent any messages within the channel. Their PublicIdentifier will be sent with their message to other clients. The Client ID will not be shared with other clients.</p>
 
     <h2>Send or retrieve messages using another application</h2>
-    <p>Using the addresses below it is possible to send or receive messages from any other application by doing web requests. When retrieving messages, the current index of each channel is also included (datatype long). Use this index number for the next request to only retrieve the new messages.</p>    
+    <p>Using the addresses below it is possible to send or receive messages from any other application by doing web requests. When retrieving messages, the current index of each channel is also included (datatype long). Use this index number for the next request to only retrieve the new messages.</p>
     <pre>Retrieve messages for a channel using a GET request:
 GET https://toolkitapi.comgenie.com/channel/communicate?clientId=YOURCLIENTIDHERE&channels=Channel1&indexes=0
 
