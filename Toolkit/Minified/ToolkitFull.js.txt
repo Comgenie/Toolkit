@@ -5518,7 +5518,19 @@ window.TK.DateTime = {
         this.Elements.DateInputContainer.Elements.DateInput.disabled = this.disabled ? true : false;
 
         var isRelative = (this.EnableRelative && this.Data && this.Data.indexOf && this.Data.indexOf("|") >= 0);
-        this.className = "toolkitDateTime" + (this.disabled ? " toolkitDateTimeDisabled" : "") + (this.readOnly ? " toolkitDateTimeReadOnly" : "") + (isRelative ? " toolkitDateTimeRelative" : "");
+
+        // class toggle with support for older browsers
+        var safeToggle = function (list, name, newValue) {
+            if (newValue && !list.contains(name))
+                list.add(name);
+            else if (!newValue && list.contains(name))
+                list.remove(name);
+        };
+        
+
+        safeToggle(this.classList, "toolkitDateTimeDisabled", this.disabled);
+        safeToggle(this.classList, "toolkitDateTimeReadOnly", this.readOnly);
+        safeToggle(this.classList, "toolkitDateTimeRelative", isRelative);
 
         if (!this.Data) {
             this.Elements.DateInputContainer.Elements.DateInput.value = "";
