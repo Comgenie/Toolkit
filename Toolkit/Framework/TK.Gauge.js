@@ -31,6 +31,8 @@ TK.Gauge = {
     FontValue: "14pt Verdana",
     TextValue: null, // Automatic (Use actual value)
     ExtraSpacingValue: 2,
+    IndicatorHeight: 10,
+    IndicatorWidth: 10,
     FontIndicators: "8pt Verdana",
     DrawIndicatorLine: false,
     EnableShadow: true,
@@ -72,17 +74,39 @@ TK.Gauge = {
 
         var offsetY = 0;
         if (this.Indicators.length > 0) {
-            offsetY += 25;
-            extraSpacingHeight += 25;
+            const indicatorTextHeight = TK.Draw.Text.MeasureHeight("1234", this.FontIndicators);
+            const totalIndicatorHeight = this.IndicatorHeight + indicatorTextHeight;
+            const textGapPx = 5;
+
+            offsetY += totalIndicatorHeight;
+            extraSpacingHeight += totalIndicatorHeight;
+
             if (this.Style == 0) {
-                extraSpacingWidth += ((this.Width * 0.1) + this.ExtraSpacingSide);
+                extraSpacingWidth += totalIndicatorHeight + this.ExtraSpacingSide;
+            }
+
+            if (this.Indicators.some(a => a.Text != null)) {
+                if (this.Style == 0) {
+                    extraSpacingWidth += textGapPx; 
+                } else if (this.Style == 1) {
+                    extraSpacingHeight += textGapPx;
+                }
             }
         }
 
         var centerX = this.Width / 2;
         var centerY = this.Height - extraSpacingHeight;
 
-        var size = this.Width > centerY * 2 ? centerY * 2 - extraSpacingHeight / 2 : this.Width - extraSpacingWidth * 3;
+        const cursorOverhang = 10;
+        if (this.Indicators.length == 0) {
+            extraSpacingHeight /= 2;
+
+            if (this.Style == 1) {
+                offsetY += cursorOverhang;
+            }
+        }
+
+        var size = this.Width > centerY * 2 ? centerY * 2 - extraSpacingHeight : this.Width - extraSpacingWidth * 2;
         this.MinValue = this.Ranges.Min(function (a) { return a.MinValue; });
         this.MaxValue = this.Ranges.Max(function (a) { return a.MaxValue; });
 
@@ -113,7 +137,7 @@ TK.Gauge = {
                 var widthX = ((this.Ranges[i].MaxValue - this.Ranges[i].MinValue) / this.Difference) * this.Width;
                 this.Canvas.Add({
                     _: TK.Draw.Rect,
-                    X: fromX, Y: 10 + offsetY, W: widthX, H: this.SizeBar,
+                    X: fromX, Y: offsetY, W: widthX, H: this.SizeBar,
                     Fill: this.Ranges[i].Color,
                     Anchor: window.TK.Draw.AnchorLeft | window.TK.Draw.AnchorTop,
                 });
@@ -121,7 +145,7 @@ TK.Gauge = {
                 if (this.EnableShadow) {
                     this.Canvas.Add({
                         _: TK.Draw.Rect,
-                        X: fromX, Y: this.SizeBar + 5 + offsetY, W: widthX, H: 5,
+                        X: fromX, Y: this.SizeBar - 5 + offsetY, W: widthX, H: 5,
                         Fill: "rgba(0,0,0,0.1)",
                         Anchor: window.TK.Draw.AnchorLeft | window.TK.Draw.AnchorTop,
                     });
@@ -150,7 +174,7 @@ TK.Gauge = {
         } else {
             this.Cursor = this.Canvas.Add({
                 _: TK.Draw.Rect,
-                X: 0, Y: offsetY, W: 2, H: this.SizeBar + 20,
+                X: 0, Y: offsetY - cursorOverhang, W: 2, H: this.SizeBar + cursorOverhang * 2,
                 Fill: this.ColorCursor,
                 Anchor: window.TK.Draw.AnchorCenter | window.TK.Draw.AnchorTop,
             });
@@ -160,9 +184,6 @@ TK.Gauge = {
         if (this.Indicators) {
             for (let i = 0; i < this.Indicators.length; i++) {
                 let indicator = this.Indicators[i];
-                let indicatorW = indicator.Width ?? 10;
-                let indicatorH = indicator.Height ?? 10;
-
                 if (this.Style == 0) {
                     let radius = size * 0.5;
                     let indicatorAngle = this.StartAngle + ((indicator.Value - this.MinValue) / this.Difference) * this.DifferenceAngles;
@@ -172,15 +193,15 @@ TK.Gauge = {
 
                     this.Canvas.Add({
                         _: TK.Draw.Triangle,
-                        X: indicatorX, Y: indicatorY, W: indicatorW, H: indicatorH,
+                        X: indicatorX, Y: indicatorY, W: this.IndicatorWidth, H: this.IndicatorHeight,
                         Rotate: indicatorAngle + 90,
                         Fill: indicator.Color ? indicator.Color : "#000",
                         Anchor: window.TK.Draw.AnchorCenter | window.TK.Draw.AnchorBottom,
                     });
 
                     if (indicator.Text) {
-                        let textX = indicatorX + indicatorH * Math.cos(radians);
-                        let textY = indicatorY + indicatorH * Math.sin(radians);
+                        let textX = indicatorX + this.IndicatorHeight * Math.cos(radians);
+                        let textY = indicatorY + this.IndicatorHeight * Math.sin(radians);
 
                         this.Canvas.Add({
                             _: TK.Draw.Text,
@@ -205,11 +226,11 @@ TK.Gauge = {
                 }
                 else if (this.Style == 1) {
                     let indicatorX = (((indicator.Value - this.MinValue) / this.Difference) * this.Width - 2) + 2;
-                    let indicatorY = offsetY + 10 - indicatorH / 2
+                    let indicatorY = offsetY - this.IndicatorHeight / 2
 
                     this.Canvas.Add({
                         _: TK.Draw.Triangle,
-                        X: indicatorX, Y: indicatorY, W: indicatorW, H: indicatorH,
+                        X: indicatorX, Y: indicatorY, W: this.IndicatorWidth, H: this.IndicatorHeight,
                         Fill: indicator.Color ? indicator.Color : "#000",
                         Anchor: window.TK.Draw.AnchorCenter | window.TK.Draw.AnchorMiddle,
                     });
@@ -223,9 +244,10 @@ TK.Gauge = {
                             textX = this.Width - textWidth / 2;
                         }
 
+                        const textMarginTop = 2;
                         let indicatorText = this.Canvas.Add({
                             _: TK.Draw.Text,
-                            X: textX, Y: offsetY + 10 - indicatorH,
+                            X: textX, Y: indicatorY - this.IndicatorHeight / 2 + textMarginTop,
                             Fill: indicator.Color ? indicator.Color : "#000",
                             Font: this.FontIndicators,
                             Text: indicator.Text,
