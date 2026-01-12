@@ -100,6 +100,10 @@ TK.Gauge = {
         const cursorOverhang = 10;
         if (this.Indicators.length == 0) {
             extraSpacingHeight /= 2;
+
+            if (this.Style == 1) {
+                offsetY += cursorOverhang;
+            }
         }
 
         var size = this.Width > centerY * 2 ? centerY * 2 - extraSpacingHeight : this.Width - extraSpacingWidth * 2;
