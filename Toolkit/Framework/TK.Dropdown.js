@@ -34,13 +34,16 @@ window.TK.Dropdown = {
         var obj = this;
 
         this.tabIndex = 0;
-        this.addEventListener("focusout", function (e) {
-            if (obj.contains(e.relatedTarget)) {
-                return;
-            }
+        if (!this.EventInitialized) {
+            this.EventInitialized = true;
+            this.addEventListener("focusout", function (e) {
+                if (obj.contains(e.relatedTarget)) {
+                    return;
+                }
 
-            obj.CloseDropdown();
-        });
+                obj.CloseDropdown();
+            });
+        }
 
         // When used in TK.Form the DataSettings will be set to configure the dropdown
         if (this.DataSettings) {

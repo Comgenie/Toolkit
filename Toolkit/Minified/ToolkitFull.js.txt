@@ -9207,12 +9207,25 @@ window.TK.Dropdown = {
         onclick: function (a) {
             this.Dropdown.SelectItem(this.Value);
             if (!this.Dropdown.Multiple) {
-                this.Dropdown.ToggleDropdown();
+                this.Dropdown.CloseDropdown();
             }
         }
     },
     Init: function () {
         var obj = this;
+
+        this.tabIndex = 0;
+        if (!this.EventInitialized) {
+            this.EventInitialized = true;
+            this.addEventListener("focusout", function (e) {
+                if (obj.contains(e.relatedTarget)) {
+                    return;
+                }
+
+                obj.CloseDropdown();
+            });
+        }
+
         // When used in TK.Form the DataSettings will be set to configure the dropdown
         if (this.DataSettings) {
             var fields = ["Placeholder", "MaxDisplayItems", "Multiple", "Options", "SelectedClass", "OpenClass"];
@@ -9387,14 +9400,31 @@ window.TK.Dropdown = {
         this.Elements.Display.Elements.Placeholder.style.display = this.Data ? "none" : "inline";
     },
 
-    ToggleDropdown: function () {
-        this.Elements.Options.style.display = this.Elements.Options.style.display === "none" ? "block" : "none";
+    ShowOptions: function (visible) {
+        this.Elements.Options.style.display = visible ? "block" : "none";
         if (this.Elements.Options.offsetTop + this.Elements.Options.offsetHeight > document.documentElement.clientHeight) {
             this.Elements.Options.style.top = (this.Elements.Display.offsetTop - this.Elements.Options.offsetHeight) + "px";
         } else {
             this.Elements.Options.style.top = "";
         }
-        this.className = this.className.indexOf(this.OpenClass) >= 0 ? this.className.replace(this.OpenClass, "") : this.className + " " + this.OpenClass;
+
+        if (visible) {
+            this.classList.add(this.OpenClass);
+        } else {
+            this.classList.remove(this.OpenClass);
+        }
+    },
+
+    OpenDropdown: function () {
+        this.ShowOptions(true);
+    },
+
+    ToggleDropdown: function () {
+        this.ShowOptions(this.Elements.Options.style.display === "none");
+    },
+
+    CloseDropdown: function () {
+        this.ShowOptions(false);
     },
 
     GetValue: function () {
