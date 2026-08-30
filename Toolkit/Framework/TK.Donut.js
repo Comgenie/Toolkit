@@ -125,6 +125,7 @@ TK.Donut = {
                 continue;
             var size = (this.Values[i].Value / total) * 360;
             
+            var hitPadding = Math.max(10, this.Values[i].Extrude ? this.Values[i].Extrude : 0);
             var donutPart = this.Canvas.Add({
                 _: TK.Draw.Circle,
                 DonutSize: this.DonutSize,
@@ -132,6 +133,42 @@ TK.Donut = {
                 Fill: this.Values[i].Color,
                 Value: this.Values[i],
                 Anchor: window.TK.Draw.AnchorCenter | window.TK.Draw.AnchorMiddle,
+                HitCenterX: middlePointX,
+                HitCenterY: middlePointY,
+                HitPadding: hitPadding,
+                GetRect: function () {
+                    var restingExtrude = this.Value.Extrude ? this.Value.Extrude : 0;
+                    var r = (this.W * 0.5) + this.HitPadding + restingExtrude;
+                    return [this.HitCenterX - r, this.HitCenterY - r, r * 2, r * 2];
+                },
+                CheckMouseOver: function (x, y) {
+                    var cx = this.HitCenterX;
+                    var cy = this.HitCenterY;
+                    var restingExtrude = this.Value.Extrude ? this.Value.Extrude : 0;
+                    if (restingExtrude) {
+                        var extrudeAngle = (this.Angle + (this.Size * 0.5)) * Math.PI / 180;
+                        cx += Math.cos(extrudeAngle) * restingExtrude;
+                        cy += Math.sin(extrudeAngle) * restingExtrude;
+                    }
+                    if (this.Size && this.Size < 360) {
+                        var deg = Math.atan2(y - cy, x - cx) * 180.0 / Math.PI;
+                        if (deg < 0)
+                            deg = 360 + deg;
+                        var checkFrom = this.Angle % 360;
+                        if (checkFrom < 0)
+                            checkFrom = 360 + checkFrom;
+                        var checkTo = (checkFrom + this.Size) % 360;
+
+                        if (deg < checkFrom && (checkTo > checkFrom || deg > checkTo))
+                            return false;
+                        if (deg > checkTo && (checkFrom < checkTo || deg < checkTo))
+                            return false;
+                    }
+                    var dist = Math.sqrt(Math.pow(x - cx, 2) + Math.pow(y - cy, 2));
+                    if (this.DonutSize && dist <= (this.W / 2) * this.DonutSize)
+                        return false;
+                    return dist <= (this.W / 2) + this.HitPadding;
+                },
                 MouseOver: function () {
                     if (obj.EnableLegend || obj.Click) {
                         if (this.Value.LegendElement)
