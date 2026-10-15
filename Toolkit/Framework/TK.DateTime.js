@@ -645,6 +645,8 @@ window.TK.DateTime = {
 window.TK.DateTime.TimeZone = "Local";
 window.TK.DateTimeUpdateDateObject = function (dateObj, timeZone) {
     if (timeZone == "UTC") {
+        dateObj.getFullYear = dateObj.getUTCFullYear;
+        dateObj.setFullYear = dateObj.setUTCFullYear;   
         dateObj.getMonth = dateObj.getUTCMonth;
         dateObj.setMonth = dateObj.setUTCMonth;
         dateObj.getHours = dateObj.getUTCHours;
