@@ -104,25 +104,32 @@ window.TK.Popup = {
                     }
                     var x, y;
                     try { x = e.pageX; y = e.pageY; } catch (errie) { var e2 = window.event; x = e2.clientX; y = e2.clientY; }
-                    var newLeft = (x - startX);
-                    var newTop = (y - startY);
+                    var maxLeft = Math.max(0, window.innerWidth - startWidth);
+                    var maxTop = Math.max(0, window.innerHeight - startHeight);
+                    var newLeft = (x - startX) < 0 ? 0 : (x - startX);
+                    var newTop = (y - startY) < 0 ? 0 : (y - startY);
                     if (obj.EnableSnapping) {
                         for (var i = 0; i < snapXSides.length; i++) {
                             if (Math.abs(snapXSides[i] - newLeft) < 10) {
-                                newLeft = snapXSides[i];
+                                newLeft = snapXSides[i] < 0 ? 0 : snapXSides[i];
                             } else if (Math.abs(snapXSides[i] - (newLeft + startWidth)) < 10) {
-                                newLeft = snapXSides[i] - startWidth;
+                                newLeft = snapXSides[i] - startWidth < 0 ? 0 : snapXSides[i] - startWidth;
                             }
                         }
 
                         for (var i = 0; i < snapYSides.length; i++) {
                             if (Math.abs(snapYSides[i] - newTop) < 10) {
-                                newTop = snapYSides[i];
+                                newTop = snapYSides[i] < 0 ? 0 : snapYSides[i];
                             } else if (Math.abs(snapYSides[i] - (newTop + startHeight)) < 10) {
-                                newTop = snapYSides[i] - startHeight;
+                                newTop = snapYSides[i] - startHeight < 0 ? 0 : snapYSides[i] - startHeight;
                             }
                         }
                     }
+
+                    if (newLeft > maxLeft)
+                        newLeft = maxLeft;
+                    if (newTop > maxTop)
+                        newTop = maxTop;
 
                     obj.style.left = newLeft + "px";
                     obj.style.top = newTop + "px";
@@ -178,12 +185,18 @@ window.TK.Popup = {
                         try { x = e.pageX; y = e.pageY; } catch (errie) { var e2 = window.event; x = e2.clientX; y = e2.clientY; }
 
                         var newWidth = startWidth + (x - startX);
+                        var maxWidth = Math.max(obj.MinWidth, window.innerWidth - obj.offsetLeft);
                         if (newWidth < obj.MinWidth)
                             newWidth = obj.MinWidth;
+                        if (newWidth > maxWidth)
+                            newWidth = maxWidth;
 
                         var newHeight = startHeight + (y - startY);
+                        var maxHeight = Math.max(obj.MinWidth, window.innerHeight - obj.offsetTop);
                         if (newHeight < obj.MinWidth)
                             newHeight = obj.MinWidth;
+                        if (newHeight > maxHeight)
+                            newHeight = maxHeight;
 
                         obj.style.width = newWidth + "px";
                         obj.style.height = newHeight + "px";
