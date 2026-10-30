@@ -64,6 +64,7 @@ window.TK.Popup = {
                     obj.style.height = window.innerHeight + "px";
                 }
 
+                obj.ConstrainToWindow();
                 if (obj.OnResize) {
                     obj.OnResize();
                 }
@@ -125,19 +126,7 @@ window.TK.Popup = {
                         }
                     }
 
-                    var horizontalPixels = 60;
-
-                    if (newTop < 0)
-                        newTop = 0;
-                    if (newLeft > window.innerWidth - horizontalPixels)
-                        newLeft = window.innerWidth - horizontalPixels;
-                    if (newTop > window.innerHeight - obj.Elements.PopupTitle.clientHeight)
-                        newTop = window.innerHeight - obj.Elements.PopupTitle.clientHeight;
-                    if (newLeft < (-1 * obj.offsetWidth) + horizontalPixels)
-                        newLeft = (-1 * obj.offsetWidth) + horizontalPixels;
-
-                    obj.style.left = newLeft + "px";
-                    obj.style.top = newTop + "px";
+                    obj.ConstrainToWindow(newLeft, newTop);
                 };
                 window.onmouseup = function () {
                     window.onmousemove = null;
@@ -211,6 +200,7 @@ window.TK.Popup = {
                             window.onselectstart = null;
                             window.ontouchmove = null;
                             window.ontouchend = null;
+                            obj.ConstrainToWindow();
                             if (obj.OnResize) {
                                 obj.OnResize();
                             }
@@ -328,6 +318,23 @@ window.TK.Popup = {
         this.style.height = this.Height + "px";
         this.style.top = Math.round((window.innerHeight / 2) - (this.Height / 2)) + "px";
         this.style.left = Math.round((window.innerWidth / 2) - (this.Width / 2)) + "px";
+    },
+    ConstrainToWindow: function (left, top) {
+        var horizontalPixels = 60;
+        var newLeft = left === undefined ? this.offsetLeft : left;
+        var newTop = top === undefined ? this.offsetTop : top;
+
+        if (newTop < 0)
+            newTop = 0;
+        if (newLeft > window.innerWidth - horizontalPixels)
+            newLeft = window.innerWidth - horizontalPixels;
+        if (newTop > window.innerHeight - this.Elements.PopupTitle.clientHeight)
+            newTop = window.innerHeight - this.Elements.PopupTitle.clientHeight;
+        if (newLeft < (-1 * this.offsetWidth) + horizontalPixels)
+            newLeft = (-1 * this.offsetWidth) + horizontalPixels;
+
+        this.style.left = newLeft + "px";
+        this.style.top = newTop + "px";
     }
 };
 window.addEventListener("resize", function () {
@@ -339,24 +346,12 @@ window.addEventListener("resize", function () {
             popup.style.top = "0px";
             popup.style.width = window.innerWidth + "px";
             popup.style.height = window.innerHeight + "px";
-            continue;
+        } else {
+            popup.ConstrainToWindow();
         }
 
-        var horizontalPixels = 60;
-        var newLeft = popup.offsetLeft;
-        var newTop = popup.offsetTop;
-
-        if (newTop < 0)
-            newTop = 0;
-        if (newLeft > window.innerWidth - horizontalPixels)
-            newLeft = window.innerWidth - horizontalPixels;
-        if (newTop > window.innerHeight - popup.Elements.PopupTitle.clientHeight)
-            newTop = window.innerHeight - popup.Elements.PopupTitle.clientHeight;
-        if (newLeft < (-1 * popup.offsetWidth) + horizontalPixels)
-            newLeft = (-1 * popup.offsetWidth) + horizontalPixels;
-
-        popup.style.left = newLeft + "px";
-        popup.style.top = newTop + "px";
+        if (popup.OnResize)
+            popup.OnResize();
     }
 });
 window.TK.Popup.StartZIndex = 10000;
