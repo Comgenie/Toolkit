@@ -13,7 +13,6 @@ window.TK.Popup = {
     CloseByClickingOutsideOfPopup: false,
     EnableResize: true,
     EnableSnapping: true,
-    EnableZoomRelocation: true,
     Maximized: false,
     className: "toolkitPopup",
     Template: {},
