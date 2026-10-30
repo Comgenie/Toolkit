@@ -63,6 +63,7 @@ window.TK.Popup = {
                     obj.style.height = window.innerHeight + "px";
                 }
 
+                obj.ConstrainToWindow();
                 if (obj.OnResize) {
                     obj.OnResize();
                 }
@@ -124,8 +125,7 @@ window.TK.Popup = {
                         }
                     }
 
-                    obj.style.left = newLeft + "px";
-                    obj.style.top = newTop + "px";
+                    obj.ConstrainToWindow(newLeft, newTop);
                 };
                 window.onmouseup = function () {
                     window.onmousemove = null;
@@ -178,12 +178,18 @@ window.TK.Popup = {
                         try { x = e.pageX; y = e.pageY; } catch (errie) { var e2 = window.event; x = e2.clientX; y = e2.clientY; }
 
                         var newWidth = startWidth + (x - startX);
+                        var maxWidth = Math.max(obj.MinWidth, window.innerWidth - obj.offsetLeft);
                         if (newWidth < obj.MinWidth)
                             newWidth = obj.MinWidth;
+                        if (newWidth > maxWidth)
+                            newWidth = maxWidth;
 
                         var newHeight = startHeight + (y - startY);
+                        var maxHeight = Math.max(obj.MinWidth, window.innerHeight - obj.offsetTop);
                         if (newHeight < obj.MinWidth)
                             newHeight = obj.MinWidth;
+                        if (newHeight > maxHeight)
+                            newHeight = maxHeight;
 
                         obj.style.width = newWidth + "px";
                         obj.style.height = newHeight + "px";
@@ -193,6 +199,7 @@ window.TK.Popup = {
                             window.onselectstart = null;
                             window.ontouchmove = null;
                             window.ontouchend = null;
+                            obj.ConstrainToWindow();
                             if (obj.OnResize) {
                                 obj.OnResize();
                             }
@@ -310,8 +317,42 @@ window.TK.Popup = {
         this.style.height = this.Height + "px";
         this.style.top = Math.round((window.innerHeight / 2) - (this.Height / 2)) + "px";
         this.style.left = Math.round((window.innerWidth / 2) - (this.Width / 2)) + "px";
+    },
+    ConstrainToWindow: function (left, top) {
+        var horizontalPixels = 60;
+        var newLeft = left === undefined ? this.offsetLeft : left;
+        var newTop = top === undefined ? this.offsetTop : top;
+
+        if (newTop < 0)
+            newTop = 0;
+        if (newLeft > window.innerWidth - horizontalPixels)
+            newLeft = window.innerWidth - horizontalPixels;
+        if (newTop > window.innerHeight - this.Elements.PopupTitle.clientHeight)
+            newTop = window.innerHeight - this.Elements.PopupTitle.clientHeight;
+        if (newLeft < (-1 * this.offsetWidth) + horizontalPixels)
+            newLeft = (-1 * this.offsetWidth) + horizontalPixels;
+
+        this.style.left = newLeft + "px";
+        this.style.top = newTop + "px";
     }
 };
+window.addEventListener("resize", function () {
+    var popups = document.querySelectorAll(".toolkitPopup");
+    for (var i = 0; i < popups.length; i++) {
+        var popup = popups[i];
+        if (popup.Maximized) {
+            popup.style.left = "0px";
+            popup.style.top = "0px";
+            popup.style.width = window.innerWidth + "px";
+            popup.style.height = window.innerHeight + "px";
+        } else {
+            popup.ConstrainToWindow();
+        }
+
+        if (popup.OnResize)
+            popup.OnResize();
+    }
+});
 window.TK.Popup.StartZIndex = 10000;
 window.TK.PopupOpen = function (template, title, width, height) {
     TK.Initialize({
@@ -322,11 +363,3 @@ window.TK.PopupOpen = function (template, title, width, height) {
         Template: template
     });
 };
-
-
-
-
-
-
-
-
