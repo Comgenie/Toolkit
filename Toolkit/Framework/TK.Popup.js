@@ -13,11 +13,13 @@ window.TK.Popup = {
     CloseByClickingOutsideOfPopup: false,
     EnableResize: true,
     EnableSnapping: true,
-    EnableContainment: [true, false, false, false],
+    EnableZoomRelocation: true,
     Maximized: false,
     className: "toolkitPopup",
     Template: {},
-    OnResize: function () { },
+    OnResize: function () {
+        console.log("Popup resized");
+    },
     Buttons: null,   // { Ok: function() { alert('ok pressed!'); } }
     Init: function () {        
         var obj = this;
@@ -125,14 +127,16 @@ window.TK.Popup = {
                         }
                     }
 
-                    if (obj.EnableContainment[0] && newTop < 0)
+                    var horizontalPixels = 60;
+
+                    if (newTop < 0)
                         newTop = 0;
-                    if (obj.EnableContainment[1] && newLeft > window.innerWidth - startWidth)
-                        newLeft = window.innerWidth - startWidth;
-                    if (obj.EnableContainment[2] && newTop > window.innerHeight - startHeight)
-                        newTop = window.innerHeight - startHeight;
-                    if (obj.EnableContainment[3] && newLeft < 0)
-                        newLeft = 0;
+                    if (newLeft > window.innerWidth - horizontalPixels)
+                        newLeft = window.innerWidth - horizontalPixels;
+                    if (newTop > window.innerHeight - obj.Elements.PopupTitle.clientHeight)
+                        newTop = window.innerHeight - obj.Elements.PopupTitle.clientHeight;
+                    if (newLeft < (-1 * obj.offsetWidth) + horizontalPixels)
+                        newLeft = (-1 * obj.offsetWidth) + horizontalPixels;
 
                     obj.style.left = newLeft + "px";
                     obj.style.top = newTop + "px";
@@ -328,6 +332,9 @@ window.TK.Popup = {
         this.style.left = Math.round((window.innerWidth / 2) - (this.Width / 2)) + "px";
     }
 };
+window.addEventListener("resize", function () {
+    console.log("Window resized");
+});
 window.TK.Popup.StartZIndex = 10000;
 window.TK.PopupOpen = function (template, title, width, height) {
     TK.Initialize({
