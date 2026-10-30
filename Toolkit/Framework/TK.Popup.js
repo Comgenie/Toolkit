@@ -13,6 +13,7 @@ window.TK.Popup = {
     CloseByClickingOutsideOfPopup: false,
     EnableResize: true,
     EnableSnapping: true,
+    EnableContainment: [true, false, false, false],
     Maximized: false,
     className: "toolkitPopup",
     Template: {},
@@ -104,32 +105,34 @@ window.TK.Popup = {
                     }
                     var x, y;
                     try { x = e.pageX; y = e.pageY; } catch (errie) { var e2 = window.event; x = e2.clientX; y = e2.clientY; }
-                    var maxLeft = Math.max(0, window.innerWidth - startWidth);
-                    var maxTop = Math.max(0, window.innerHeight - startHeight);
-                    var newLeft = (x - startX) < 0 ? 0 : (x - startX);
-                    var newTop = (y - startY) < 0 ? 0 : (y - startY);
+                    var newLeft = (x - startX);
+                    var newTop = (y - startY);
                     if (obj.EnableSnapping) {
                         for (var i = 0; i < snapXSides.length; i++) {
                             if (Math.abs(snapXSides[i] - newLeft) < 10) {
-                                newLeft = snapXSides[i] < 0 ? 0 : snapXSides[i];
+                                newLeft = snapXSides[i];
                             } else if (Math.abs(snapXSides[i] - (newLeft + startWidth)) < 10) {
-                                newLeft = snapXSides[i] - startWidth < 0 ? 0 : snapXSides[i] - startWidth;
+                                newLeft = snapXSides[i] - startWidth;
                             }
                         }
 
                         for (var i = 0; i < snapYSides.length; i++) {
                             if (Math.abs(snapYSides[i] - newTop) < 10) {
-                                newTop = snapYSides[i] < 0 ? 0 : snapYSides[i];
+                                newTop = snapYSides[i];
                             } else if (Math.abs(snapYSides[i] - (newTop + startHeight)) < 10) {
-                                newTop = snapYSides[i] - startHeight < 0 ? 0 : snapYSides[i] - startHeight;
+                                newTop = snapYSides[i] - startHeight;
                             }
                         }
                     }
 
-                    if (newLeft > maxLeft)
-                        newLeft = maxLeft;
-                    if (newTop > maxTop)
-                        newTop = maxTop;
+                    if (obj.EnableContainment[0] && newTop < 0)
+                        newTop = 0;
+                    if (obj.EnableContainment[1] && newLeft > window.innerWidth - startWidth)
+                        newLeft = window.innerWidth - startWidth;
+                    if (obj.EnableContainment[2] && newTop > window.innerHeight - startHeight)
+                        newTop = window.innerHeight - startHeight;
+                    if (obj.EnableContainment[3] && newLeft < 0)
+                        newLeft = 0;
 
                     obj.style.left = newLeft + "px";
                     obj.style.top = newTop + "px";
