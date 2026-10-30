@@ -17,9 +17,7 @@ window.TK.Popup = {
     Maximized: false,
     className: "toolkitPopup",
     Template: {},
-    OnResize: function () {
-        console.log("Popup resized");
-    },
+    OnResize: function () { },
     Buttons: null,   // { Ok: function() { alert('ok pressed!'); } }
     Init: function () {        
         var obj = this;
@@ -333,7 +331,33 @@ window.TK.Popup = {
     }
 };
 window.addEventListener("resize", function () {
-    console.log("Window resized");
+    var popups = document.querySelectorAll(".toolkitPopup");
+    for (var i = 0; i < popups.length; i++) {
+        var popup = popups[i];
+        if (popup.Maximized) {
+            popup.style.left = "0px";
+            popup.style.top = "0px";
+            popup.style.width = window.innerWidth + "px";
+            popup.style.height = window.innerHeight + "px";
+            continue;
+        }
+
+        var horizontalPixels = 60;
+        var newLeft = popup.offsetLeft;
+        var newTop = popup.offsetTop;
+
+        if (newTop < 0)
+            newTop = 0;
+        if (newLeft > window.innerWidth - horizontalPixels)
+            newLeft = window.innerWidth - horizontalPixels;
+        if (newTop > window.innerHeight - popup.Elements.PopupTitle.clientHeight)
+            newTop = window.innerHeight - popup.Elements.PopupTitle.clientHeight;
+        if (newLeft < (-1 * popup.offsetWidth) + horizontalPixels)
+            newLeft = (-1 * popup.offsetWidth) + horizontalPixels;
+
+        popup.style.left = newLeft + "px";
+        popup.style.top = newTop + "px";
+    }
 });
 window.TK.Popup.StartZIndex = 10000;
 window.TK.PopupOpen = function (template, title, width, height) {
@@ -345,11 +369,3 @@ window.TK.PopupOpen = function (template, title, width, height) {
         Template: template
     });
 };
-
-
-
-
-
-
-
-
